@@ -23,7 +23,6 @@
 ; General
 ;====
 
-
 ;====
 ; Sets the VRAM write address. The next byte sent to the data port will be
 ; written to this address
