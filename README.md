@@ -1,9 +1,9 @@
 # Sega Master System Z80 Libs
 
 - **smslib.asm** - some common functions used by all the libs
-- [input.asm](#Input) - reading the joypad inputs
+- [input.asm](#inputasm) - reading the joypad inputs
 - **sprites.asm** - manages a sprite table in a RAM and pushes to VRAM when required
-- **vdpreg.asm** - defines and sets graphics chip register settings
+- [vdpreg.asm](#vdpregasm) - defines and sets graphics chip register settings
 - **vdp.asm** - graphics routines
 - **z80.asm** - logical/math routines
 
@@ -37,7 +37,7 @@ This may change, but the libs don't define RAMSECTIONS. They instead export stru
 
 Each routine is documented with a comment block above it specifying the parameters (registers or macro arguments)
 
-## Input
+## input.asm
 
 ```
 input.readPort1
@@ -58,3 +58,17 @@ If needed you can change the register that holds the input value (default is `a`
 .redefine input.register "d"
 .input.readPort1 ; result stored in register d
 ```
+
+## vdpreg.asm
+
+Handles the VDP registers and settings.
+
+```
+vdpreg.set vdpreg.DISPLAY_ENABLED 0             ; disable display
+vdpreg.set vdpreg.FRAME_INTERRUPTS_ENABLED 1    ; enable frame interrupts
+
+; send the settings to the VDP
+vdpreg.apply
+```
+
+See the vdpreg.asm file for all supported settings.
