@@ -1,5 +1,7 @@
 ;===
-; Taken from Waimanu source by Disjointed Studio
+; Taken from Waimanu source
+;
+; @author Disjointed Studio
 ;
 ; Documented in http://www.smspower.org/forums/15794-AFewHintsOnCodingAMediumLargeSizedGameUsingWLADX
 ;

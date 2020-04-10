@@ -107,6 +107,7 @@
 
 ;====
 ; Sets multiple patterns
+;
 ; @in  startPattern  the first pattern slot
 ; @in  dataAddress   the address of the first byte of data
 ; @in  size          the size of the data block, in bytes

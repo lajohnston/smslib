@@ -6,7 +6,7 @@
 .define smslib.VDP_DATA_PORT $be
 
 .ifndef "smslib.outiBlock.MAX"
-    .define "smslib.outiBlock.MAX" 1024
+    .define smslib.outiBlock.MAX 1024
 .endif
 
 ;====

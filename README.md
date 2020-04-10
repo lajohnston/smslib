@@ -1,5 +1,9 @@
 # Sega Master System Z80 Libs
 
+Low level Z80 ASM libs for handling Sega Master System hardware.
+
+## Contents
+
 - **smslib.asm** - some common functions used by all the libs
 - [input.asm](#inputasm) - reading the joypad inputs
 - **sprites.asm** - manages a sprite table in a RAM and pushes to VRAM when required
@@ -7,11 +11,7 @@
 - **vdp.asm** - graphics routines
 - **z80.asm** - logical/math routines
 
-## Design principles for the Libs
-
-### Decoupled
-
-The smslib.asm file contains common functionality used by the other lib files, but other than that the separate files don't reference each other and you can pick and choose which ones to include in your project.
+## Design principles
 
 ### Low level
 
@@ -19,11 +19,15 @@ The libs act as a thin layer to the Master System chips, to ensure they are appl
 
 ### Speed > Size
 
-Over time the routines will be optimised for speed and size without one aspect adversely affecting the other. There will however be an emphasis on speed, as code size is rarely a problem in Master System projects whereas speed can be a bottleneck, especially within VBlank timing constraints.
+Over time the routines will be optimised for speed and size without one aspect adversely affecting the other. There will however be an emphasis on speed as code size is rarely a problem in Master System projects (especially compared to asset sizes) whereas speed can be a bottleneck, especially within VBlank timing constraints.
+
+### Decoupled
+
+The smslib.asm file contains common functionality used by the other lib files, but other than that the separate files don't reference each other and you can pick and choose which ones to include in your project.
 
 ### Prefixes
 
-Each library file prefixes its labels with its name and a '.' (i.e. input.readPortA)
+Each library file prefixes its labels with its name and a '.' (i.e. input.readPortA). Although it can make things more verbose it makes for much easier code tracking.
 
 ### No unnecessary pushing/popping
 
