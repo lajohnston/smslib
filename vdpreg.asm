@@ -245,28 +245,32 @@
 ; @clobs af, bc, de, hl
 ;====
 .macro "vdpreg.apply"
-    ; Define register data
-    jp _registerDataEnd\@
+    ; Ensure there is data to write
+    .if vdpreg.register0Pending|vdpreg.register1Pending|vdpreg.register2Pending|vdpreg.register3Pending|vdpreg.register4Pending|vdpreg.register5Pending|vdpreg.register6Pending|vdpreg.register7Pending|vdpreg.register8Pending|vdpreg.register9Pending|vdpreg.register10Pending > 0
+        ; Jump over register data
+        jp _registerDataEnd\@
 
-    _registerData\@:
-        vdpreg.defineData
-    _registerDataEnd\@:
+        ; Define register data
+        _registerData\@:
+            vdpreg.defineData
+        _registerDataEnd\@:
 
-    ; Write register data
-    vdpreg.write _registerData\@ _registerDataEnd\@
+        ; Write register data
+        vdpreg.write _registerData\@ _registerDataEnd\@
 
-    ; Clear pending flags
-    .redefine vdpreg.register0Pending 0
-    .redefine vdpreg.register1Pending 0
-    .redefine vdpreg.register2Pending 0
-    .redefine vdpreg.register3Pending 0
-    .redefine vdpreg.register4Pending 0
-    .redefine vdpreg.register5Pending 0
-    .redefine vdpreg.register6Pending 0
-    .redefine vdpreg.register7Pending 0
-    .redefine vdpreg.register8Pending 0
-    .redefine vdpreg.register9Pending 0
-    .redefine vdpreg.register10Pending 0
+        ; Clear pending flags
+        .redefine vdpreg.register0Pending 0
+        .redefine vdpreg.register1Pending 0
+        .redefine vdpreg.register2Pending 0
+        .redefine vdpreg.register3Pending 0
+        .redefine vdpreg.register4Pending 0
+        .redefine vdpreg.register5Pending 0
+        .redefine vdpreg.register6Pending 0
+        .redefine vdpreg.register7Pending 0
+        .redefine vdpreg.register8Pending 0
+        .redefine vdpreg.register9Pending 0
+        .redefine vdpreg.register10Pending 0
+    .endif
 .endm
 
 ;====
