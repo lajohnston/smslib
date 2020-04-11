@@ -11,6 +11,7 @@ Low level Z80 ASM libs for handling Sega Master System hardware.
 - **vdp.asm** - graphics routines
 - [vdpreg.asm](#vdpregasm) - defines and sets graphics chip register settings
 - **z80.asm** - logical/math routines
+- [/mapper](#mappers)
 
 ## Design principles
 
@@ -97,4 +98,52 @@ paletteEnd:
 
 ; load colours into slot 0 and onwards
 palette.load 0, paletteStart, paletteEnd
+```
+
+# mappers
+
+The Master System can only view 48KB of ROM memory at a time. Mappers control which portions of ROM are visible within this 48KB window and can dynamically switch portions at runtime to allow for much larger cartridge sizes. The included smslib mappers can abstract this complexity from you or can be used as examples to create your own.
+
+Include the mapper you wish to use:
+
+```
+.include "smslib/mapper/waimanu.asm"
+```
+
+Initialise the SMS mapping registers when booting your game:
+
+```
+mapper.init
+```
+
+The mapper exposes FIXED_SLOT, PAGEABLE_SLOT and RAM_SLOT constants:
+
+```
+; Fixed slot is appropriate for code
+.slot mapper.FIXED_SLOT
+.include "game.asm"
+
+; Pageable slot is appropriate for assets
+.slot mapper.PAGEABLE_SLOT
+.include "assets.asm"
+
+; RAM slot can be used for RAM sections
+.ramsection "foo" slot mapper.RAM_SLOT
+    bar     DB
+.ends
+```
+
+Before loading assets remember to page the bank you want to access. You can use WLA-DX's
+colon prefix to retrieve a bank number for a given address:
+
+```
+mapper.pageBank :paletteData
+palette.load 0, paletteData, paletteDataEnd
+```
+
+You can customise some mappers with additional paramters. Check the relevant mapper asm file to see which settings are supported.
+
+```
+.define mapper.pageableBanks 4
+.include "smslib/mapper/waimanu.asm"
 ```
