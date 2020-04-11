@@ -16,19 +16,22 @@
 .endif
 
 ;====
-; Set a range of colors
+; Loads colors into the palette
 ;
-; @in    fromSlot        the first color slot to set (0-31)
-; @in    dataAddr        the address of the data to load. Each color
-;                        should be a byte containing an RGB value in the format
-;                        --bbggrr
-; @in    dataSize        the data size in bytes/the number of slots to set
-; @clobs af, bc, hl
+; @in       fromSlot    the first color slot to set (0-31)
+;
+; @in       dataAddr    the address of the data to load. Each color
+;   should be a byte containing an RGB value in the
+;   format --bbggrr
+;
+; @in       endDataAddr the address of the last byte of data
+;
+; @clobs    af, bc, hl
 ;====
-.macro "palette.set" args fromSlot dataAddr dataSize
+.macro "palette.load" args fromSlot dataAddr endDataAddr
     smslib.setVdpWrite palette.address + fromSlot
     ld hl, dataAddr
-    ld b, dataSize
+    ld b, (endDataAddr - dataAddr)
     ld c, vdp.DATA_PORT
     otir
 .endm

@@ -4,11 +4,12 @@ Low level Z80 ASM libs for handling Sega Master System hardware.
 
 ## Contents
 
-- **smslib.asm** - some common functions used by all the libs
-- [input.asm](#inputasm) - reading the joypad inputs
+- **smslib.asm** - common functions used by all the libs
+- [input.asm](#inputasm) - interprets the joypad inputs
+- [palette.asm](#paletteasm) - handles the colour palettes
 - **sprites.asm** - manages a sprite table in a RAM and pushes to VRAM when required
-- [vdpreg.asm](#vdpregasm) - defines and sets graphics chip register settings
 - **vdp.asm** - graphics routines
+- [vdpreg.asm](#vdpregasm) - defines and sets graphics chip register settings
 - **z80.asm** - logical/math routines
 
 ## Design principles
@@ -76,3 +77,24 @@ vdpreg.apply
 ```
 
 See the vdpreg.asm file for all supported settings.
+
+## palette.asm
+
+Handles the VDP colour palettes. There are 31 colour slots:
+
+- Sprites can only use the last 16 slots (16-31).
+- Each background pattern (tile) can use either the first 16 slots (0-15) or
+  the last 16 (16-31)
+
+Each colour is a byte containing 2-bit RGB colour values (--BBGGRR)
+
+```
+paletteStart:
+    .db %00110000 ; blue
+    .db %00001100 ; green
+    .db %00000011 ; red
+paletteEnd:
+
+; load colours into slot 0 and onwards
+palette.load 0, paletteStart, paletteEnd
+```
