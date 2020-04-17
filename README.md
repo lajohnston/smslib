@@ -69,15 +69,30 @@ If needed you can change the register that holds the input value (default is `a`
 
 Handles the VDP registers and settings.
 
-```
-vdpreg.set vdpreg.DISPLAY_ENABLED 0             ; disable display
-vdpreg.set vdpreg.FRAME_INTERRUPTS_ENABLED 1    ; enable frame interrupts
+Initialise the VDP registers with sensible initial defaults:
 
-; send the settings to the VDP
-vdpreg.apply
+```
+vdpInitData:
+    vdpreg.defineInitData
+vdpInitDataEnd:
+
+vdpreg.load vdpInitData, vdpInitDataEnd
 ```
 
-See the vdpreg.asm file for all supported settings.
+Change registers relative to default values:
+
+```
+vdpData:
+    ; See vdpreg.asm for supported settings
+    vdpreg.set vdpreg.ENABLE_DISPLAY    1   ; enable display
+    vdpreg.set vdpreg.ENABLE_VBLANK     0   ; disable frame interrupts
+    vdpreg.defineData
+vdpDataEnd:
+
+vdpreg.load vdpData, vdpDataEnd
+```
+
+Note: some options reside in the same VDP register (such as ENABLE_DIAPLSY and ENABLE_VBLANK) so setting one may reset another back to its default. Check vdpreg.asm for more details about which options share registers.
 
 ## palette.asm
 
