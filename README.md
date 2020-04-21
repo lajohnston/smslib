@@ -1,6 +1,6 @@
 # Sega Master System Z80 Libs
 
-Low level Z80 ASM libs for handling Sega Master System hardware.
+Low level Z80 WLA-DX libs for handling Sega Master System hardware.
 
 ## Contents
 
@@ -102,17 +102,21 @@ Handles the VDP colour palettes. There are 31 colour slots:
 - Each background pattern (tile) can use either the first 16 slots (0-15) or
   the last 16 (16-31)
 
-Each colour is a byte containing 2-bit RGB colour values (--BBGGRR)
+Each colour is a byte containing 2-bit RGB colour values (--BBGGRR). You can call `palette.rgb` with the RGB values to generate a colour byte with an approximate RGB value. Each colour component can have the value of 0, 85, 170 or 255. Values inbetween these will be rounded to the closest factor.
 
 ```
 paletteStart:
-    .db %00110000 ; blue
-    .db %00001100 ; green
-    .db %00000011 ; red
+    palette.rgb 255, 0, 0   ; red
+    palette.rgb 255, 170, 0 ; orange
+    palette.rgb 255, 255, 0 ; yellow
+    palette.rgb 0, 255, 0   ; green
+    palette.rgb 0, 0, 255   ; blue
+    palette.rgb 85, 0, 85   ; indigo
+    palette.rgb 170, 0, 255 ; violet
 paletteEnd:
 
-; load colours into slot 0 and onwards
-palette.load 0, paletteStart, paletteEnd
+; load colours into slot 16 onwards
+palette.load paletteStart, paletteEnd, 16
 ```
 
 # mappers
