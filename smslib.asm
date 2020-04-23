@@ -25,48 +25,38 @@
         ret
 .ends
 
-.macro "smslib.outiBlock" args bytes
+.macro "smslib.callOutiBlock" args bytes
     call (smslib.outiBlock - bytes * 2)
 .endm
 
 ;====
 ; Outputs the given data to VRAM using the fast OUTI block method
 ;
-; @in     hl      the source address to copy from
-; @in     dest    the destination address in VRAM to write to
-; @in     bytes   the number of bytes to write
+; @in   dataStart
+; @in   dataEnd
 ;
 ; @clobs af, bc, hl
 ;====
-.macro "smslib.fastVramWrite" args dest bytes
-    ; Output low byte of address to VDP
-    ld a, <dest
-    out (smslib.VDP_COMMAND_PORT), a
-
-    ; Output high byte of address to VDP, ORed with %01000000 to issue write command
-    ld a, >dest | %01000000
-    out (smslib.VDP_COMMAND_PORT), a
-
-    ; Port to write to
-    ld c, smslib.VDP_DATA_PORT
-
-    ; Output
-    smslib.outiBlock bytes
+.macro "smslib.copyToVdp" args dataStart dataEnd
+    ld hl, dataStart
+    smslib.callOutiBlock (dataEnd - dataStart)
 .endm
 
 ;====
-; Sets the VRAM write address. The next byte sent to the data port will be
-; written to this address
+; Prepares the VDP to write to given VRAM write address.
 ;
 ; @in    address    the VRAM write address
 ; @clobs af
 ;====
-.macro "smslib.setVdpWrite" args address
+.macro "smslib.prepVdpWrite" args address
     ; Output low byte to VDP
     ld a, <address
-    out (vdp.COMMAND_PORT), a
+    out (smslib.VDP_COMMAND_PORT), a
 
     ; Output high byte to VDP, ORed with $40 (01000000) to issue write command
     ld a, >address | $40
-    out (vdp.COMMAND_PORT), a
+    out (smslib.VDP_COMMAND_PORT), a
+
+    ; Port to write to
+    ld c, smslib.VDP_DATA_PORT
 .endm

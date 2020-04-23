@@ -25,26 +25,16 @@
 .endm
 
 ;====
-; Loads colors into the palette
+; Loads colors into the palette. Each color should be a byte containing an RGB
+; value in the format --bbggrr
 ;
-; @in       dataAddr    the address of the data to load. Each color
-;   should be a byte containing an RGB value in the
-;   format --bbggrr
-;
+; @in       dataAddr    the address of the data to load
 ; @in       endDataAddr the address of the last byte of data
-;
 ; @in       fromSlot    the first color slot to set (0-31)
 ;
 ; @clobs    af, bc, hl
 ;====
 .macro "palette.load" args dataAddr endDataAddr fromSlot
-    .ifndef fromSlot
-        .redefine fromSlot 0
-    .endif
-
-    smslib.setVdpWrite palette.address + fromSlot
-    ld hl, dataAddr
-    ld b, (endDataAddr - dataAddr)
-    ld c, vdp.DATA_PORT
-    otir
+    smslib.prepVdpWrite (palette.vramAddress + fromSlot)
+    smslib.copyToVdp dataAddr endDataAddr
 .endm
