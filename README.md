@@ -116,7 +116,8 @@ paletteStart:
 paletteEnd:
 
 ; load colours into slot 16 onwards
-palette.load paletteStart, paletteEnd, 16
+palette.setSlot 16
+palette.load paletteStart, paletteEnd
 ```
 
 # mappers

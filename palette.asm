@@ -30,11 +30,16 @@
 ;
 ; @in       dataAddr    the address of the data to load
 ; @in       endDataAddr the address of the last byte of data
-; @in       fromSlot    the first color slot to set (0-31)
-;
-; @clobs    af, bc, hl
 ;====
-.macro "palette.load" args dataAddr endDataAddr fromSlot
-    smslib.prepVdpWrite (palette.vramAddress + fromSlot)
+.macro "palette.load" args dataAddr endDataAddr
     smslib.copyToVdp dataAddr endDataAddr
+.endm
+
+;====
+; Set the current palette slot (0-31) ready to load data into
+;
+; @in slot  the palette slot (0-31)
+;====
+.macro "palette.setSlot" args slot
+    smslib.prepVdpWrite (palette.vramAddress + slot)
 .endm
