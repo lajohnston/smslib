@@ -6,7 +6,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware.
 
 - **smslib.asm** - common functions used by all the libs
 - [input.asm](#inputasm) - interprets the joypad inputs
-- [palette.asm](#paletteasm) - handles the colour palettes
+- [palette.asm](#paletteasm) - handles the color palettes
 - **sprites.asm** - manages a sprite table in a RAM and pushes to VRAM when required
 - **vdp.asm** - graphics routines
 - [vdpreg.asm](#vdpregasm) - defines and sets graphics chip register settings
@@ -96,16 +96,16 @@ Note: some options reside in the same VDP register (such as ENABLE_DIAPLSY and E
 
 ## palette.asm
 
-Handles the VDP colour palettes. There are 31 colour slots:
+Handles the VDP color palettes. There are 31 color slots:
 
 - Sprites can only use the last 16 slots (16-31).
 - Each background pattern (tile) can use either the first 16 slots (0-15) or
   the last 16 (16-31)
 
-Each colour is a byte containing 2-bit RGB colour values (--BBGGRR). You can call `palette.rgb` with the RGB values to generate a colour byte with an approximate RGB value. Each colour component can have the value of 0, 85, 170 or 255. Values inbetween these will be rounded to the closest factor.
+Each color is a byte containing 2-bit RGB color values (--BBGGRR). You can call `palette.rgb` with the RGB values to generate a color byte with an approximate RGB value. Each color component can have the value of 0, 85, 170 or 255. Values inbetween these will be rounded to the closest factor.
 
 ```
-paletteStart:
+paletteData:
     palette.rgb 255, 0, 0   ; red
     palette.rgb 255, 170, 0 ; orange
     palette.rgb 255, 255, 0 ; yellow
@@ -113,11 +113,21 @@ paletteStart:
     palette.rgb 0, 0, 255   ; blue
     palette.rgb 85, 0, 85   ; indigo
     palette.rgb 170, 0, 255 ; violet
-paletteEnd:
+```
 
-; load colours into slot 16 onwards
+You can then load these into the VDP VRAM the following macros:
+
+```
+; load 7 colors into slot 0 onwards
+palette.setSlot 0
+palette.load paletteData, 7
+
+; load 5 colors into slot 16 onwards, skipping the first 2 (red, orange)
 palette.setSlot 16
-palette.load paletteStart, paletteEnd
+palette.load paletteData, 5, 2
+
+; ...append red and orange at the end (no need to call setSlot again)
+palette.load paletteData, 2
 ```
 
 # mappers

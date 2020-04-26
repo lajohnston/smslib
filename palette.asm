@@ -8,7 +8,8 @@
 ; last 16 slots (16-31). Sprites can only use the last 16 slots (16-31).
 ;====
 
-.define palette.vramAddress $c000
+.define palette.VRAM_ADDR $c000
+.define palette.SLOT_SIZE 1
 
 ;====
 ; Defines a byte with an approximate RGB value. Each color component is rounded
@@ -29,10 +30,16 @@
 ; value in the format --bbggrr
 ;
 ; @in       dataAddr    the address of the data to load
-; @in       endDataAddr the address of the last byte of data
+; @in       count       the number of colors to load
+; @in       offset      (optional) how many colors to skip from the start
+;                       of the data. Defaults to 0
 ;====
-.macro "palette.load" args dataAddr endDataAddr
-    smslib.copyToVdp dataAddr endDataAddr
+.macro "palette.load" args dataAddr count offset
+    .ifndef offset
+        smslib.outputArray dataAddr palette.SLOT_SIZE count 0
+    .else
+        smslib.outputArray dataAddr palette.SLOT_SIZE count offset
+    .endif
 .endm
 
 ;====
@@ -41,5 +48,5 @@
 ; @in slot  the palette slot (0-31)
 ;====
 .macro "palette.setSlot" args slot
-    smslib.prepVdpWrite (palette.vramAddress + slot)
+    smslib.prepVdpWrite (palette.VRAM_ADDR + slot)
 .endm
