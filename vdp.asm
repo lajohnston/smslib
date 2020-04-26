@@ -101,45 +101,10 @@
     ret
 .ends
 
-;====
-; Patterns
-;====
-
-;====
-; Sets multiple patterns
-;
-; @in  startPattern  the first pattern slot
-; @in  dataAddress   the address of the first byte of data
-; @in  size          the size of the data block, in bytes
-;====
-.macro "vdp.setPatterns" args startPattern dataAddress size
-    vdp.setWriteAddress.inline (vdp.address.patterns + (startPattern * 32))
-
-    ; 2. Output tile data
-    ld hl, dataAddress     ; Location of tile data
-    ld bc, size            ; Counter for number of bytes to write
-    call vdp.writeBlock
+; Macro alias for call vdp.clearVram
+.macro "vdp.clearVram"
+    call vdp.clearVram
 .endm
-
-;====
-; Sets a pattern
-; @in  patternSlot the pattern slot to set
-; @in  dataAddress the address of the pattern data
-;====
-.macro "vdp.setPattern" args patternSlot dataAddress
-    vdp.setPatterns patternSlot dataAddress 32
-.endm
-
-;====
-; Sets the next pattern, after calling vdp.setPattern
-; @in  dataAddress the address of the pattern data
-;====
-.macro "vdp.setNextPattern" args dataAddress
-    ld hl, dataAddress
-    ld bc, 32
-    call vdp.writeBlock
-.endm
-
 
 ;====
 ; Tilemap
