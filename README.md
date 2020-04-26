@@ -14,15 +14,29 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware.
 - **z80.asm** - logical/math routines
 - [/mapper](#mappers)
 
+## Usage
+
+Include `smslib.asm` file then any of the specific libs you wish to use:
+
+```
+.include "lib/smslib/smslib.asm"
+.include "lib/smslib/input.asm"
+.include "lib/smslib/palette.asm"
+.include "lib/smslib/patterns.asm"
+
+```
+
 ## Design principles
 
 ### Low level
 
-The libs act as a thin layer to the Master System chips, to ensure they are applicable across many projects and engines. They provide macros and routines to abstract many of the nuances of Master System development, but don't aim to be a full-blown engine.
+The libs act as a thin layer to the Master System chips, to ensure they are applicable across many projects and engines. They provide macros and routines to abstract many of the nuances of Master System development so you can build a more fuller-blown engine on top of them.
 
-### Speed > Size
+### Priorities: Speed > Ease > Size
 
 Over time the routines will be optimised for speed and size without one aspect adversely affecting the other. There will however be an emphasis on speed as code size is rarely a problem in Master System projects (especially compared to asset sizes) whereas speed can be a bottleneck, especially within VBlank timing constraints.
+
+The libs are also designed for ease of use so long as this doesn't reduce the speed of the generated code.
 
 ### Decoupled
 
@@ -34,17 +48,15 @@ Each library file prefixes its labels with its name and a '.' (i.e. input.readPo
 
 ### No unnecessary pushing/popping
 
-The library routines don't PUSH or POP registers to preserve them, meaning they will happily 'clobber' registers if need be. This shifts this responsibility to the code calling the library, mainly for efficiency reasons: the calling code knows what registers it actually cares about, so only needs to preserve those.
-
-### No RAMSECTIONS
-
-This may change, but the libs don't define RAMSECTIONS. They instead export structs, which the calling code can place in RAMSECTIONS in the location/slot they desire.
+The library routines don't PUSH or POP registers to preserve them, meaning they will happily 'clobber' registers if need be. This shifts the responsibility of preservation to the code calling the library, mainly for efficiency reasons: the calling code knows what registers it actually cares about, so only needs to preserve those.
 
 ### Documentation
 
 Each routine is documented with a comment block above it specifying the parameters (registers or macro arguments)
 
 ## input.asm
+
+Allows you to read input from the controller pads.
 
 ```
 input.readPort1
@@ -125,7 +137,7 @@ palette.load paletteData, 7
 
 ; load 5 colors into slot 16 onwards, skipping the first 2 (red, orange)
 palette.setSlot 16
-palette.load paletteData, 5, 2
+palette.load paletteData, 5, 2  ; load 5, skipping first 2 (red, orange)
 
 ; ...append red and orange at the end (no need to call setSlot again)
 palette.load paletteData, 2
