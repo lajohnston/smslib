@@ -208,3 +208,22 @@ You can customise some mappers with additional paramters. Check the relevant map
 .define mapper.pageableBanks 4
 .include "smslib/mapper/waimanu.asm"
 ```
+
+# tilemap.asm
+
+Manages the tilemap, which utilises patterns to create the background image.
+
+Output ASCII data:
+
+```
+    .asciitable
+        map " " to "~" = 0
+    .enda
+
+    message:
+        .asc "Hello, world"
+        .db $ff ; terminator byte
+
+    tilemap.setSlot 0, 0 ; top left tile slot
+    tilemap.loadBytesUntil $ff message
+```
