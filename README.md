@@ -84,27 +84,18 @@ Handles the VDP registers and settings.
 Initialise the VDP registers with sensible initial defaults:
 
 ```
-vdpInitData:
-    vdpreg.defineInitData
-vdpInitDataEnd:
-
-vdpreg.load vdpInitData, vdpInitDataEnd
+vdpreg.init
 ```
 
-Change registers relative to default values:
+Change register values. See vdpreg.asm for available options:
 
 ```
-vdpData:
-    ; See vdpreg.asm for supported settings
-    vdpreg.set vdpreg.ENABLE_DISPLAY    1   ; enable display
-    vdpreg.set vdpreg.ENABLE_VBLANK     0   ; disable frame interrupts
-    vdpreg.defineData
-vdpDataEnd:
-
-vdpreg.load vdpData, vdpDataEnd
+vdpreg.setRegister0 vdpreg.HIDE_LEFT_COLUMN
+vdpreg.setRegister1 vdpreg.ENABLE_DISPLAY|vdpreg.ENABLE_VBLANKS
+vdpreg.setBackgroundColor 0 ; use first slot in sprite palette
+vdpreg.setScrollX 100
+vdpreg.setScrollY 255
 ```
-
-Note: some options reside in the same VDP register (such as ENABLE_DIAPLSY and ENABLE_VBLANK) so setting one may reset another back to its default. Check vdpreg.asm for more details about which options share registers.
 
 ## palette.asm
 

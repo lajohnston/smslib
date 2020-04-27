@@ -1,97 +1,11 @@
 ;====
-; Utility to set VDP settings
-;
-; Usage:
-; Use vdpreg.set to enable or disable a given setting (see Settings below)
-; Use vdpreg.apply to send the settings to the VDP
+; Manages the VDP registers
 ;====
 
 ;====
-; Settings
-; Assigns unique identifiers for each setting. These can be passed to the
-; vdpreg.set macro.
-;
-; Only the commonly used settings are implemented
+; Default register values
 ;====
-.enum $00
-    ; The color slot in the sprite palette to use for the border (0-15)
-    vdpreg.BORDER_PALETTE_SLOT DB
-
-    ; Default: off
-    vdpreg.ENABLE_DISPLAY  DB
-
-    ;====
-    ; Enable HBlank interrupts
-    ; Default: off
-    ;====
-    vdpreg.ENABLE_HBLANK  DB
-
-    ;====
-    ; Sets all sprites to be 2-tiles high. The sprite's pattern number rounded
-    ; down to the nearest multiple of 2 will be used for the bottom sprite,
-    ; and the next pattern in the table will be used for the top
-    ;
-    ; Default: off
-    ;====
-    vdpreg.ENABLE_TALL_SPRITES  DB
-
-    ;====
-    ; Enables VBlank interrupts
-    ; Default: off
-    ;====
-    vdpreg.ENABLE_VBLANK DB
-
-    ;====
-    ; Useful to allow sprites to move on/off the left side of the screen smoothly
-    ; Default: off
-    ;====
-    vdpreg.HIDE_LEFT_COLUMN    DB
-
-    ;====
-    ; The line interrupt counter
-    ;====
-    vdpreg.LINE_INTERRUPT_COUNTER DB
-
-    ;====
-    ; Stops the top two rows scrolling horizontally. They can still scroll vertically
-    ; though which can cause unwanted effects.
-    ;
-    ; Can be used to implement status bars
-    ;
-    ; Default: off
-    ;====
-    vdpreg.LOCK_H_SCROLL  DB
-
-    ;====
-    ; Stops the right-most 8 columns scrolling vertically. They can still scroll horizontally
-    ; though which can cause unwanted effects
-    ;
-    ; Can be used to implement status bars
-    ;
-    ; Default: off
-    ;====
-    vdpreg.LOCK_V_SCROLL  DB
-
-    ;====
-    ; Renders each pixel as as 2x2 pixels.
-    ;
-    ; Note: SMS1 can only display the first 4 sprites per scanline in this way,
-    ; and the rest on the scanline will only be zoomed vertically
-    ;
-    ; Default: off
-    ;====
-    vdpreg.ZOOM_SPRITES  DB
-.ende
-
-;====
-; Constants
-;====
-.define vdpreg.COMMAND_PORT $bf   ; write (issue command to vdp)
-
-;====
-; Defaults
-;====
-.define vdpreg.default.register0    %00000110;  Mode control 1
+.define vdpreg.register0Default     %00000110;  Mode control 1
                                     ;|||||||`-  Sync enable; always 0
                                     ;||||||`--  Extra height enable/TMS9918 mode select; always 1
                                     ;|||||`---  Mode 4 enable; always 1
@@ -99,9 +13,9 @@
                                     ;|||`-----  Enable line interrupts
                                     ;||`------  Hide leftmost 8 pixels
                                     ;|`-------  Horizontal scroll lock
-                                    ;`--------  Vertical scroll lock ()
+                                    ;`--------  Vertical scroll lock
 
-.define vdpreg.default.register1    %10000000;  Mode control 2
+.define vdpreg.register1Default     %10000000;  Mode control 2
                                     ;|||||||`-  Zoomed sprites -> 16x16 pixels
                                     ;||||||`--  Doubled sprites -> 2 tiles per sprite, 8x16
                                     ;|||||`---  Mega Drive mode 5 enable
@@ -111,115 +25,31 @@
                                     ;|`-------  Enable display
                                     ;`--------  Unused; always 1
 
-.define vdpreg.default.register2    %11111111;  Tilemap base address (default = $3800)
+.define vdpreg.register2Default     %11111111;  Tilemap base address (default = $3800)
                                     ;|||||||`-  Mask bit (SMS1)
                                     ;```````--  Name table base address
 
-.define vdpreg.default.register3    %11111111   ; Palette base address (always $ff for SMS1)
-.define vdpreg.default.register4    %00000111   ; Pattern base address (last 3 bits always set for SMS1)
-.define vdpreg.default.register5    %11111111   ; Sprite table base address (usually $ff)
-.define vdpreg.default.register6    %11111111   ; Sprite pattern generator base address (always $ff)
-.define vdpreg.default.register7    %00000000   ; Overscan/backdrop color slot (bits 0-3)
-.define vdpreg.default.register8    %00000000   ; Background X scroll
-.define vdpreg.default.register9    %00000000   ; Background Y scroll
-.define vdpreg.default.register10   %11111111   ; Line interrupt counter
+.define vdpreg.register3Default     %11111111   ; Palette base address (always $ff for SMS1)
+.define vdpreg.register4Default     %00000111   ; Pattern base address (last 3 bits always set for SMS1)
+.define vdpreg.register5Default     %11111111   ; Sprite table base address (usually $ff)
+.define vdpreg.register6Default     %11111111   ; Sprite pattern generator base address (always $ff)
+.define vdpreg.register7Default     %00000000   ; Overscan/backdrop color slot (bits 0-3)
+.define vdpreg.register8Default     %00000000   ; Background X scroll
+.define vdpreg.register9Default     %00000000   ; Background Y scroll
+.define vdpreg.register10Default    %11111111   ; Line interrupt counter
 
 ;====
-; Pending overrides
+; Constants
 ;====
-.define vdpreg.pending.register0 vdpreg.default.register0
-.define vdpreg.pending.register1 vdpreg.default.register1
-.define vdpreg.pending.register2 vdpreg.default.register2
-.define vdpreg.pending.register3 vdpreg.default.register3
-.define vdpreg.pending.register4 vdpreg.default.register4
-.define vdpreg.pending.register5 vdpreg.default.register5
-.define vdpreg.pending.register6 vdpreg.default.register6
-.define vdpreg.pending.register7 vdpreg.default.register7
-.define vdpreg.pending.register8 vdpreg.default.register8
-.define vdpreg.pending.register9 vdpreg.default.register9
-.define vdpreg.pending.register10 vdpreg.default.register10
-
-;====
-; Sets the value of a given setting and stores the result in a define.
-; Once all settings have been set you can use the 'vdpreg.apply' macro
-; to send the data to the VDP.
-;
-; @in     setting     the setting identifier. See 'Settings' at the top
-; @in     value       the setting value
-;====
-.macro "vdpreg.set" args setting value
-    .if setting == vdpreg.BORDER_PALETTE_SLOT
-        .redefine vdpreg.pending.register7 value & %00001111
-    .endif
-
-    .if setting == vdpreg.ENABLE_DISPLAY
-        .if value == 0
-            .redefine vdpreg.pending.register1 vdpreg.pending.register1 & %10111111 ; reset bit 6
-        .else
-            .redefine vdpreg.pending.register1 vdpreg.pending.register1 | %01000000 ; set bit 6
-        .endif
-    .endif
-
-    .if setting == vdpreg.ENABLE_HBLANK
-        .if value == 0
-            .redefine vdpreg.pending.register0 vdpreg.pending.register0 & %11101111 ; reset bit 4
-        .else
-            .redefine vdpreg.pending.register0 vdpreg.pending.register0 | %00010000 ; set bit 4
-        .endif
-    .endif
-
-    .if setting == vdpreg.ENABLE_TALL_SPRITES
-        .if value == 0
-            .redefine vdpreg.pending.register1 vdpreg.pending.register1 & %11111101 ; reset bit 1
-        .else
-            .redefine vdpreg.pending.register1 vdpreg.pending.register1 | %00000010 ; set bit 1
-        .endif
-    .endif
-
-    .if setting == vdpreg.ENABLE_VBLANK
-        .if value == 0
-            .redefine vdpreg.pending.register1 vdpreg.pending.register1 & %11011111 ; reset bit 5
-        .else
-            .redefine vdpreg.pending.register1 vdpreg.pending.register1 | %00100000 ; set bit 5
-        .endif
-    .endif
-
-    .if setting == vdpreg.HIDE_LEFT_COLUMN
-        .if value == 0
-            .redefine vdpreg.pending.register0 vdpreg.pending.register0 & %11011111 ; reset bit 5
-        .else
-            .redefine vdpreg.pending.register0 vdpreg.pending.register0 | %00100000 ; set bit 5
-        .endif
-    .endif
-
-    .if setting == vdpreg.LINE_INTERRUPT_COUNTER
-        .redefine vdpreg.pending.register10 value
-    .endif
-
-    .if setting == vdpreg.LOCK_H_SCROLL
-        .if value == 0
-            .redefine vdpreg.pending.register0 vdpreg.pending.register1 & %10111111 ; reset bit 6
-        .else
-            .redefine vdpreg.pending.register0 vdpreg.pending.register1 | %01000000 ; set bit 6
-        .endif
-    .endif
-
-    .if setting == vdpreg.ZOOM_SPRITES
-        .if value == 0
-            .redefine vdpreg.pending.register1 vdpreg.pending.register1 & %11111110 ; reset bit 0
-        .else
-            .redefine vdpreg.pending.register1 vdpreg.pending.register1 | %00000001 ; set bit 0
-        .endif
-    .endif
-
-    .if setting == vdpreg.LOCK_V_SCROLL
-        .if value == 0
-            .redefine vdpreg.pending.register0 vdpreg.pending.register1 & %01111111 ; reset bit 7
-        .else
-            .redefine vdpreg.pending.register0 vdpreg.pending.register1 | %10000000 ; set bit 7
-        .endif
-    .endif
-.endm
+.define vdpreg.COMMAND_PORT             $bf   ; write (issue command to vdp)
+.define vdpreg.ENABLE_HBLANK            %00010000
+.define vdpreg.HIDE_LEFT_COLUMN         %00100000
+.define vdpreg.ENABLE_DISPLAY           %01000000
+.define vdpreg.ENABLE_TALL_SPRITES      %00000010
+.define vdpreg.ENABLE_VBLANK            %00100000
+.define vdpreg.LOCK_H_SCROLL            %01000000
+.define vdpreg.LOCK_V_SCROLL            %10000000
+.define vdpreg.ZOOM_SPRITES             %00000001
 
 ;====
 ; Write the given data bytes to the VDP registers. The data should be data
@@ -237,81 +67,139 @@
     otir
 .endm
 
-;===
-; Defines the initial/default register data ready to be loaded with vdpreg.load
-;===
-.macro "vdpreg.defineInitData"
-    .db vdpreg.default.register0, $80
-    .db vdpreg.default.register1, $81
-    .db vdpreg.default.register2, $82
-    .db vdpreg.default.register3, $83
-    .db vdpreg.default.register4, $84
-    .db vdpreg.default.register5, $85
-    .db vdpreg.default.register6, $86
-    .db vdpreg.default.register7, $87
-    .db vdpreg.default.register8, $88
-    .db vdpreg.default.register9, $89
-    .db vdpreg.default.register10, $8a
+;====
+; Defines the default register values ready to be loaded with vdpreg.load
+;====
+.section "vdpreg.initData" free
+    vdpreg.initData:
+        .db vdpreg.register0Default, $80
+        .db vdpreg.register1Default, $81
+        .db vdpreg.register2Default, $82
+        .db vdpreg.register3Default, $83
+        .db vdpreg.register4Default, $84
+        .db vdpreg.register5Default, $85
+        .db vdpreg.register6Default, $86
+        .db vdpreg.register7Default, $87
+        .db vdpreg.register8Default, $88
+        .db vdpreg.register9Default, $89
+        .db vdpreg.register10Default, $8a
+    vdpreg.initDataEnd:
+.ends
+
+;====
+; Initialises the vdp registers with sensible defaults
+;====
+.macro "vdpreg.init"
+    vdpreg.load vdpreg.initData, vdpreg.initDataEnd
 .endm
 
-;===
-; Defines the data changed by vdpreg.set, ready to loaded by vdpreg.load
-;===
-.macro "vdpreg.defineData"
-    .ifneq vdpreg.pending.register0 vdpreg.default.register0
-        .db vdpreg.pending.register0, $80
-    .endif
+;====
+; Sets the value of the given register
+;
+; @in   number  the register number (0-10)
+; @in   value   the register value
+;====
+.macro "vdpreg.setRegister" args number value
+    ld a, value
+    out (vdpreg.COMMAND_PORT), a
+    ld a, $80 + number
+    out (vdpreg.COMMAND_PORT), a
+.endm
 
-    .ifneq vdpreg.pending.register1 vdpreg.default.register1
-        .db vdpreg.pending.register1, $81
-    .endif
+;====
+; Set the value of register 0 (Mode Control 1)
+;
+; Usage: vdpreg.setRegister0 vdpreg.ENABLE_HBLANK | vdpreg.HIDE_LEFT_COLUMN
+;
+; @in value     accepts the following options which can be ORed together (|).
+;               Any options that are not passed are set back to their
+;               default off setting
+;
+; Options:
+;   vdpreg.ENABLE_HBLANK
+;       Enable HBlank interrupts, which occur after each scan line is drawn
+;
+;   vdpreg.HIDE_LEFT_COLUMN
+;       Hide the left-most column (8-pixels). Useful to allow sprites to move
+;       on/off  the left-side of the screen smoothly
+;
+;   vdpreg.LOCK_H_SCROLL
+;       Stops the top two rows scrolling horizontally. They can however still
+;       scroll vertically which can cause unwanted effects. Often used to
+;       implement status bars
+;
+;   vdpreg.LOCK_V_SCROLL
+;       Stops the right-most 8 columns scrolling vertically. They can however
+;       still scroll horizontally which can cause unwanted effects. Often used
+;       to implement status bars
+;====
+.macro "vdpreg.setRegister0" args value
+    vdpreg.setRegister 0 (vdpreg.register0Default | value)
+.endm
 
-    .ifneq vdpreg.pending.register2 vdpreg.default.register2
-        .db vdpreg.pending.register2, $82
-    .endif
+;====
+; Set the value of register 1 (Mode Control 2)
+;
+; Usage: vdpreg.setRegister1 vdpreg.ENABLE_DISPLAY | vdpreg.ENABLE_VBLANK
+;
+; @in value     accepts the following options which can be ORed together (|).
+;               Any options that are not passed are set back to their
+;               default off setting
+;
+; Options:
+;   vdpreg.ENABLE_DISPLAY
+;
+;   vdpreg.ENABLE_TALL_SPRITES
+;       Sets all sprites to be 2-tiles high. The sprite's pattern number
+;       rounded down to the nearest multiple of 2 will be used for the
+;       bottom sprite and the next pattern in the table will be used for the
+;       top
+;
+;   vdpreg.ENABLE_VBLANK
+;       Enable the display
+;
+;   vdpreg.ZOOM_SPRITES
+;       Renders each sprite pixel as 2x2 pixels. Note: SMS1 can only display
+;       the first 4 sprites per scanline in this way, and the rest on the
+;       scanline will only be zoomed vertically
+;====
+.macro "vdpreg.setRegister1" args value
+    vdpreg.setRegister 1 (vdpreg.register1Default | value)
+.endm
 
-    .ifneq vdpreg.pending.register3 vdpreg.default.register3
-        .db vdpreg.pending.register3, $83
-    .endif
+;====
+; Sets the overscan/border colour
+;
+; @in   value   the palette slot to use. This is taken from the sprite palette,
+;               so 0 = slot 16, 15 = slot 31
+;====
+.macro "vdpreg.setBackgroundColor" args value
+    vdpreg.setRegister 7 value
+.endm
 
-    .ifneq vdpreg.pending.register4 vdpreg.default.register4
-        .db vdpreg.pending.register4, $84
-    .endif
+;====
+; Sets the line interrupt counter
+;
+; @in   value
+;====
+.macro "vdpreg.setLineCounter" args value
+    vdpreg.setRegister 10 value
+.endm
 
-    .ifneq vdpreg.pending.register5 vdpreg.default.register5
-        .db vdpreg.pending.register5, $85
-    .endif
+;====
+; Sets the background horizontal scroll value
+;
+; @in   value
+;====
+.macro "vdpreg.setScrollX" args value
+    vdpreg.setRegister 8 value
+.endm
 
-    .ifneq vdpreg.pending.register6 vdpreg.default.register6
-        .db vdpreg.pending.register6, $86
-    .endif
-
-    .ifneq vdpreg.pending.register7 vdpreg.default.register7
-        .db vdpreg.pending.register7, $87
-    .endif
-
-    .ifneq vdpreg.pending.register8 vdpreg.default.register8
-        .db vdpreg.pending.register8, $88
-    .endif
-
-    .ifneq vdpreg.pending.register9 vdpreg.default.register9
-        .db vdpreg.pending.register9, $89
-    .endif
-
-    .ifneq vdpreg.pending.register10 vdpreg.default.register10
-        .db vdpreg.pending.register10, $8a
-    .endif
-
-    ; Reset back to defaults
-    .redefine vdpreg.pending.register0 vdpreg.default.register0
-    .redefine vdpreg.pending.register1 vdpreg.default.register1
-    .redefine vdpreg.pending.register2 vdpreg.default.register2
-    .redefine vdpreg.pending.register3 vdpreg.default.register3
-    .redefine vdpreg.pending.register4 vdpreg.default.register4
-    .redefine vdpreg.pending.register5 vdpreg.default.register5
-    .redefine vdpreg.pending.register6 vdpreg.default.register6
-    .redefine vdpreg.pending.register7 vdpreg.default.register7
-    .redefine vdpreg.pending.register8 vdpreg.default.register8
-    .redefine vdpreg.pending.register9 vdpreg.default.register9
-    .redefine vdpreg.pending.register10 vdpreg.default.register10
+;====
+; Sets the background horizontal scroll value
+;
+; @in   value
+;====
+.macro "vdpreg.setScrollY" args value
+    vdpreg.setRegister 9 value
 .endm
