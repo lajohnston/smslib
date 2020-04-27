@@ -109,3 +109,28 @@
     ; Port to write to
     ld c, smslib.VDP_DATA_PORT
 .endm
+
+;====
+; Zeroes all the VRAM
+;====
+.section "smslib.clearVram" free
+    smslib.clearVram:
+        ; 1. Set VRAM write address to $0000
+        smslib.prepVdpWrite 0
+
+        ; 2. Output 16KB of zeroes
+        ld bc, $4000     ; Counter for 16KB of VRAM
+        -:
+            xor a
+            out (smslib.VDP_DATA_PORT), a ; Output to VRAM address, which is auto-incremented after each write
+            dec bc
+            ld a, b
+            or c
+        jr nz,-
+    ret
+.ends
+
+; Macro alias for call smslib.clearVram
+.macro "smslib.clearVram"
+    call smslib.clearVram
+.endm
