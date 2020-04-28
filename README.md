@@ -4,7 +4,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware.
 
 ## Contents
 
-- **smslib.asm** - common functions used by all the libs
+- [smslib.asm](#smslibasm) - common functions used by all the libs
 - [input.asm](#inputasm) - interprets the joypad inputs
 - [palette.asm](#paletteasm) - handles the color palettes
 - [patterns.asm](#patternsasm) - handles patterns (tile images)
@@ -197,6 +197,25 @@ You can customise some mappers with additional paramters. Check the relevant map
 ```
 .define mapper.pageableBanks 4
 .include "smslib/mapper/waimanu.asm"
+```
+
+# smslib.asm
+
+Base library containing common functionality.
+
+Use smslib.init to initialise the system (disables interrupts, sets stack pointer, clears vram). This should be called at .orga 0.
+If you've included an smslib mapper it will set up the paging registers. It will also initialise the VDP registers if you're using vdpreg.
+
+```
+.orga 0
+.section "main" force
+    smslib.init init    ; init system then jump to init label
+.ends
+
+.section "init" free
+    init:
+        ; game init
+.ends
 ```
 
 # tilemap.asm

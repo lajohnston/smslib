@@ -1,6 +1,7 @@
 ;===
 ; Simple 32KB ROM with no paging
 ;===
+.define mapper 1
 
 .define mapper.FIXED_SLOT = 0
 .define mapper.PAGEABLE_SLOT = 0 ; none

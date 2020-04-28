@@ -39,6 +39,37 @@
 .define smslib.OUTI_BLOCK_INSTRUCTIONS (smslib.outiBlockSize / 2) & $ffff
 
 ;====
+; Initialises the system. Should be called at orga 0.
+;
+; Clears vram
+; If a mapper is being used it will initialise the paging registers
+; If vdpreg is being used it will initialise the VDP registers
+;
+; @in   then    (optional) label to jump to when complete
+;====
+.macro "smslib.init" args then
+    di              ; disable interrupts
+    im 1            ; interrupt mode 1
+    ld sp, $dff0    ; set stack pointer
+
+    ; initialise paging registers
+    .ifdef mapper
+        mapper.init
+    .endif
+
+    ; initialise vdp registers
+    .ifdef vdpreg
+        vdpreg.init
+    .endif
+
+    call smslib.clearVram
+
+    .ifdef then
+        jp then         ; jump to init section
+    .endif
+.endm
+
+;====
 ; Creates a block of OUTI instructions to provide the fastest means of
 ; outputting data to the VDP. Generate calls to this using the
 ; smslib.callOutiBlock macro

@@ -2,6 +2,8 @@
 ; Manages the VDP registers
 ;====
 
+.define vdpreg 1
+
 ;====
 ; Default register values
 ;====

@@ -9,15 +9,20 @@
 ;   * Main 32KB bank in non-pageable slot 0
 ;   * Multiple (default 6) additional 16KB banks in pageable slot 2
 ;===
+.define mapper 1
 
-; Parameters
+;====
+; Settings
+;====
 
 ; Define the number of pageable 16KB banks (default 6 = 128KB)
 .ifndef mapper.pageableBanks
     .define mapper.pageableBanks 6
 .endif
 
+;====
 ; Constants
+;====
 .define mapper.FIXED_SLOT = 0
 .define mapper.PAGEABLE_SLOT = 2
 .define mapper.RAM_SLOT = 3
