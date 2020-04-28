@@ -25,6 +25,8 @@ Include `smslib.asm` file then any of the specific libs you wish to use:
 
 ```
 
+See `examples` directory for examples. Within an example, call the `build.sh` script (Linux). wlalink and wla-z80 should be in your system path. The compiled .sms ROM will appear in the `examples/build` directory.
+
 ## Design principles
 
 ### Low level
