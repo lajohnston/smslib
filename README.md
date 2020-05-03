@@ -89,7 +89,7 @@ Include the mapper you wish to use:
 .include "smslib/mapper/waimanu.asm"
 ```
 
-Initialise the SMS mapping registers when booting your game:
+Initialise the SMS mapping registers when booting your game. This will be done for you if you're using `smslib.init`
 
 ```
 mapper.init
@@ -183,10 +183,9 @@ patterns.load patternData, 1, 9 ; skip first 9
 
 # smslib.asm
 
-Base library containing common functionality.
+Base library containing common functionality for the other modules.
 
-Use smslib.init to initialise the system (disables interrupts, sets stack pointer, clears vram). This should be called at .orga 0.
-If you've included an smslib mapper it will set up the paging registers. It will also initialise the VDP registers if you're using vdpreg.
+Use `smslib.init` to initialise the system (disable interrupts, set stack pointer, clear vram). This should be placed in a section at .orga 0. `smslib.init` will also initialise the other smslib modules you've included, such as mapper and vdpreg to initialise the paging registers and VDP registers respectively.
 
 ```
 .orga 0
@@ -223,7 +222,7 @@ tilemap.loadBytesUntil $ff message
 
 Handles the VDP registers and settings.
 
-Initialise the VDP registers with sensible initial defaults:
+Initialise the VDP registers with sensible initial defaults. This will be done for you if you use `smslib.init`:
 
 ```
 vdpreg.init
