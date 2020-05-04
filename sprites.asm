@@ -1,34 +1,15 @@
-;================================================================
+;====
 ; Sprite Buffer
 ; Manages a sprite table buffer in RAM and transfers it to VRAM
-;================================================================
-
 ;====
-; How to use
-;
-; 1. Create an instance of sprites.buffer in RAM with a $xx40 offset (64-bytes)
-; 2. In the game loop, use sprites.push or sprites.pushGroup to add sprites to
-;       the buffer
-; 3. During vblank, call sprites.copyToVram to transfer the buffer to VRAM
-;====
+.define sprites 1
 
 ;====
 ; Settings
 ;====
-
-; The y position to set sprites to hide them offscreen
-.ifndef sprites.HIDE_Y_POSITION
-    .define sprites.HIDE_Y_POSITION $F0
-.endif
-
-; The sprite y position that hides the current and all following sprites
-.ifndef sprites.Y_TERMINATOR
-    .define sprites.Y_TERMINATOR $D0
-.endif
-
-; The maximum screen y coordinate a sprite can be. Defaults to 192.
-.ifndef sprites.MAX_SCREEN_Y
-    .define sprites.MAX_SCREEN_Y 192
+; The maximum screen y coordinate a sprite can be. Defaults to 192
+.ifndef sprites.maxYPos
+    .define sprites.maxYPos 192
 .endif
 
 ; The sprite table's address in VRAM. Defaults to $3f00
@@ -39,51 +20,61 @@
 ;====
 ; Constants
 ;====
-; Terminates a list of sprites.sprite instances
-.define sprites.SPRITE_LIST_TERMINATOR 0-128
-
-; VDP ports
-.define sprites.VDP_COMMAND_PORT $bf
-.define sprites.VDP_DATA_PORT $be
+.define sprites.GROUP_TERMINATOR 255  ; terminates list of sprites.Sprite instances
+.define sprites.Y_TERMINATOR $D0
 
 ;====
 ; Sprite buffer
 ;
-; An instance should be placed in RAM at a $xx40 offset
+; An instance should be placed in RAM at a $xx40 offset and named
+; 'sprite.buffer'
 ;====
-.struct "sprites.buffer"
+.struct "sprites.Buffer"
     yPos:           DSB 64  ; screen yPos for each of the 64 sprites
-    xPosAndPattern: DSB 128 ; 1 byte xPos, 1 byte pattern * 64 sprites
+    xPosAndPattern: DSB 128 ; { 1 byte xPos, 1 byte pattern } * 64 sprites
 .endst
 
 ;====
-; Represents a single sprite. If using sprites.pushGroup, more than one can be
-; defined in a list terminated with a sprites.SPRITE_LIST_TERMINATOR byte
+; Represents a single sprite. If using sprites.addGroup, more than one can be
+; defined in a list terminated with a sprites.GROUP_TERMINATOR byte
 ;====
-.struct "sprites.sprite"
-    relativeY:  db  ; two's compliment (-127 to 127) (-128 signifies the end of a sprite list)
-    relativeX:  db  ; two's compliment (-128 to 127)
+.struct "sprites.Sprite"
+    relativeX:  db
+    relativeY:  db
     pattern:    db
 .endst
 
-; Defines a single sprite
-.macro "sprites.sprite.define" args pattern relativeX relativeY
-    .db relativeY relativeX pattern
+;====
+; Define data for a sprite.Sprite instance
+;
+; @in   pattern     the pattern number
+; @in   relativeX   the relativeX position
+; @in   relativeY   the relativeY position
+;====
+.macro "sprites.sprite" args pattern, relX, relY
+    .db relX relY pattern
+.endm
+
+;====
+; Marks the end of a group of sprites
+;====
+.macro "sprites.endGroup"
+    .db sprites.GROUP_TERMINATOR
 .endm
 
 ;====
 ; Adds a sprite to the buffer
 ;
-; @in  de address of the y position in the buffer
-; @in  a  yPos
-; @in  b  xPos
-; @in  c  pattern
+; @in  de pointer to next available y slot in sprite buffer
+; @in  a  screen yPos
+; @in  b  screen xPos
+; @in  c  pattern number
 ;
 ; @clobs af
 ;====
-.section "sprites.push" free
-    sprites.push:
-        ; yPos
+.section "sprites.add" free
+    sprites.add:
+        ; Set ypos
         ld (de), a
 
         ; xPos
@@ -98,42 +89,28 @@
 
         ; Restore de to point back to yPos
         rr e    ; (e - 1) / 2
+        inc de  ; point to next free slot
         ret
 .ends
 
 ;====
-; Clears all sprites in the sprite table buffer
-;
-; @in  de address of the table buffer in RAM
-;
-; @clobs af, b, de
+; Macro alias for sprites.add
 ;====
-.section "sprites.clear" free
-    sprites.clear:
-        ; Set all y positions to the hidden position
-        ld a, sprites.HIDE_Y_POSITION
-        ld b, 64
-        -:
-            ld (de), a
-            inc de
-        djnz -
+.macro "sprites.add"
+    call sprites.add
+.endm
 
-        ; Zero x and patterns
-        xor a   ; a = 0
-        ld b, 128
-        -:
-            ld (de), a
-            inc de
-        djnz -
-
-        ret
-.ends
+;====
+; Sets the sprite slot in the buffer ready to add sprites to
+;====
+.macro "sprites.setSlot" args slot
+    ld de, sprites.buffer + slot
+.endm
 
 ;====
 ; Marks the end of sprite table so remaining sprites are not processed
 ;
-; @in     de  address of the next free y position in the buffer
-; @clobs a
+; @in     de  pointer to next free y position in the buffer
 ;====
 .macro "sprites.end"
     ld a, sprites.Y_TERMINATOR
@@ -141,104 +118,82 @@
 .endm
 
 ;====
-; Copies a sprites.buffer instance from RAM to VRAM
-;
-; @in     hl    the address of the sprites.buffer instance in RAM
-; @clobs af, bc, hl
+; Initialises a sprite buffer in RAM
 ;====
-.macro "sprites.copyToVram" args sourceAddress
-    ld hl, sourceAddress
-    smslib.fastVramWrite sprites.vramAddress 64
-
-    ld hl, sourceAddress + 64
-    smslib.fastVramWrite (sprites.vramAddress + 128) 128
+.macro "sprites.init"
+    sprites.setSlot 0
+    sprites.end ; just set sprite terminator at position 0
 .endm
 
 ;====
-; Pushes one or more sprites to a buffer, as defined by a list of
-; sprites.sprite instances. Each sprite position is relative to the
-; previous sprite. The list of sprites must be terminated by a
-; byte containing the sprites.SPRITE_LIST_TERMINATOR value
-;
-; @in     hl  pointer to the spriteGroup
-; @in     de  pointer to the next free
-; @in     ix  pointer to the entity's x position (relative to the camera)
-; @in     iy  pointer to the entity's y position (relative to the camera)
-;
-; @out  de  address of the next free sprite in the buffer
-;
-; @clobs af, bc, hl, ix, iy
+; Copies the sprites.Buffer instance from RAM to VRAM
 ;====
-.section "sprites.pushGroup"
-    ; @in  hl pointer to 'pattern' byte of previous sprite
+.macro "sprites.copyToVram"
+    ; Copy y positions
+    smslib.prepVdpWrite sprites.vramAddress
+    ld hl, sprites.buffer
+    smslib.callOutiBlock 64
+
+    ; Copy x position and patterns
+    smslib.prepVdpWrite (sprites.vramAddress + 128) ; skip y and sprite table hole
+    ld hl, sprites.buffer + sprites.Buffer.xPosAndPattern
+    smslib.callOutiBlock 128
+.endm
+
+;====
+; Adds a group of sprites relative to a base position. Sprites within the group
+; that are off-screen are not added.
+;
+; @in   b   base x position (left-most)
+; @in   c   base y position (top-most)
+; @in   de  pointer to next free sprite slot
+; @in   hl  pointer to sprites.Sprite instances terminated by
+;           sprites.GROUP_TERMINATOR
+;
+; @out  de  next free sprite slot
+;====
+.section "sprites.addGroup"
+    _xOffScreen:
+        inc hl  ; point to relY
+    _yOffScreen:
+        inc hl  ; point to pattern
     _nextSprite:
-        inc hl  ; point to next sprite
+        inc hl  ; point to next item
 
-    sprites.pushGroup:
-        ; if yPos == terminator, return
-        ld a, (hl)
-        cp sprites.SPRITE_LIST_TERMINATOR
-        ret z
+    sprites.addGroup:
+        ld a, (hl)          ; load relX
+        cp sprites.GROUP_TERMINATOR
+        ret z               ; end of group
 
-        ; add y offset to yPos
-        _addYOffset:
-            or a                ; analyse yOffset in register a
-            jp z, _addXOffset   ; no offset to add
-            ld b, 0
-            jp p, +     ; if offset is negative:
-                dec b   ; set high-byte to $FF, for 2's complement addition
-            +:
+        ; Add relative x
+        add a, b            ; relX + baseX
+        jp c, _xOffScreen   ; off screen; next sprite
+        ld ixh, a           ; store result x for later
 
-            ld c, a     ; load offset into register c
-            add iy, bc
+        ; Add relative y
+        inc hl              ; point to relY
+        ld a, (hl)          ; load relY
+        add a, c            ; relY + baseY
+        cp sprites.maxYPos  ; compare with max y allowed
+        jp nc, _yOffScreen  ; off screen; next sprite
 
-        ; add x offset to xPos
-        _addXOffset:
-            inc hl      ; point to x offset
-            ld a, (hl)  ; load xOffset
-            or a        ; analyse xOffset in register a
-            jp z, _checkOnScreen    ; no offset to add
-
-            ld b, 0
-            jp p, +     ; if offset is negative:
-                dec b   ; set high-byte to $FF, for 2's complement addition
-            +:
-
-            ld c, a     ; load offset into register c
-            add ix, bc
-
-        _checkOnScreen:
-            inc hl      ; point to pattern number
-
-            ; if high-bytes of xPos or yPos are not zero, skip sprite
-            xor a       ; a = 0
-            cp iyh
-            jp nz, _nextSprite  ; jp if sprite is offscreen
-            cp ixh
-            jp nz, _nextSprite  ; jp if sprite is offscreen
-
-            ; if yPos >= max y position, skip
-            ld a, iyl
-            cp sprites.MAX_SCREEN_Y + 1 ; +1 to make comparison <=
-            jp nc, _nextSprite  ; jp if sprite is offscreen
-
-        ;; add sprite to buffer
-        ; store yPos in buffer
-        ld a, iyl
-        ld (de), a
-
-        ; store xPos in buffer
-        ld a, ixl
-        rlc e       ; switch to xPos (e = e * 2; works because of $xx40 offset)
-        ld (de), a
-
-        ; store pattern in buffer
-        inc de
-        ld a, (hl)
-        ld (de), a
-
-        ; Restore de to point back to yPos in buffer
-        rr e    ; (e - 1) / 2
-        inc de  ; point to next slot
+        ; Output sprite to sprite buffer
+        ld (de), a          ; set sprite y in buffer
+        rlc e               ; point to sprite x; works because of $xx40 offset
+        ld a, ixh           ; restore x
+        ld (de), a          ; set sprite x in buffer
+        inc hl              ; point to pattern number in group
+        inc de              ; point to pattern number in buffer
+        ld a, (hl)          ; load pattern number
+        ld (de), a          ; set pattern number in buffer
+        rr e                ; return to y in buffer
+        inc de              ; point to next sprite slot in buffer
         jp _nextSprite
 .ends
+
+;====
+; Macro alias for sprites.addGroup
+;====
+.macro "sprites.addGroup"
+    call sprites.addGroup
+.endm

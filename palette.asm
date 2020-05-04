@@ -10,6 +10,7 @@
 
 .define palette.VRAM_ADDR $c000
 .define palette.SLOT_SIZE 1
+.define palette.SPRITE_PALETTE 16
 
 ;====
 ; Defines a byte with an approximate RGB value. Each color component is rounded

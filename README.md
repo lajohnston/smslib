@@ -8,7 +8,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware.
 - [input.asm](#inputasm) - interprets the joypad inputs
 - [palette.asm](#paletteasm) - handles the color palettes
 - [patterns.asm](#patternsasm) - handles patterns (tile images)
-- **sprites.asm** - manages a sprite table in a RAM and pushes to VRAM when required
+- [sprites.asm](#sprites) - manages a sprite table in a RAM and pushes to VRAM when required
 - [vdpreg.asm](#vdpregasm) - defines and sets graphics chip register settings
 - **z80.asm** - logical/math routines
 - [/mapper](#mappers)
@@ -185,7 +185,7 @@ patterns.load patternData, 1, 9 ; skip first 9
 
 Base library containing common functionality for the other modules.
 
-Use `smslib.init` to initialise the system (disable interrupts, set stack pointer, clear vram). This should be placed in a section at .orga 0. `smslib.init` will also initialise the other smslib modules you've included, such as mapper and vdpreg to initialise the paging registers and VDP registers respectively.
+Use `smslib.init` to initialise the system (disable interrupts, set stack pointer, clear vram). This should be placed in a section at .orga 0. `smslib.init` will also initialise the other smslib modules you've included, such as sprites, mapper and vdpreg to initialise the sprite buffer, paging registers and VDP registers respectively.
 
 ```
 .orga 0
@@ -197,6 +197,73 @@ Use `smslib.init` to initialise the system (disable interrupts, set stack pointe
     init:
         ; game init
 .ends
+```
+
+# sprites.asm
+
+Manages a sprite table buffer in RAM and can push this to VRAM when required.
+
+Create an instance of sprite.Buffer in RAM with an address of \$xx40 and the label 'sprites.buffer'. This offset allows it to perform some optimisations:
+
+```
+.ramsection "ram" bank 0 slot mapper.RAM_SLOT orga $C040 force
+    sprites.buffer: instanceof sprites.Buffer
+.ends
+```
+
+Initialise the table. This is done automatically if you use `smslib.init`:
+
+```
+sprites.init
+```
+
+Add sprites to the table:
+
+```
+sprites.setSlot 0   ; point to first sprite slot in table
+ld a, 100           ; yPos
+ld b, 80            ; xPos
+ld c, 5             ; pattern number
+sprites.add
+
+; Add a sprite to slot 1 (not need to call sprites.setSlot again)
+ld a, 150           ; yPos
+ld b, 30            ; xPos
+ld c, 5             ; pattern number
+sprites.add
+
+```
+
+Add multiple sprites with positions relative to a base position. The offsets must be positive numbers, so the base position is the top-left of the entity. If any sub-sprites fall off screen they will not be added:
+
+:
+
+```
+spriteGroup:
+    ; pattern number, relX, relY
+    sprites.sprite 1, 0, 0  ; top left
+    sprites.sprite 2, 8, 0  ; top right
+    sprites.sprite 3, 0, 8  ; bottom left
+    sprites.sprite 4, 8, 8  ; bottom right
+    sprites.endGroup        ; end of group
+
+code:
+    ld hl, spriteGroup
+    ld b, 150   ; base x pos
+    ld c, 50    ; base y pos
+    sprites.addGroup
+```
+
+Mark when you've finished adding sprites. This will tell the VDP to stop processing the table from that point:
+
+```
+sprites.end
+```
+
+Transfer buffer to VRAM when safe to do so, when either the display is off or during VBlank:
+
+```
+sprites.copyToVram
 ```
 
 # tilemap.asm

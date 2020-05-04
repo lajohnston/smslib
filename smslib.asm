@@ -62,6 +62,11 @@
         vdpreg.init
     .endif
 
+    ; initialise sprite buffer
+    .ifdef sprites
+        sprites.init
+    .endif
+
     call smslib.clearVram
 
     .ifdef then
