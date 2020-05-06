@@ -1,0 +1,52 @@
+; this file was created with wlalink by ville helin <vhelin@iki.fi>.
+; wla symbolic information for "03-movingSprites.sms".
+
+[labels]
+00:0268 smslib.outiBlock
+00:001b smslib.clearVram
+00:03c0 sprites.add
+00:039b vdpreg.initData
+00:03b1 vdpreg.initDataEnd
+00:c040 sprites.buffer
+00:c040 sprites.buffer.yPos
+00:c080 sprites.buffer.xPosAndPattern
+00:033c init
+00:0364 loop
+00:0378 vBlank
+00:0269 paletteData
+00:026f patternData
+00:032f spriteGroup
+00:03cc *WLA_SDSC_PRG_AUTHOR_PTR
+00:03b1 *WLA_SDSC_PRG_NAME_PTR
+00:003e *WLA_SDSC_PRG_NOTES_PTR
+
+[definitions]
+00000001 _sizeof_smslib.outiBlock
+00000016 _sizeof_smslib.clearVram
+0000000c _sizeof_sprites.add
+00000016 _sizeof_vdpreg.initData
+00000000 _sizeof_vdpreg.initDataEnd
+000000c0 _sizeof_sprites.buffer
+00000040 _sizeof_sprites.buffer.yPos
+00000080 _sizeof_sprites.buffer.xPosAndPattern
+00000028 _sizeof_init
+00000014 _sizeof_loop
+00000023 _sizeof_vBlank
+00000006 _sizeof_paletteData
+000000c0 _sizeof_patternData
+0000000d _sizeof_spriteGroup
+0000000b _sizeof_*WLA_SDSC_PRG_AUTHOR_PTR
+0000000f _sizeof_*WLA_SDSC_PRG_NAME_PTR
+0000001e _sizeof_*WLA_SDSC_PRG_NOTES_PTR
+
+[source files]
+0001 cefa724c main.asm 
+0002 ef555018 ../../smslib.asm 
+0003 ff0d9196 ../../mapper/basic.asm 
+0004 44a34b68 ../../palette.asm 
+0005 aecbbadd ../../patterns.asm 
+0006 9c6203c1 ../../sprites.asm 
+0007 a1857d46 ../../vdpreg.asm 
+
+[rom checksum]
+9291893f
