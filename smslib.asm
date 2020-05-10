@@ -8,8 +8,7 @@
 ;====
 ; Settings
 ;
-; Define these before '.include "smslib.asm"'' if you wish to override
-; the defaults
+; Define these before including this file if you wish to override the defaults
 ;====
 
 ; OUTI block size in bytes. This block is used to provide a fast means of

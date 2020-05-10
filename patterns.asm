@@ -8,6 +8,8 @@
 
 ;====
 ; Settings
+;
+; Define these before including this file if you wish to override the defaults
 ;====
 
 ; Pattern address in VRAM

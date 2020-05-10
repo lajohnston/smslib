@@ -41,7 +41,7 @@ The libs are also designed for ease of use so long as this doesn't reduce the sp
 
 ### Decoupled
 
-The smslib.asm file contains common functionality used by the other lib files, but other than that the separate files don't reference each other and you can pick and choose which ones to include in your project.
+The smslib.asm file contains common functionality used by the other lib files, but other than that the separate files don't depend on each other and you can pick and choose which ones to include in your project.
 
 ### Prefixes
 
@@ -54,6 +54,15 @@ The library routines don't PUSH or POP registers to preserve them, meaning they 
 ### Documentation
 
 Each routine is documented with a comment block above it specifying the parameters (registers or macro arguments)
+
+## Settings
+
+Many of the lib files include settings that default to sensible values but can be overridden if required. These are defined in the 'Settings' section near the top of each file. The overrides must be defined before including the relevant file:
+
+```
+.define smslib.outiBlockSize 1024
+.include "smslib.asm"
+```
 
 ## input.asm
 

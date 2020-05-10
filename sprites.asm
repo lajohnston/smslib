@@ -6,7 +6,10 @@
 
 ;====
 ; Settings
+;
+; Define these before including this file if you wish to override the defaults
 ;====
+
 ; The maximum screen y coordinate a sprite can be. Defaults to 192
 .ifndef sprites.maxYPos
     .define sprites.maxYPos 192

@@ -8,6 +8,8 @@
 
 ;====
 ; Settings
+;
+; Define these before including this file if you wish to override the defaults
 ;====
 
 ; The tilemap address in VRAM (default $3800)

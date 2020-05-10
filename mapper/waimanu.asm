@@ -13,6 +13,9 @@
 
 ;====
 ; Settings
+;
+; Define these before including this file if you wish to override
+; the defaults
 ;====
 
 ; Define the number of pageable 16KB banks (default 6 = 128KB)
