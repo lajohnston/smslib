@@ -66,6 +66,11 @@
         sprites.init
     .endif
 
+    ; initialise interrupt handler
+    .ifdef interrupts
+        interrupts.init
+    .endif
+
     call smslib.clearVram
 
     .ifdef then

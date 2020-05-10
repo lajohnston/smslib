@@ -18,6 +18,8 @@ do
     cd ./$i
     PROJECT_NAME=$i
 
+    printf "\nBuilding example ${PROJECT_NAME}:\n\n"
+
     # Create simple linkfile
     LINKFILE=$TEMP_DIR/linkfile
     echo [objects] > $LINKFILE
