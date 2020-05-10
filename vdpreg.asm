@@ -44,11 +44,11 @@
 ; Constants
 ;====
 .define vdpreg.COMMAND_PORT             $bf   ; write (issue command to vdp)
-.define vdpreg.ENABLE_HBLANK            %00010000
+.define vdpreg.ENABLE_HBLANKS           %00010000
 .define vdpreg.HIDE_LEFT_COLUMN         %00100000
 .define vdpreg.ENABLE_DISPLAY           %01000000
 .define vdpreg.ENABLE_TALL_SPRITES      %00000010
-.define vdpreg.ENABLE_VBLANK            %00100000
+.define vdpreg.ENABLE_VBLANKS           %00100000
 .define vdpreg.LOCK_H_SCROLL            %01000000
 .define vdpreg.LOCK_V_SCROLL            %10000000
 .define vdpreg.ZOOM_SPRITES             %00000001
@@ -111,19 +111,19 @@
 ;====
 ; Set the value of register 0 (Mode Control 1)
 ;
-; Usage: vdpreg.setRegister0 vdpreg.ENABLE_HBLANK | vdpreg.HIDE_LEFT_COLUMN
+; Usage: vdpreg.setRegister0 vdpreg.ENABLE_HBLANKS | vdpreg.HIDE_LEFT_COLUMN
 ;
 ; @in value     accepts the following options which can be ORed together (|).
 ;               Any options that are not passed are set back to their
 ;               default off setting
 ;
 ; Options:
-;   vdpreg.ENABLE_HBLANK
-;       Enable HBlank interrupts, which occur after each scan line is drawn
+;   vdpreg.ENABLE_HBLANKS
+;       Enable HBlank interrupts, which occur after scan lines are drawn
 ;
 ;   vdpreg.HIDE_LEFT_COLUMN
 ;       Hide the left-most column (8-pixels). Useful to allow sprites to move
-;       on/off  the left-side of the screen smoothly
+;       on/off the left-side of the screen smoothly
 ;
 ;   vdpreg.LOCK_H_SCROLL
 ;       Stops the top two rows scrolling horizontally. They can however still
@@ -142,7 +142,7 @@
 ;====
 ; Set the value of register 1 (Mode Control 2)
 ;
-; Usage: vdpreg.setRegister1 vdpreg.ENABLE_DISPLAY | vdpreg.ENABLE_VBLANK
+; Usage: vdpreg.setRegister1 vdpreg.ENABLE_DISPLAY | vdpreg.ENABLE_VBLANKS
 ;
 ; @in value     accepts the following options which can be ORed together (|).
 ;               Any options that are not passed are set back to their
@@ -157,7 +157,7 @@
 ;       bottom sprite and the next pattern in the table will be used for the
 ;       top
 ;
-;   vdpreg.ENABLE_VBLANK
+;   vdpreg.ENABLE_VBLANKS
 ;       Enable the display
 ;
 ;   vdpreg.ZOOM_SPRITES
