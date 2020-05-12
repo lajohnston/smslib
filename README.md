@@ -9,6 +9,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware.
 - [interrupts.asm](#interruptsasm) - handles VBlank and HBlank interrupts
 - [palette.asm](#paletteasm) - handles the color palettes
 - [patterns.asm](#patternsasm) - handles patterns (tile images)
+- [pause.asm](#pauseasm) - handles the pause button
 - [sprites.asm](#sprites) - manages a sprite table in a RAM and pushes to VRAM when required
 - [vdpreg.asm](#vdpregasm) - defines and sets graphics chip register settings
 - **z80.asm** - logical/math routines
@@ -299,6 +300,26 @@ patterns.load patternData, 5
 
 ; ...then load pattern 10 into the next slot (5)
 patterns.load patternData, 1, 9 ; skip first 9
+```
+
+# pause.asm
+
+Provides a pause handler that toggles a flag in RAM whenever the pause button is pressed. This flag can be detected at a safe position in your code such as at the start of the game loop.
+
+Basic pause functionality can be provided by simply waiting until the pause button is pressed again:
+
+```
+pause.waitIfPaused
+```
+
+If you wish to jp or call a label based on the pause state, you can use the following:
+
+```
+pause.jpIfPaused myPauseState
+pause.callIfPaused myPauseState
+
+myPauseState:
+    ...
 ```
 
 # smslib.asm

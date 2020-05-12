@@ -61,6 +61,11 @@
         vdpreg.init
     .endif
 
+    ; initialise pause handler
+    .ifdef smslib.pause
+        pause.init
+    .endif
+
     ; initialise sprite buffer
     .ifdef sprites
         sprites.init

@@ -27,14 +27,6 @@
 .ends
 
 ;====
-; Pause button handler
-;====
-.orga $66
-.section "pauseHandler" force
-    retn    ; do nothing
-.ends
-
-;====
 ; Place an instance of sprite.Buffer somewhere in RAM with an offset of $40
 ; This offset is used by smslib to perform optimisations
 ;====

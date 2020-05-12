@@ -13,6 +13,7 @@
 .include "mapper/basic.asm" ; memory mapper
 .include "palette.asm"      ; handles colors
 .include "patterns.asm"     ; handles patterns (tile images)
+.include "pause.asm"        ; handles pause button
 .include "sprites.asm"      ; handles a sprite buffer in RAM
 .include "vdpreg.asm"       ; handles vdp settings
 
@@ -27,14 +28,6 @@
 .orga 0
 .section "main" force
     smslib.init init ; initialise then jump to init
-.ends
-
-;====
-; Pause button handler
-;====
-.orga $66
-.section "pauseHandler" force
-    retn    ; do nothing
 .ends
 
 ;====
@@ -89,6 +82,9 @@
     mainLoop:
         ; Wait for VBlank to finish before continuing
         interrupts.waitForVBlank
+
+        ; If paused, keep restarting loop until unpaused
+        pause.jpIfPaused mainLoop
 
         ; Add bubble movement vector to position
         ld ix, bubble

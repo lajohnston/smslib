@@ -25,14 +25,6 @@
 .ends
 
 ;====
-; Pause button handler
-;====
-.orga $66
-.section "pauseHandler" force
-    retn    ; do nothing
-.ends
-
-;====
 ; Initialise program
 ;====
 .section "init" free
