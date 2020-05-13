@@ -5,32 +5,17 @@
 .define smslib.pause 1
 
 ;====
-; Constants
+; RAM
 ;====
 
 ; RAM slot to use
-.ifdef mapper.RAM_SLOT
-    .define pause.RAM_SLOT mapper.RAM_SLOT
-.else
-    .ifdef smslib.RAM_SLOT
-        .define pause.RAM_SLOT smslib.RAM_SLOT
-    .else
-        .print "Error in smslib pause.asm:\n  Unsure which RAM slot to use;"
-        .print " Either include an smslib mapper before including pause.asm"
-        .print " or .define an smslib.RAM_SLOT value"
-        .print "\n\n"
-        .fail
-    .endif
-.endif
-
-;====
-; RAM
-;====
+; Indent is needed to make it work: https://github.com/vhelin/wla-dx/issues/310
+ smslib.assertRamSlot "pause.asm"
 
 ;====
 ; Flag is set when the pause button has been pressed
 ;====
-.ramsection "pause.ram.pauseFlag" slot pause.RAM_SLOT
+.ramsection "pause.ram.pauseFlag" slot smslib.RAM_SLOT
     pause.ram.pauseFlag: db
 .ends
 

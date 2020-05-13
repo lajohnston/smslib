@@ -41,30 +41,19 @@
 ;====
 .define interrupts.VDP_STATUS_PORT $bf
 
-; RAM slot to use
-.ifdef mapper.RAM_SLOT
-    .define interrupts.RAM_SLOT mapper.RAM_SLOT
-.else
-    .ifdef smslib.RAM_SLOT
-        .define interrupts.RAM_SLOT smslib.RAM_SLOT
-    .else
-        .print "Error in smslib interrupts.asm:\n  Unsure which RAM slot to use;"
-        .print " Either include an smslib mapper before including interrupts.asm"
-        .print " or .define an smslib.RAM_SLOT value"
-        .print "\n\n"
-        .fail
-    .endif
-.endif
-
 ;====
 ; RAM
 ;====
+
+; RAM slot to use
+; Indent is needed to make it work: https://github.com/vhelin/wla-dx/issues/310
+ smslib.assertRamSlot "interrupts.asm"
 
 ;====
 ; Flag is set when a VBlank interrupt has occurred so that
 ; interrupts.waitForVBlank can differentiate them from pauses and HBlanks
 ;====
-.ramsection "interrupts.ram.vBlankFlag" slot interrupts.RAM_SLOT
+.ramsection "interrupts.ram.vBlankFlag" slot smslib.RAM_SLOT
     interrupts.ram.vBlankFlag: db
 .ends
 
