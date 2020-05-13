@@ -2,7 +2,7 @@
 ; Pause handler
 ;====
 
-.define smslib.pause 1
+.define pause.ENABLED 1
 
 ;====
 ; RAM

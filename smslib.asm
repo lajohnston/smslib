@@ -56,27 +56,27 @@
     ld sp, $dff0    ; set stack pointer
 
     ; initialise paging registers
-    .ifdef mapper
+    .ifdef mapper.ENABLED
         mapper.init
     .endif
 
     ; initialise vdp registers
-    .ifdef vdpreg
+    .ifdef vdpreg.ENABLED
         vdpreg.init
     .endif
 
     ; initialise pause handler
-    .ifdef smslib.pause
+    .ifdef pause.ENABLED
         pause.init
     .endif
 
     ; initialise sprite buffer
-    .ifdef sprites
+    .ifdef sprites.ENABLED
         sprites.init
     .endif
 
     ; initialise interrupt handler
-    .ifdef interrupts
+    .ifdef interrupts.ENABLED
         interrupts.init
     .endif
 

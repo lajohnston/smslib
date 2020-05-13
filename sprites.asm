@@ -2,7 +2,7 @@
 ; Sprite Buffer
 ; Manages a sprite table buffer in RAM and transfers it to VRAM
 ;====
-.define sprites 1
+.define sprites.ENABLED 1
 
 ;====
 ; Settings

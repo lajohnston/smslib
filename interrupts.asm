@@ -8,7 +8,7 @@
 ; Enable HBlank - VDP register 0, bit 4
 ; Enable VBlank - VDP register 1, bit 5
 ;====
-.define interrupts 1
+.define interrupts.ENABLED 1
 
 ;====
 ; Settings

@@ -9,7 +9,7 @@
 ;   * Main 32KB bank in non-pageable slot 0
 ;   * Multiple (default 6) additional 16KB banks in pageable slot 2
 ;===
-.define mapper 1
+.define mapper.ENABLED 1
 
 ;====
 ; Settings

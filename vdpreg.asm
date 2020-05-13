@@ -2,7 +2,7 @@
 ; Manages the VDP registers
 ;====
 
-.define vdpreg 1
+.define vdpreg.ENABLED 1
 
 ;====
 ; Default register values
