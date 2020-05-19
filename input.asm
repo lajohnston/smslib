@@ -17,7 +17,7 @@
 ; Variables
 
 ; The register to store the input data once parsed
-.define input.register "a"
+.define input.register "b"
 
 ;====
 ; Reads controller port 1 input into the given register

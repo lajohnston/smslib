@@ -83,7 +83,7 @@ input.if input.BUTTON1, +
 
 ```
 
-If needed you can change the register that holds the input value (default is `a`):
+If needed you can change the register that holds the input value (default is `b`):
 
 ```
 .redefine input.register "d"
