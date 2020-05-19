@@ -42,7 +42,7 @@
         tilemap.loadBytesUntil $ff message  ; Load data from 'message' until reaching terminator ($ff) byte
 
         ; Enable the display
-        vdpreg.setRegister1 vdpreg.ENABLE_DISPLAY
+        vdpreg.enableDisplay
 
         ; Freeze with infinite loop
         -: jr -

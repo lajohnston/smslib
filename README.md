@@ -104,8 +104,8 @@ You will need to enable interrupts in both the VDP and Z80. After you initialise
 You can use [vdpreg.asm](#vdpregasm) for this, taking care not to overwrite any other flags that are also stored within these registers (see vdpreg.asm file for documentation):
 
 ```
-vdpreg.setRegister0 vdpreg.ENABLE_HBLANK
-vdpreg.setRegister1 vdpreg.ENABLE_DISPLAY|vdpreg.ENABLE_VBLANK
+vdpreg.enableHBlank
+vdpreg.enableVBlank
 ```
 
 You also need to enable interrupts within the Z80 CPU:
@@ -377,8 +377,6 @@ sprites.add
 
 Add multiple sprites with positions relative to a base position. The offsets must be positive numbers, so the base position is the top-left of the entity. If any sub-sprites fall off screen they will not be added:
 
-:
-
 ```
 spriteGroup:
     ; pattern number, relX, relY
@@ -436,12 +434,46 @@ Initialise the VDP registers with sensible initial defaults. This will be done f
 vdpreg.init
 ```
 
-Change register values. See vdpreg.asm for available options:
+Change register values using the provided macros. See vdpreg.asm for more details about each setting.
 
 ```
-vdpreg.setRegister0 vdpreg.HIDE_LEFT_COLUMN
-vdpreg.setRegister1 vdpreg.ENABLE_DISPLAY|vdpreg.ENABLE_VBLANKS
-vdpreg.setBackgroundColor 0 ; use first slot in sprite palette
+vdpreg.setBackgroundColorSlot 16
 vdpreg.setScrollX 100
 vdpreg.setScrollY 255
+
+vdpreg.enableDisplay
+vdpreg.disableDisplay
+
+vdpreg.enableVBlank
+vdpreg.disableVBlank
+
+vdpreg.enableTallSprites
+vdpreg.disableTallSprites
+
+vdpreg.enableSpriteZoom
+vdpreg.disableSpriteZoom
+
+vdpreg.enableHBlank
+vdpreg.disableHBlank
+
+vdpreg.enableSpriteShift
+vdpreg.disableSpriteShift
+
+vdpreg.hideLeftColumn
+vdpreg.showLeftColumn
+
+vdpreg.lockHScroll
+vdpreg.unlockHScroll
+
+vdpreg.lockVScroll
+vdpreg.unlockVScroll
+```
+
+Many settings are stored within the same VDP register, so if you are changing multiple settings then it's much more efficient to batch them together by wrapping them in calls to `vdpreg.startBatch` and `vdpreg.endBatch`:
+
+```
+vdpreg.startBatch
+vdpreg.enableDisplay
+vdpreg.enableVBlank
+vdpreg.endBatch
 ```

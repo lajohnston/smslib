@@ -76,7 +76,11 @@
         ld (ix + Bubble.yPos), 80
 
         ; Enable the display and interrupts
-        vdpreg.setRegister1 vdpreg.ENABLE_DISPLAY|vdpreg.ENABLE_VBLANKS
+        vdpreg.startBatch
+        vdpreg.enableDisplay
+        vdpreg.enableVBlank
+        vdpreg.endBatch
+
         interrupts.enable
 
     mainLoop:
