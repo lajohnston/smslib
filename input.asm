@@ -20,9 +20,24 @@
 .define input.register "b"
 
 ;====
-; Reads controller port 1 input into the given register
+; Set the register used to hold the input value for processing
+; The default is register b
 ;
-; @out   a      Reset bits represent the buttons currently pressed
+; @in register  the register ("a", "b", "c", "d", "e", "h", "l")
+;====
+.macro "input.setRegister" args register
+    .redefine input.register register
+.endm
+
+;====
+; Reads the input from controller port 1 into the register specified by
+; input.setRegister
+;
+; @out  (a|b|c|d|e|h|l) -   depending on register given to input.setRegister
+;                           (default b)
+;
+; The reset bits represent the buttons currently pressed
+;
 ;       xx000000
 ;       |||||||*- Up
 ;       ||||||*-- Down
@@ -30,7 +45,7 @@
 ;       ||||*---- Right
 ;       |||*----- Button 1
 ;       ||*------ Button 2
-;       ** junk (actually, port B down and up, respectively)
+;       ** junk
 ;====
 .macro "input.readPort1"
     in a, input.PORT_1
@@ -38,7 +53,8 @@
 .endm
 
 ;====
-; Stores the read input value into the given register
+; Stores the read input value into the register given to input.setRegister
+; (default is b)
 ;====
 .macro "input._store"
     .if input.register == "b"
@@ -68,15 +84,16 @@
 
 ; See input.readPort1 doc
 .macro "input.readPort2"
+    ; Retrieve up and down buttons, which are stored within input1 byte
     in a, input.PORT_1
     and %11000000       ; mask out port A buttons
-    ld b, a
+    ld b, a             ; store in b
 
-    in a, input.PORT_2
+    in a, input.PORT_2  ; read remaining buttons
     and %00001111       ; mask out misc. buttons
     or b                ; combine both masks
 
-    ; Rotate left twice to match port A format
+    ; Rotate left twice to match port 1 format
     rlca
     rlca
 
@@ -124,8 +141,8 @@
 ;===
 ; Check if a given button has been pressed
 ;
-; @param button     the button to check (input.UP, input.BUTTON_1 etc)
-; @param else       the address to jump to if the button is not pressed
+; @in   button  the button to check (input.UP, input.BUTTON_1 etc)
+; @in   else    the address to jump to if the button is not pressed
 ;===
 .macro "input.if" args button else
     input.isPressed button

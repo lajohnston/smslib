@@ -86,8 +86,13 @@ input.if input.BUTTON1, +
 If needed you can change the register that holds the input value (default is `b`):
 
 ```
-.redefine input.register "d"
-.input.readPort1 ; result stored in register d
+input.setRegister "d"
+input.readPort1     ; result stored in register d
+
+; This will check input value in register d
+input.if input.LEFT, +
+    ; Left has been pressed
++:
 ```
 
 ## interrupts.asm
