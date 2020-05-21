@@ -20,6 +20,11 @@
     .define sprites.vramAddress $3f00
 .endif
 
+; The RAM address to place the sprite buffer. The low byte must be $40
+.ifndef sprites.bufferAddress
+    .define sprites.bufferAddress $C040
+.endif
+
 ;====
 ; Constants
 ;====
@@ -36,6 +41,23 @@
     yPos:           DSB 64  ; screen yPos for each of the 64 sprites
     xPosAndPattern: DSB 128 ; { 1 byte xPos, 1 byte pattern } * 64 sprites
 .endst
+
+;====
+; RAM
+;====
+
+; RAM slot to use
+; Indent is needed to make it work: https://github.com/vhelin/wla-dx/issues/310
+ smslib.assertRamSlot "sprites.asm"
+
+;====
+; The offset of $40 is required to make use of performance optimisations. This
+; technique is described by user gvx32 in:
+; https://www.smspower.org/forums/15794-AFewHintsOnCodingAMediumLargeSizedGameUsingWLADX
+;====
+.ramsection "ram" bank 0 slot smslib.RAM_SLOT orga sprites.bufferAddress force
+    sprites.buffer: instanceof sprites.Buffer
+.ends
 
 ;====
 ; Represents a single sprite. If using sprites.addGroup, more than one can be

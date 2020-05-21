@@ -349,15 +349,7 @@ Use `smslib.init` to initialise the system (disable interrupts, set stack pointe
 
 Manages a sprite table buffer in RAM and can push this to VRAM when required.
 
-Create an instance of sprite.Buffer in RAM with an address of \$xx40 and the label 'sprites.buffer'. This offset allows it to perform some optimisations:
-
-```
-.ramsection "ram" bank 0 slot mapper.RAM_SLOT orga $C040 force
-    sprites.buffer: instanceof sprites.Buffer
-.ends
-```
-
-Initialise the table. This is done automatically if you use `smslib.init`:
+Initialise the sprite buffer. This is done automatically if you use `smslib.init`:
 
 ```
 sprites.init

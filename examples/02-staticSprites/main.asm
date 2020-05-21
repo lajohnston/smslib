@@ -27,14 +27,6 @@
 .ends
 
 ;====
-; Place an instance of sprite.Buffer somewhere in RAM with an offset of $40
-; This offset is used by smslib to perform optimisations
-;====
-.ramsection "ram" bank 0 slot mapper.RAM_SLOT orga $C040 force
-    sprites.buffer: instanceof sprites.Buffer
-.ends
-
-;====
 ; Initialise program
 ;====
 .section "init" free
