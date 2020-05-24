@@ -4,7 +4,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware.
 
 ## Contents
 
-- [smslib.asm](#smslibasm) - common functions used by all the libs
+- [boot.asm](#bootasm) - boots the system and initialises smslib modules
 - [input.asm](#inputasm) - interprets the joypad inputs
 - [interrupts.asm](#interruptsasm) - handles VBlank and HBlank interrupts
 - [palette.asm](#paletteasm) - handles the color palettes
@@ -66,6 +66,10 @@ Many of the lib files include settings that default to sensible values but can b
 .include "smslib.asm"
 ```
 
+## boot.asm
+
+Automatically initialises the system and smslib modules. Includes a section at address 0. When it is done it will call an `init` label that you must define in your code.
+
 ## input.asm
 
 Allows you to read input from the controller pads.
@@ -121,7 +125,7 @@ interrupts.enable
 
 ### Initialise
 
-In your init code call `interrupts.init`. This is performed automatically if you're using `smslib.init`.
+In your init code call `interrupts.init`. This is performed automatically if you're using `boot.asm`.
 
 ```
 interrupts.init
@@ -215,7 +219,7 @@ Include the mapper you wish to use:
 .include "smslib/mapper/waimanu.asm"
 ```
 
-Initialise the SMS mapping registers when booting your game. This will be done for you if you're using `smslib.init`
+Initialise the SMS mapping registers when booting your game. This will be done for you if you're using `boot.asm`
 
 ```
 mapper.init
@@ -327,29 +331,11 @@ myPauseState:
     ...
 ```
 
-# smslib.asm
-
-Base library containing common functionality for the other modules.
-
-Use `smslib.init` to initialise the system (disable interrupts, set stack pointer, clear vram). This should be placed in a section at .orga 0. `smslib.init` will also initialise the other smslib modules you've included, such as sprites, mapper and vdpreg to initialise the sprite buffer, paging registers and VDP registers respectively.
-
-```
-.orga 0
-.section "main" force
-    smslib.init init    ; init system then jump to init label
-.ends
-
-.section "init" free
-    init:
-        ; game init
-.ends
-```
-
 # sprites.asm
 
 Manages a sprite table buffer in RAM and can push this to VRAM when required.
 
-Initialise the sprite buffer. This is done automatically if you use `smslib.init`:
+Initialise the sprite buffer. This is done automatically if you use `boot.asm`:
 
 ```
 sprites.init
@@ -425,7 +411,7 @@ tilemap.loadBytesUntil $ff message
 
 Handles the VDP registers and settings.
 
-Initialise the VDP registers with sensible initial defaults. This will be done for you if you use `smslib.init`:
+Initialise the VDP registers with sensible initial defaults. This will be done for you if you use `boot.asm`:
 
 ```
 vdpreg.init

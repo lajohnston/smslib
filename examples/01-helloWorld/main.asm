@@ -13,16 +13,7 @@
 .include "patterns.asm"     ; handles patterns (tile images)
 .include "tilemap.asm"      ; handles on-screen tilemap
 .include "vdpreg.asm"       ; handles vdp settings
-
-;====
-; Boot sequence at ROM address 0
-;====
-.bank 0 slot 0
-.orga 0
-.section "main" force
-    ; Initialise the system then jump to the init label
-    smslib.init init
-.ends
+.include "boot.asm"         ; initialise system and smslib modules
 
 ;====
 ; Initialise program

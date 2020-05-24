@@ -28,18 +28,11 @@
 .define interrupts.handleVBlank 1
 .include "interrupts.asm"
 
+.include "boot.asm"         ; initialise system and smslib modules
+
 ; Import bubble entity
 .incdir "."
 .include "bubble.asm"
-
-;====
-; Boot sequence at ROM address 0
-;====
-.bank 0 slot 0
-.orga 0
-.section "main" force
-    smslib.init init ; initialise then jump to init
-.ends
 
 ;====
 ; Reserve a place in RAM for a Bubble instance
