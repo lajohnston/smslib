@@ -11,6 +11,11 @@
 .define interrupts.ENABLED 1
 
 ;====
+; Dependencies
+;====
+.include "./utils/ram.asm"
+
+;====
 ; Settings
 ;
 ; Define these before including this file if you wish to override the defaults
@@ -45,15 +50,11 @@
 ; RAM
 ;====
 
-; RAM slot to use
-; Indent is needed to make it work: https://github.com/vhelin/wla-dx/issues/310
- smslib.assertRamSlot "interrupts.asm"
-
 ;====
 ; Flag is set when a VBlank interrupt has occurred so that
 ; interrupts.waitForVBlank can differentiate them from pauses and HBlanks
 ;====
-.ramsection "interrupts.ram.vBlankFlag" slot smslib.RAM_SLOT
+.ramsection "interrupts.ram.vBlankFlag" slot utils.ram.SLOT
     interrupts.ram.vBlankFlag: db
 .ends
 

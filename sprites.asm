@@ -26,6 +26,11 @@
 .endif
 
 ;====
+; Dependencies
+;====
+.include "./utils/ram.asm"
+
+;====
 ; Constants
 ;====
 .define sprites.GROUP_TERMINATOR 255  ; terminates list of sprites.Sprite instances
@@ -46,16 +51,12 @@
 ; RAM
 ;====
 
-; RAM slot to use
-; Indent is needed to make it work: https://github.com/vhelin/wla-dx/issues/310
- smslib.assertRamSlot "sprites.asm"
-
 ;====
 ; The offset of $40 is required to make use of performance optimisations. This
 ; technique is described by user gvx32 in:
 ; https://www.smspower.org/forums/15794-AFewHintsOnCodingAMediumLargeSizedGameUsingWLADX
 ;====
-.ramsection "ram" bank 0 slot smslib.RAM_SLOT orga sprites.bufferAddress force
+.ramsection "ram" bank 0 slot utils.ram.SLOT orga sprites.bufferAddress force
     sprites.buffer: instanceof sprites.Buffer
 .ends
 

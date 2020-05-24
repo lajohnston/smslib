@@ -5,17 +5,16 @@
 .define pause.ENABLED 1
 
 ;====
+; Dependencies
+;====
+.include "./utils/ram.asm"
+
+;====
 ; RAM
-;====
-
-; RAM slot to use
-; Indent is needed to make it work: https://github.com/vhelin/wla-dx/issues/310
- smslib.assertRamSlot "pause.asm"
-
-;====
+;
 ; Flag is set when the pause button has been pressed
 ;====
-.ramsection "pause.ram.pauseFlag" slot smslib.RAM_SLOT
+.ramsection "pause.ram.pauseFlag" slot utils.ram.SLOT
     pause.ram.pauseFlag: db
 .ends
 

@@ -5,6 +5,11 @@
 .define vdpreg.ENABLED 1
 
 ;====
+; Dependencies
+;====
+.include "./utils/ram.asm"
+
+;====
 ; Default register values
 ;====
 .define vdpreg.register0Default     %00000110;  Mode control 1
@@ -63,13 +68,9 @@
 ; RAM
 ;====
 
-; RAM slot to use
-; Indent is needed to make it work: https://github.com/vhelin/wla-dx/issues/310
- smslib.assertRamSlot "vdpreg.asm"
-
 ; Buffer for setting the mode control registers, to allow settings to be changed
 ; without overwriting existing ones
-.ramsection "vdpreg.ram" slot smslib.RAM_SLOT
+.ramsection "vdpreg.ram" slot utils.ram.SLOT
     vdpreg.ram.register0Buffer: db
     vdpreg.ram.register1Buffer: db
 .ends

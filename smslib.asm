@@ -183,24 +183,3 @@
 .macro "smslib.clearVram"
     call smslib.clearVram
 .endm
-
-;====
-; Ensures smslib.RAM_SLOT is set, for use with ramsections. If this value is not
-; defined, this macro will attempt to set it from the mapper.RAM_SLOT defined by
-; the mapper. If neither of this options is available it will fail with an error
-;
-; @in   \1  the name of the module requesting the value, for error reporting
-;====
-.macro "smslib.assertRamSlot"
-    .ifndef smslib.RAM_SLOT
-        .ifdef mapper.RAM_SLOT
-            .define smslib.RAM_SLOT mapper.RAM_SLOT
-        .else
-            .print "Error in smslib ", \1, ":\n  Unsure which RAM slot to use;"
-            .print " Either include an smslib mapper before including ", \1
-            .print " or .define an smslib.RAM_SLOT value"
-            .print "\n\n"
-            .fail
-        .endif
-    .endif
-.endm
