@@ -7,31 +7,19 @@
 .sdsctag 1.10, "smslib sprites", "smslib static sprite tutorial", "lajohnston"
 
 ;====
-; Import smslib
-;====
-.incdir "../../"            ; back to smslib directory
-.include "smslib.asm"       ; base library
-.include "mapper/basic.asm" ; memory mapper
-.include "input.asm"        ; handles input
-.include "palette.asm"      ; handles colors
-.include "patterns.asm"     ; handles patterns (tile images)
-.include "pause.asm"        ; handles pause button
-.include "sprites.asm"      ; handles a sprite buffer in RAM
-.include "vdpreg.asm"       ; handles vdp settings
-
-;====
-; Handle frame (VBlank) interrupts. This will call the interrupts.vBlank label
-; below each time a frame has finished being drawn. This occurs 50 times a
-; second for PAL and 60 times per second for NTSC and can be used to regulate
-; the logic speed
+; Tell smslib interrupts module to handle frame (VBlank) interrupts. This will
+; call the interrupts.onVBlank label each time a frame has finished being drawn.
+; This occurs 50 times a second for PAL and 60 times per second for NTSC and can
+; be used to regulate the logic speed
 ;====
 .define interrupts.handleVBlank 1
-.include "interrupts.asm"
 
-.include "boot.asm"         ; initialise system and smslib modules
+; Import smslib
+.incdir "../../"            ; back to smslib directory
+.include "smslib.asm"       ; base library
 
 ; Import bubble entity
-.incdir "."
+.incdir "."                 ; current directory
 .include "bubble.asm"
 
 ;====
@@ -95,9 +83,8 @@
 ; This is a good time to send data to the VDP before it starts drawing the next
 ; frame.
 ;
-; When this has finished, the mainLoop will continue. The
-; interrupts.waitForVBlank will be satisfied and the rest of the loop will
-; proceed.
+; When this has finished, interrupts.waitForVBlank in the main loop will be
+; satisfied and the rest of the loop will continue
 ;====
 .section "vBlankHandler" free
     ; This is called by interrupts.asm

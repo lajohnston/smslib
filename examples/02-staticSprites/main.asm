@@ -10,15 +10,11 @@
 ;====
 .incdir "../../"            ; back to smslib directory
 .include "smslib.asm"       ; base library
-.include "mapper/basic.asm" ; memory mapper
-.include "palette.asm"      ; handles colors
-.include "patterns.asm"     ; handles patterns (tile images)
-.include "sprites.asm"      ; handles a sprite buffer in RAM
-.include "vdpreg.asm"       ; handles vdp settings
-.include "boot.asm"         ; initialise system and smslib modules
 
 ;====
 ; Initialise program
+;
+; SMSLib will jump to 'init' label after initialising the system
 ;====
 .section "init" free
     init:

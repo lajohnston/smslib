@@ -7,16 +7,12 @@
 ; Import smslib
 ;====
 .incdir "../../"            ; back to smslib directory
-.include "smslib.asm"       ; base library
-.include "mapper/basic.asm" ; memory mapper
-.include "palette.asm"      ; handles colors
-.include "patterns.asm"     ; handles patterns (tile images)
-.include "tilemap.asm"      ; handles on-screen tilemap
-.include "vdpreg.asm"       ; handles vdp settings
-.include "boot.asm"         ; initialise system and smslib modules
+.include "smslib.asm"
 
 ;====
 ; Initialise program
+;
+; SMSLib will jump to 'init' label after initialising the system
 ;====
 .section "init" free
     init:
@@ -35,7 +31,7 @@
         ; Enable the display
         vdpreg.enableDisplay
 
-        ; Freeze with infinite loop
+        ; End program with infinite loop
         -: jr -
 .ends
 
@@ -43,7 +39,7 @@
 ; Assets
 ;====
 
-; Maps ASCII data to bytes (see wla-dx docs)
+; Maps ASCII data to bytes so we can use .asc later (see wla-dx docs)
 .asciitable
     map " " to "~" = 0
 .enda
@@ -54,10 +50,10 @@
         palette.rgb 255, 255, 255   ; white
 
     fontData:
-        .incdir "."
+        .incdir "."                 ; back to current working directory
         .incbin "font.bin"
 
     message:
-        .asc "Hello, world!"    ; possible because we set asciitable earlier
-        .db $ff                 ; terminator byte
+        .asc "Hello, world!"
+        .db $ff                     ; terminator byte
 .ends

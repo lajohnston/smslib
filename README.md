@@ -1,6 +1,6 @@
 # Sega Master System Z80 Libs
 
-Low level Z80 WLA-DX libs for handling Sega Master System hardware.
+Low level Z80 WLA-DX libs for handling Sega Master System hardware. Its aim is to provide a consistent API for the hardware with zero/very low cost abstractions and to minimise the boilerplate required to get homebrew projects up and running quickly.
 
 ## Contents
 
@@ -17,17 +17,22 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware.
 
 ## Usage
 
-Include `smslib.asm` file then any of the specific libs you wish to use:
-
 ```
-.include "lib/smslib/smslib.asm"
-.include "lib/smslib/input.asm"
-.include "lib/smslib/palette.asm"
-.include "lib/smslib/patterns.asm"
+.incdir "lib/smslib"    ; set the working directory to the smslib directory
+.include "smslib.asm"   ; include the libs
 
+; SMSLib will call 'init' label once it has booted the system
+init:
+    ...
 ```
 
-See `examples` directory for examples. Within an example, call the `build.sh` script (Linux). wlalink and wla-z80 should be in your system path. The compiled .sms ROM will appear in the `examples/build` directory.
+See example programs in the `examples` directory. Build the examples using the `build.sh` script (Linux). wlalink and wla-z80 should be in your system path. The compiled .sms ROM will appear in the `examples/build` directory.
+
+Each module is decoupled from the others and can be imported individually without having to include `smslib.asm`.
+
+### Settings
+
+Many of the lib files include settings that default to sensible values but can be overridden if required. These are defined in the 'Settings' section near the top of each file. The overrides must be defined at some point before you `.include` the relevant file.
 
 ## Design principles
 
@@ -45,26 +50,15 @@ The libs are also designed for ease of use so long as this doesn't reduce the sp
 
 The smslib.asm file contains common functionality used by the other lib files, but other than that the separate files don't depend on each other and you can pick and choose which ones to include in your project.
 
-### Prefixes
+### Namespaced prefixes
 
-Each library file prefixes its labels with its name and a '.' (i.e. input.readPortA). Although it can make things more verbose it makes for much easier code tracking.
+Each library file prefixes its labels with its name and a '.' (i.e. input.readPortA). Although it can make things more verbose it makes for much easier code tracking and prevents naming collisions.
 
 ### Unsafe register preservation
 
 The library routines don't generally PUSH or POP registers to preserve them, meaning they will happily 'clobber' registers if need be. This shifts the responsibility of preservation to the code calling the library, mainly for efficiency reasons: the calling code knows what registers it actually cares about, so only needs to preserve those.
 
-### Documentation
-
-Each routine is documented with a comment block above it specifying the parameters (registers or macro arguments)
-
-## Settings
-
-Many of the lib files include settings that default to sensible values but can be overridden if required. These are defined in the 'Settings' section near the top of each file. The overrides must be defined before including the relevant file:
-
-```
-.define smslib.outiBlockSize 1024
-.include "smslib.asm"
-```
+# Documentation
 
 ## boot.asm
 
@@ -123,21 +117,6 @@ You also need to enable interrupts within the Z80 CPU:
 interrupts.enable
 ```
 
-### Initialise
-
-In your init code call `interrupts.init`. This is performed automatically if you're using `boot.asm`.
-
-```
-interrupts.init
-```
-
-If you're using an smslib mapper then this will need to be imported first as it specifies the RAM slot to use. If you're not using a mapper then you will need to define an `smslib.RAM_SLOT` value before importing `interrupts.asm`:
-
-```
-.define smslib.RAM_SLOT 3
-.include "interrupts.asm"
-```
-
 ### VBlanks (frame interrupts)
 
 VBlanks occur each time the VDP has finished drawing a frame (50 times a second in PAL, 60 times a second in NTSC). It's a small window of opportunity to blast data to the VDP before it starts drawing the next frame. Sending data to the VDP outside this window can result in missed writes and graphical corruption. The only other safe time to write to the VDP is when the display is off.
@@ -163,7 +142,7 @@ VBlanks can also be used to regulate the speed of your game logic. Place `interr
 gameLoop:
     interrupts.waitForVBlank
     ... update logic
-    jp gameLoop
+    jp gameLoop         ; run loop again
 ```
 
 ### HBlanks (line interrupts)
@@ -209,20 +188,16 @@ You can read the current line being drawn. The value will be loaded into `a`
 interrupts.getLine
 ```
 
-# mappers
+## mappers
 
 The Master System can only view 48KB of ROM memory at a time. Mappers control which portions of ROM are visible within this 48KB window and can dynamically switch portions at runtime to allow for much larger cartridge sizes. The included smslib mappers can abstract this complexity from you or can be used as examples to create your own.
 
-Include the mapper you wish to use:
+Include the mapper you wish to use before including `smslib.asm`. If you don't it will default to the basic 32KB mapper:
 
 ```
-.include "smslib/mapper/waimanu.asm"
-```
-
-Initialise the SMS mapping registers when booting your game. This will be done for you if you're using `boot.asm`
-
-```
-mapper.init
+.incdir "lib/smslib"
+.include "mapper/waimanu.asm"
+.include "smslib.asm"
 ```
 
 The mapper exposes FIXED_SLOT, PAGEABLE_SLOT and RAM_SLOT constants:
@@ -311,7 +286,7 @@ patterns.load patternData, 5
 patterns.load patternData, 1, 9 ; skip first 9
 ```
 
-# pause.asm
+## pause.asm
 
 Provides a pause handler that toggles a flag in RAM whenever the pause button is pressed. This flag can be detected at a safe position in your code such as at the start of the game loop.
 
@@ -331,15 +306,9 @@ myPauseState:
     ...
 ```
 
-# sprites.asm
+## sprites.asm
 
 Manages a sprite table buffer in RAM and can push this to VRAM when required.
-
-Initialise the sprite buffer. This is done automatically if you use `boot.asm`:
-
-```
-sprites.init
-```
 
 Add sprites to the table:
 
@@ -355,7 +324,6 @@ ld a, 150           ; yPos
 ld b, 30            ; xPos
 ld c, 5             ; pattern number
 sprites.add
-
 ```
 
 Add multiple sprites with positions relative to a base position. The offsets must be positive numbers, so the base position is the top-left of the entity. If any sub-sprites fall off screen they will not be added:
@@ -388,7 +356,7 @@ Transfer buffer to VRAM when safe to do so, when either the display is off or du
 sprites.copyToVram
 ```
 
-# tilemap.asm
+## tilemap.asm
 
 Manages the tilemap, which utilises patterns to create the background image.
 
@@ -410,12 +378,6 @@ tilemap.loadBytesUntil $ff message
 ## vdpreg.asm
 
 Handles the VDP registers and settings.
-
-Initialise the VDP registers with sensible initial defaults. This will be done for you if you use `boot.asm`:
-
-```
-vdpreg.init
-```
 
 Change register values using the provided macros. See vdpreg.asm for more details about each setting.
 
