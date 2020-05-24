@@ -30,6 +30,10 @@
 ;====
 .include "./utils/ram.asm"
 
+.ifndef utils.vdp
+    .include "utils/vdp.asm"
+.endif
+
 ;====
 ; Constants
 ;====
@@ -156,14 +160,14 @@
 ;====
 .macro "sprites.copyToVram"
     ; Copy y positions
-    smslib.prepVdpWrite sprites.vramAddress
+    utils.vdp.prepWrite sprites.vramAddress
     ld hl, sprites.buffer
-    smslib.callOutiBlock 64
+    utils.vdp.callOutiBlock 64
 
     ; Copy x position and patterns
-    smslib.prepVdpWrite (sprites.vramAddress + 128) ; skip y and sprite table hole
+    utils.vdp.prepWrite (sprites.vramAddress + 128) ; skip y and sprite table hole
     ld hl, sprites.buffer + sprites.Buffer.xPosAndPattern
-    smslib.callOutiBlock 128
+    utils.vdp.callOutiBlock 128
 .endm
 
 ;====

@@ -13,6 +13,13 @@
 .define palette.SPRITE_PALETTE 16
 
 ;====
+; Dependencies
+;====
+.ifndef utils.vdp
+    .include "utils/vdp.asm"
+.endif
+
+;====
 ; Defines a byte with an approximate RGB value. Each color component is rounded
 ; to the nearest 85 (0, 85, 170, 255)
 ;====
@@ -37,9 +44,9 @@
 ;====
 .macro "palette.load" args dataAddr count offset
     .ifndef offset
-        smslib.outputArray dataAddr palette.SLOT_SIZE count 0
+        utils.vdp.outputArray dataAddr palette.SLOT_SIZE count 0
     .else
-        smslib.outputArray dataAddr palette.SLOT_SIZE count offset
+        utils.vdp.outputArray dataAddr palette.SLOT_SIZE count offset
     .endif
 .endm
 
@@ -49,5 +56,5 @@
 ; @in slot  the palette slot (0-31)
 ;====
 .macro "palette.setSlot" args slot
-    smslib.prepVdpWrite (palette.VRAM_ADDR + slot)
+    utils.vdp.prepWrite (palette.VRAM_ADDR + slot)
 .endm

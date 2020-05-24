@@ -18,6 +18,13 @@
 .endif
 
 ;====
+; Dependencies
+;====
+.ifndef utils.vdp
+    .include "utils/vdp.asm"
+.endif
+
+;====
 ; Tile attributes
 ; Combine using OR (|), i.e. tilemap.HIGH_BIT | tilemap.FLIPX
 ;====
@@ -47,7 +54,7 @@
 ; @in   row     row number (y)
 ;====
 .macro "tilemap.setSlot" args col row
-    smslib.prepVdpWrite (tilemap.vramAddress + (col * 64) + (row * 2))
+    utils.vdp.prepWrite (tilemap.vramAddress + (col * 64) + (row * 2))
 .endm
 
 ;====

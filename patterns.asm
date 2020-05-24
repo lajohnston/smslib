@@ -17,7 +17,17 @@
     .define patterns.address $0000
 .endif
 
+;====
+; Constants
+;====
 .define patterns.SLOT_SIZE 32
+
+;====
+; Dependencies
+;====
+.ifndef utils.vdp
+    .include "utils/vdp.asm"
+.endif
 
 ;====
 ; Loads patterns into VRAM.
@@ -48,9 +58,9 @@
 ;====
 .macro "patterns.load" args dataAddr slots offset
     .ifndef offset
-        smslib.outputArray dataAddr patterns.SLOT_SIZE slots 0
+        utils.vdp.outputArray dataAddr patterns.SLOT_SIZE slots 0
     .else
-        smslib.outputArray dataAddr patterns.SLOT_SIZE slots offset
+        utils.vdp.outputArray dataAddr patterns.SLOT_SIZE slots offset
     .endif
 .endm
 
@@ -59,5 +69,5 @@
 ; @in   slot    the slot number (0-512)
 ;====
 .macro "patterns.setSlot" args slot
-    smslib.prepVdpWrite (patterns.address + (slot * 32))
+    utils.vdp.prepWrite (patterns.address + (slot * 32))
 .endm
