@@ -60,8 +60,8 @@
 ; technique is described by user gvx32 in:
 ; https://www.smspower.org/forums/15794-AFewHintsOnCodingAMediumLargeSizedGameUsingWLADX
 ;====
-.ramsection "ram" bank 0 slot utils.ram.SLOT orga sprites.bufferAddress force
-    sprites.buffer: instanceof sprites.Buffer
+.ramsection "sprites.ram.buffer" bank 0 slot utils.ram.SLOT orga sprites.bufferAddress force
+    sprites.ram.buffer: instanceof sprites.Buffer
 .ends
 
 ;====
@@ -134,7 +134,7 @@
 ; Sets the sprite slot in the buffer ready to add sprites to
 ;====
 .macro "sprites.setSlot" args slot
-    ld de, sprites.buffer + slot
+    ld de, sprites.ram.buffer + sprites.Buffer.yPos + slot
 .endm
 
 ;====
@@ -161,12 +161,12 @@
 .macro "sprites.copyToVram"
     ; Copy y positions
     utils.vdp.prepWrite sprites.vramAddress
-    ld hl, sprites.buffer
+    ld hl, sprites.ram.buffer + sprites.Buffer.yPos
     utils.vdp.callOutiBlock 64
 
     ; Copy x position and patterns
     utils.vdp.prepWrite (sprites.vramAddress + 128) ; skip y and sprite table hole
-    ld hl, sprites.buffer + sprites.Buffer.xPosAndPattern
+    ld hl, sprites.ram.buffer + sprites.Buffer.xPosAndPattern
     utils.vdp.callOutiBlock 128
 .endm
 
