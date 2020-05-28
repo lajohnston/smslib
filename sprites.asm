@@ -161,13 +161,13 @@
         ld (de), a
 
         ; Pattern
-        inc de
+        inc e
         ld a, c
         ld (de), a
 
         ; Restore de to point back to yPos
         rr e    ; (e - 1) / 2
-        inc de  ; point to next free slot
+        inc e   ; point to next free slot
         ret
 .ends
 
@@ -229,7 +229,7 @@
 
     ; Set sprite terminator
     ld a, sprites.Y_TERMINATOR
-    inc de                      ; point to y positions
+    inc e       ; point to next slot (y pos)
     ld (de), a
 .endm
 
@@ -320,11 +320,11 @@
         ld a, ixh           ; restore x
         ld (de), a          ; set sprite x in buffer
         inc hl              ; point to pattern number in group
-        inc de              ; point to pattern number in buffer
+        inc e               ; point to pattern number in buffer
         ld a, (hl)          ; load pattern number
         ld (de), a          ; set pattern number in buffer
         rr e                ; return to y in buffer
-        inc de              ; point to next sprite slot in buffer
+        inc e               ; point to next sprite slot in buffer
         jp _nextSprite
 .ends
 
