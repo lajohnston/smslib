@@ -308,46 +308,48 @@ myPauseState:
 
 ## sprites.asm
 
-Manages a sprite table buffer in RAM and can push this to VRAM when required.
+Manages a sprite table buffer in RAM and outputs it to VRAM when required.
 
-Add sprites to the table:
+First, reset the sprite buffer at the start of each game loop:
 
 ```
-sprites.setSlot 0   ; point to first sprite slot in table
+sprites.reset
+```
+
+Add sprites to the buffer:
+
+```
 ld a, 100           ; yPos
 ld b, 80            ; xPos
 ld c, 5             ; pattern number
 sprites.add
-
-; Add a sprite to slot 1 (not need to call sprites.setSlot again)
-ld a, 150           ; yPos
-ld b, 30            ; xPos
-ld c, 5             ; pattern number
-sprites.add
 ```
 
-Add multiple sprites with positions relative to a base position. The offsets must be positive numbers, so the base position is the top-left of the entity. If any sub-sprites fall off screen they will not be added:
+Sprite groups allow you to add multiple sprites with their positions relative to an anchor point. The offsets must be positive numbers. If any sub-sprites fall off screen they will not be added:
 
 ```
+; Create 2x2 sprite
 spriteGroup:
     ; pattern number, relX, relY
     sprites.sprite 1, 0, 0  ; top left
-    sprites.sprite 2, 8, 0  ; top right
-    sprites.sprite 3, 0, 8  ; bottom left
-    sprites.sprite 4, 8, 8  ; bottom right
+    sprites.sprite 2, 8, 0  ; top right (x + 8)
+    sprites.sprite 3, 0, 8  ; bottom left (y + 8)
+    sprites.sprite 4, 8, 8  ; bottom right (x + 8, y + 8)
     sprites.endGroup        ; end of group
 
 code:
     ld hl, spriteGroup
-    ld b, 150   ; base x pos
-    ld c, 50    ; base y pos
+    ld b, 150   ; anchor x pos
+    ld c, 50    ; anchor y pos
     sprites.addGroup
 ```
 
-Mark when you've finished adding sprites. This will tell the VDP to stop processing the table from that point:
+It is more efficient adding multiple sprites and/or sprite groups within a batch. This allows smslib avoid having to store and retrieve the next slot from RAM for each sprite, and instead can do it once at the beginning of the batch and once at the end. During a batch the next sprite slot will be kept in `de` and incremented each time so be careful not to clobber this:
 
 ```
-sprites.end
+sprites.startBatch
+... ; add multiple sprites
+sprites.endBatch
 ```
 
 Transfer buffer to VRAM when safe to do so, when either the display is off or during VBlank:

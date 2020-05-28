@@ -26,27 +26,33 @@
         patterns.setSlot 256
         patterns.load patternData, 6
 
-        ; Add sprite to buffer
-        sprites.setSlot 0
-        ld a, 100   ; y
-        ld b, 80    ; x
+        ; Reset the sprite buffer
+        sprites.reset
+
+        ; It's more efficient (but optional) to add multiple sprites within a
+        ; batch, so start a new batch
+        sprites.startBatch
+
+        ; Add a sprite to the buffer
+        ld a, 100   ; y position
+        ld b, 80    ; x position
         ld c, 5     ; pattern number
-        sprites.add
+        sprites.add ; add sprite
 
         ; Add a sprite group - multiple sprites relative to a position
-        ld hl, spriteGroup
-        ld b, 140   ; base x pos
-        ld c, 50    ; base y pos
-        sprites.addGroup
+        ld hl, spriteGroup  ; point to group (see assets below)
+        ld b, 140           ; base x pos
+        ld c, 50            ; base y pos
+        sprites.addGroup    ; add group to buffer
 
         ; Another group - same group, different position
-        ld hl, spriteGroup
-        ld b, 170   ; base x pos
-        ld c, 120   ; base y pos
-        sprites.addGroup
+        ld hl, spriteGroup  ; point to group
+        ld b, 170           ; base x pos
+        ld c, 120           ; base y pos
+        sprites.addGroup    ; add group to buffer
 
-        ; Mark end of sprites to ensure no more get rendered
-        sprites.end
+        ; End the sprite batch
+        sprites.endBatch
 
         ; Copy buffer to VRAM
         sprites.copyToVram

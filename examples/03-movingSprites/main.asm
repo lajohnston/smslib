@@ -70,8 +70,10 @@
         ld ix, bubbleInstance
         call bubble.updateInput
         call bubble.updateMovement
-        call bubble.updateSprite
-        sprites.end ; no more sprites
+
+        ; Add sprites
+        sprites.reset               ; reset buffer
+        call bubble.updateSprite    ; add sprites
 
         ; Next loop
         jp mainLoop

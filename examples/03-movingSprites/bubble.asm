@@ -85,7 +85,6 @@
 .section "bubble.updateSprite"
     bubble.updateSprite:
         ; Add sprite group to sprite buffer
-        sprites.setSlot 0
         ld hl, bubble.spriteGroup
         ld b, (ix + Bubble.xPos)    ; base x pos
         ld c, (ix + Bubble.yPos)    ; base y pos

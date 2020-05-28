@@ -20,9 +20,10 @@
     .define sprites.vramAddress $3f00
 .endif
 
-; The RAM address to place the sprite buffer. The low byte must be $40
-.ifndef sprites.bufferAddress
-    .define sprites.bufferAddress $C040
+; The high byte of the RAM address to place the sprite buffer. The low byte is
+; always set to $3F to allow for optimisations
+.ifndef sprites.bufferAddressHigh
+    .define sprites.bufferAddressHigh $C0
 .endif
 
 ;====
@@ -35,18 +36,23 @@
 .endif
 
 ;====
-; Constants
+; Constants and variables
 ;====
+.define sprites.BUFFER_ADDRESS (sprites.bufferAddressHigh * 256) + $3F
 .define sprites.GROUP_TERMINATOR 255  ; terminates list of sprites.Sprite instances
 .define sprites.Y_TERMINATOR $D0
+
+; If 1 a batch is in progress, otherwise it is 0
+.define sprites.batchInProgress 0
 
 ;====
 ; Sprite buffer
 ;
-; An instance should be placed in RAM at a $xx40 offset and named
-; 'sprite.buffer'
+; An instance should be placed in RAM at a $xx3F offset and named
+; 'sprites.ram.buffer'
 ;====
 .struct "sprites.Buffer"
+    nextSlot:       DSB 1   ; the low byte address of the next free y slot
     yPos:           DSB 64  ; screen yPos for each of the 64 sprites
     xPosAndPattern: DSB 128 ; { 1 byte xPos, 1 byte pattern } * 64 sprites
 .endst
@@ -60,7 +66,7 @@
 ; technique is described by user gvx32 in:
 ; https://www.smspower.org/forums/15794-AFewHintsOnCodingAMediumLargeSizedGameUsingWLADX
 ;====
-.ramsection "sprites.ram.buffer" bank 0 slot utils.ram.SLOT orga sprites.bufferAddress force
+.ramsection "sprites.ram.buffer" bank 0 slot utils.ram.SLOT orga sprites.BUFFER_ADDRESS force
     sprites.ram.buffer: instanceof sprites.Buffer
 .ends
 
@@ -93,16 +99,58 @@
 .endm
 
 ;====
+; Loads the next available sprite slot (y position) into de
+;
+; @out  de  the address of the next available slot
+;====
+.macro "sprites.getNextSlot"
+    ld de, sprites.ram.buffer + sprites.Buffer.nextSlot
+    ld a, (de)
+    ld e, a
+.endm
+
+;====
+; Stores the current slot
+;
+; @in   de  the address of the current slot (y position)
+;====
+.macro "sprites._storeNextSlot"
+    ; Cap off end of sprite table
+    ld a, sprites.Y_TERMINATOR
+    ld (de), a
+
+    ; Store next slot
+    ld a, e
+    ld de, sprites.ram.buffer + sprites.Buffer.nextSlot
+    ld (de), a
+.endm
+
+;====
 ; Adds a sprite to the buffer
-;
-; @in  de pointer to next available y slot in sprite buffer
-; @in  a  screen yPos
-; @in  b  screen xPos
-; @in  c  pattern number
-;
-; @clobs af
 ;====
 .section "sprites.add" free
+    ;====
+    ; Add sprite to the next available slot
+    ;
+    ; @in  a  screen yPos
+    ; @in  b  screen xPos
+    ; @in  c  pattern number
+    ;====
+    sprites.addToNextSlot:
+        ; Retrieve next slot
+        ld iyl, a               ; preserve yPos
+        sprites.getNextSlot
+        ld a, iyl               ; restore yPos
+                                ; continue to sprites.add
+
+    ;====
+    ; Set a sprite in the currently selected slot
+    ;
+    ; @in  de pointer to next available y slot in sprite buffer
+    ; @in  a  screen yPos
+    ; @in  b  screen xPos
+    ; @in  c  pattern number
+    ;====
     sprites.add:
         ; Set ypos
         ld (de), a
@@ -124,35 +172,72 @@
 .ends
 
 ;====
-; Macro alias for sprites.add
+; Add a sprite to the buffer
+;
+; @in  a  screen yPos
+; @in  b  screen xPos
+; @in  c  pattern number
+;
+; @in  de (optional)    pointer to next available slot (yPos) in sprite buffer
+;                       Only required if a batch is in progress
 ;====
 .macro "sprites.add"
-    call sprites.add
+    .if sprites.batchInProgress == 1
+        call sprites.add
+    .else
+        call sprites.addToNextSlot
+        sprites._storeNextSlot
+    .endif
 .endm
 
 ;====
-; Sets the sprite slot in the buffer ready to add sprites to
+; Starts a 'batch' of sprites. If adding multiple sprites and sprite groups it
+; is more efficient to wrap the multiple calls in sprites.startBatch and
+; sprites.endBatch; This ensures the nextSlot value is only read and updated
+; once rather than for each sprite or spriteGroup
 ;====
-.macro "sprites.setSlot" args slot
-    ld de, sprites.ram.buffer + sprites.Buffer.yPos + slot
+.macro "sprites.startBatch"
+    .ifeq sprites.batchInProgress 1
+        .print "Warning: sprites.startBatch called but batch already in progress."
+        .print " Ensure you also call sprites.endBatch\n\n"
+    .endif
+
+    .redefine sprites.batchInProgress 1
+    sprites.getNextSlot
 .endm
 
 ;====
-; Marks the end of sprite table so remaining sprites are not processed
-;
-; @in     de  pointer to next free y position in the buffer
+; Ends a sprite batch
 ;====
-.macro "sprites.end"
-    ld a, sprites.Y_TERMINATOR
-    ld (de), a
+.macro "sprites.endBatch"
+    .ifeq sprites.batchInProgress 0
+        .print "Warning: sprites.endBatch called but no batch is in progress"
+    .else
+        .redefine sprites.batchInProgress 0
+        sprites._storeNextSlot
+    .endif
 .endm
 
 ;====
 ; Initialises a sprite buffer in RAM
 ;====
 .macro "sprites.init"
-    sprites.setSlot 0
-    sprites.end ; just set sprite terminator at position 0
+    ; Set nextSlot to slot 0
+    ld a, <(sprites.ram.buffer) + sprites.Buffer.yPos   ; low byte of slot 0
+    ld de, sprites.ram.buffer + sprites.Buffer.nextSlot ; point to 'nextSlot'
+    ld (de), a                                          ; store low byte
+
+    ; Set sprite terminator
+    ld a, sprites.Y_TERMINATOR
+    inc de                      ; point to y positions
+    ld (de), a
+.endm
+
+;====
+; Reset sprite buffer back to default. Alias for sprites.init
+;====
+.macro "sprites.reset"
+    sprites.init
 .endm
 
 ;====
@@ -171,18 +256,40 @@
 .endm
 
 ;====
-; Adds a group of sprites relative to a base position. Sprites within the group
-; that are off-screen are not added.
+; Adds a group of sprites relative to an anchor position. Sprites within the
+; group that fall off-screen are not added.
 ;
-; @in   b   base x position (left-most)
-; @in   c   base y position (top-most)
-; @in   de  pointer to next free sprite slot
-; @in   hl  pointer to sprites.Sprite instances terminated by
-;           sprites.GROUP_TERMINATOR
-;
-; @out  de  next free sprite slot
+; Limitation: Once the anchorX position falls off screen the entire group will
+; disappear, meaning the group cannot move smoothly off the left edge of the
+; screen. This can be partially obscured by setting the VDP registers to hide
+; the left column
 ;====
 .section "sprites.addGroup"
+    ;====
+    ; Gets the next free sprite slot and adds a sprite group from there onwards
+    ;
+    ; @in   b   anchor x position (left-most)
+    ; @in   c   anchor y position (top-most)
+    ; @in   hl  pointer to sprites.Sprite instances terminated by
+    ;           sprites.GROUP_TERMINATOR
+    ;
+    ; @out  de  next free sprite slot
+    ;====
+    sprites.addGroupFromNextSlot:
+        sprites.getNextSlot
+        jp sprites.addGroup
+
+    ;====
+    ; Add a group of sprites from the currently selected slot
+    ;
+    ; @in   b   anchor x position (left-most)
+    ; @in   c   anchor y position (top-most)
+    ; @in   de  pointer to next free sprite slot
+    ; @in   hl  pointer to sprites.Sprite instances terminated by
+    ;           sprites.GROUP_TERMINATOR
+    ;
+    ; @out  de  next free sprite slot
+    ;====
     _xOffScreen:
         inc hl  ; point to relY
     _yOffScreen:
@@ -196,14 +303,14 @@
         ret z               ; end of group
 
         ; Add relative x
-        add a, b            ; relX + baseX
+        add a, b            ; relX + anchorX
         jp c, _xOffScreen   ; off screen; next sprite
         ld ixh, a           ; store result x for later
 
         ; Add relative y
         inc hl              ; point to relY
         ld a, (hl)          ; load relY
-        add a, c            ; relY + baseY
+        add a, c            ; relY + anchorY
         cp sprites.maxYPos  ; compare with max y allowed
         jp nc, _yOffScreen  ; off screen; next sprite
 
@@ -225,5 +332,10 @@
 ; Macro alias for sprites.addGroup
 ;====
 .macro "sprites.addGroup"
-    call sprites.addGroup
+    .if sprites.batchInProgress == 1
+        call sprites.addGroup
+    .else
+        call sprites.addGroupFromNextSlot
+        sprites._storeNextSlot
+    .endif
 .endm
