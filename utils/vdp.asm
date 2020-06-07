@@ -12,14 +12,15 @@
 ;====
 
 ;==
-; OUTI block size in bytes. This block is used to provide a fast means of
-; outputting data to the VDP but requires a chunk of ROM space. Lower values
-; may mean transfers require multiple calls to this block, each taking
-; up 24-cycles. Each OUTI takes 2-bytes, so 512 allows 256 bytes of data to be
-; transferred in one call
+; The number of OUTI instructions in the OUTI block. This block is used to
+; provide a fast means of outputting data to the VDP but requires a chunk of ROM
+; space.
+;
+; Each OUTI transfers 1-byte. Lower values may mean transfers require multiple
+; calls to this block, each taking up 24-cycles. Each OUTI takes 2-bytes of ROM.
 ;==
-.ifndef "utils.vdp.outiBlockSize"
-    .define utils.vdp.outiBlockSize 512
+.ifndef "utils.vdp.outiBlockCount"
+    .define utils.vdp.outiBlockCount 256
 .endif
 
 ;==
@@ -32,6 +33,15 @@
 .endif
 
 ;====
+; The minimum address the outi block can be placed in ROM. The block will be
+; placed somewhere above this address, allowing it to align itself to provide
+; optimisations
+;====
+.ifndef "utils.vdp.outiBlockMinAddress"
+    .define utils.vdp.outiBlockMinAddress 160    ; allow room for interrupts
+.endif
+
+;====
 ; Constants
 ;====
 
@@ -40,7 +50,7 @@
 .define utils.vdp.VDP_DATA_PORT $be
 
 ; Number of OUTI instructions in the OUTI block; AND with $ffff to get floor
-.define utils.vdp.OUTI_BLOCK_INSTRUCTIONS (utils.vdp.outiBlockSize / 2) & $ffff
+.define utils.vdp.OUTI_BLOCK_SIZE utils.vdp.outiBlockCount * 2
 
 ;====
 ; Creates a block of OUTI instructions to provide the fastest means of
@@ -50,10 +60,17 @@
 ; @in     c     the port to write to
 ; @in     hl    the address to copy from
 ;====
-.section "utils.vdp.outiBlock" free
-    .rept utils.vdp.OUTI_BLOCK_INSTRUCTIONS
+
+; Ensure last outi address falls on an $xxFF offset
+.define utils.vdp.LAST_OUTI_ADDRESS ((((utils.vdp.outiBlockMinAddress + utils.vdp.OUTI_BLOCK_SIZE) / 256) + 1) & $FFFF) * 256 - 1
+.orga utils.vdp.LAST_OUTI_ADDRESS - utils.vdp.OUTI_BLOCK_SIZE + 2
+.section "utils.vdp.outiBlock" force
+    .rept utils.vdp.outiBlockCount - 1
         outi
     .endr
+
+    utils.vdp.lastOuti:
+        outi
 
     utils.vdp.outiBlock:
         ret
@@ -68,8 +85,8 @@
 ;====
 .macro "utils.vdp.callOutiBlock" args bytes
     ; Transfer chunks if data exceeds outi block size
-    .rept bytes / utils.vdp.OUTI_BLOCK_INSTRUCTIONS
-        call utils.vdp.outiBlock - utils.vdp.OUTI_BLOCK_INSTRUCTIONS * 2
+    .rept bytes / utils.vdp.outiBlockCount
+        call utils.vdp.outiBlock - utils.vdp.outiBlockCount * 2
     .endr
 
     ; Transfer remaining bytes
@@ -79,9 +96,33 @@
             outi
         .endr
     .else
-        call utils.vdp.outiBlock - (bytes # utils.vdp.OUTI_BLOCK_INSTRUCTIONS) * 2
+        call utils.vdp.outiBlock - (bytes # utils.vdp.outiBlockCount) * 2
     .endif
 .endm
+
+;====
+; OUTI between 1-128 bytes
+;
+; @in   b   the number of bytes to write. Must be greater than 0 and <= 128
+; @in   hl  the address of the source data
+;====
+.section "utils.vdp.sendUpTo128Bytes" free
+    utils.vdp.sendUpTo128Bytes:
+        ; Address of last OUTI instruction
+        ld d, >(utils.vdp.lastOuti)         ; high-byte address of last outi
+        ld a, <(utils.vdp.lastOuti)         ; load low-byte address of last outi
+
+        ; Subtract additional bytes required
+        dec b                               ; make 0-based (0 = 1, 127 = 128)
+        sub b                               ; subtract bytes
+        sub b                               ; subtract again (1 outi = 2 bytes)
+        ld e, a                             ; set low-byte of address
+
+        ; Push address to stack then 'return' to it
+        ; ret in outi block will return to original caller
+        push de                             ; push address to stack
+        ret                                 ; 'return' to address in stack
+.ends
 
 ;====
 ; Copies an array of data using OUTI instructions
@@ -99,19 +140,29 @@
 ;====
 ; Prepares the VDP to write to the given VRAM write address
 ;
-; @in    address    the VRAM write address
+; @in   address     the VRAM write address
+; @in   [setPort]   if 1 (the default) then the c register will be loaded with
+;                   the VDP data. Set to 0 if the port is already set (saves 7
+;                   cycles)
 ;====
-.macro "utils.vdp.prepWrite" args address
+.macro "utils.vdp.prepWrite" args address setPort
     ; Output low byte to VDP
     ld a, <address
     out (utils.vdp.VDP_COMMAND_PORT), a
 
-    ; Output high byte to VDP, ORed with $40 (01000000) to issue write command
+    ; Output high byte to VDP
+    ; OR with $40 (%01000000) to set 6th bit and issue write command
     ld a, >address | $40
     out (utils.vdp.VDP_COMMAND_PORT), a
 
     ; Port to write to
-    ld c, utils.vdp.VDP_DATA_PORT
+    .ifndef setPort
+        .redefine setPort 1
+    .endif
+
+    .if setPort == 1
+        ld c, utils.vdp.VDP_DATA_PORT
+    .endif
 .endm
 
 ;====
@@ -130,7 +181,7 @@
             dec bc
             ld a, b
             or c
-        jr nz,-
+        jr nz, -
     ret
 .ends
 

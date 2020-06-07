@@ -133,7 +133,7 @@
 .macro "vdpreg.startBatch"
     .ifeq vdpreg.batchInProgress 1
         .print "vdpreg.startBatch: Batch already in progress."
-        .print " Ensure you also call vdpreg.endBatch"
+        .print " Ensure you also call vdpreg.endBatch\n\n"
     .endif
 
     .redefine vdpreg.batchInProgress 1

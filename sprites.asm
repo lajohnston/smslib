@@ -41,6 +41,7 @@
 .define sprites.BUFFER_ADDRESS (sprites.bufferAddressHigh * 256) + $3F
 .define sprites.GROUP_TERMINATOR 255  ; terminates list of sprites.Sprite instances
 .define sprites.Y_TERMINATOR $D0
+.define sprites.MAX_SPRITES 64
 
 ; If 1 a batch is in progress, otherwise it is 0
 .define sprites.batchInProgress 0
@@ -115,10 +116,6 @@
 ; @in   de  the address of the current slot (y position)
 ;====
 .macro "sprites._storeNextSlot"
-    ; Cap off end of sprite table
-    ld a, sprites.Y_TERMINATOR
-    ld (de), a
-
     ; Store next slot
     ld a, e
     ld de, sprites.ram.buffer + sprites.Buffer.nextSlot
@@ -226,11 +223,6 @@
     ld a, <(sprites.ram.buffer) + sprites.Buffer.yPos   ; low byte of slot 0
     ld de, sprites.ram.buffer + sprites.Buffer.nextSlot ; point to 'nextSlot'
     ld (de), a                                          ; store low byte
-
-    ; Set sprite terminator
-    ld a, sprites.Y_TERMINATOR
-    inc e       ; point to next slot (y pos)
-    ld (de), a
 .endm
 
 ;====
@@ -241,18 +233,56 @@
 .endm
 
 ;====
-; Copies the sprites.Buffer instance from RAM to VRAM
+; Copies the sprite buffer from RAM to VRAM. This should be performed while the
+; display is off or during VBlank
+;====
+.section "sprites.copyToVram"
+    sprites.copyToVram:
+        ; Load number of slots occupied
+        ld hl, sprites.ram.buffer + sprites.Buffer.nextSlot ; nextSlot address
+        ld a, (hl)  ; read nextSlot value
+        sub $40     ; remove table offset to get sprite count
+        ld iyh, a   ; preserve counter in iyh
+
+        ; Set VDP write address to y positions
+        utils.vdp.prepWrite sprites.vramAddress
+
+        ; Copy y positions to VRAM
+        jp z, _noSprites                ; jp if no sprites
+        ld b, iyh                       ; load size into b
+        inc l                           ; point to y positions in buffer
+        call utils.vdp.sendUpTo128Bytes ; send data
+
+        ; Output sprite terminator at end of y positions
+        ld a, iyh                       ; load counter into a
+        cp sprites.MAX_SPRITES          ; compare with max sprites
+        jp nc, +                        ; skip if counter == max sprites
+            ld a, sprites.Y_TERMINATOR  ; load y terminator into a
+            out (c), a                  ; output y terminator
+        +:
+
+        ; Point to x positions in VRAM and buffer
+        utils.vdp.prepWrite (sprites.vramAddress + 128) 0           ; vram
+        ld l, <(sprites.ram.buffer) + sprites.Buffer.xPosAndPattern ; buffer
+
+        ; Copy x positions and patterns from buffer to VRAM
+        ld b, iyh                       ; restore sprite count
+        rlc b                           ; double to get xPos + pattern
+        jp utils.vdp.sendUpTo128Bytes   ; send bytes, then ret
+
+    ; No sprites in buffer - cap table with sprite terminator then return
+    ; VRAM address must be set
+    _noSprites:
+        ld a, sprites.Y_TERMINATOR      ; load y terminator into a
+        out (c), a                      ; output y terminator
+        ret
+.ends
+
+;====
+; Alias for sprites.copyToVram
 ;====
 .macro "sprites.copyToVram"
-    ; Copy y positions
-    utils.vdp.prepWrite sprites.vramAddress
-    ld hl, sprites.ram.buffer + sprites.Buffer.yPos
-    utils.vdp.callOutiBlock 64
-
-    ; Copy x position and patterns
-    utils.vdp.prepWrite (sprites.vramAddress + 128) ; skip y and sprite table hole
-    ld hl, sprites.ram.buffer + sprites.Buffer.xPosAndPattern
-    utils.vdp.callOutiBlock 128
+    call sprites.copyToVram
 .endm
 
 ;====
