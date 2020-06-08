@@ -91,16 +91,8 @@
 .section "vBlankHandler" free
     ; This is called by interrupts.asm
     interrupts.onVBlank:
-        ; Ensure registers get preserved
-        push bc
-        push de
-        push hl
-        push iy
-            sprites.copyToVram  ; copy buffer to VRAM
-        pop iy
-        pop hl
-        pop de
-        pop bc
+        ; Copy buffer to VRAM
+        sprites.copyToVram
 
         ; End vBlank handler
         interrupts.endVBlank

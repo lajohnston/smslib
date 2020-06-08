@@ -32,13 +32,18 @@
 .endif
 
 ;==
-; If 1, the handler will use ex af, 'af preserve the af registers when
-; handling interrupts, instead of push/pop. This reduces the delay executing
-; handlers by 7 clock cycles but means you have to be careful using ex in your
-; own code outside of your interrupt code
+; If 1, allows the interrupt handler to utilise shadow registers to efficiently
+; preserve registers instead of using the slower stack. When enabled it will
+; also preserve af, bc, de and hl during VBlank so you don't need to push/pop
+; these registers.
+;
+; If you wish to use shadow registers outside interrupts then you may need to
+; set this to 0 to prevent the interrupt from overwriting data, or just ensure
+; that an interrupt doesn't occur at this point in the code (i.e. by using
+; interrupts.waitForVBlank to ensure they don't clash)
 ;==
 .ifndef interrupts.useShadowRegisters
-    .define interrupts.useShadowRegisters 0
+    .define interrupts.useShadowRegisters 1
 .endif
 
 ;====
@@ -97,10 +102,19 @@
         .if interrupts.handleVBlank + interrupts.handleHBlank == 2
             or a                        ; analyse a
             jp p, interrupts.onHBlank   ; jp if 7th bit (VBlank) is reset
+
+            .if interrupts.useShadowRegisters == 1
+                exx
+            .endif
+
             jp interrupts.onVBlank
         .else
             ; If only VBlank enabled, jump to that handler
             .if interrupts.handleVBlank == 1
+                .if interrupts.useShadowRegisters == 1
+                    exx
+                .endif
+
                 jp interrupts.onVBlank
             .endif
 
@@ -116,13 +130,20 @@
 ; Returns from a VBlank interrupt
 ;====
 .macro "interrupts.endVBlank"
-    ; Set flag to signal that a VBlank has occurred
-    push hl
-        ld hl, interrupts.ram.vBlankFlag
-        inc (hl)
-    pop hl
+    .if interrupts.useShadowRegisters == 0
+        push hl
+    .endif
 
-    interrupts._restoreAF   ; restore a, overwritten by status read
+    ; Set flag to signal that a VBlank has occurred
+    ld hl, interrupts.ram.vBlankFlag
+    inc (hl)
+
+    .if interrupts.useShadowRegisters == 0
+        pop hl
+    .endif
+
+    interrupts._restoreAF   ; restore af, overwritten by status read
+    exx                     ; restore bc, de, hl from shadow registers
     ei                      ; re-enable interrupts
     ret                     ; faster than reti
 .endm
