@@ -32,29 +32,34 @@
 .section "bubble.updateInput" free
     bubble.updateInput:
         ; Read the port 1 into register b
-        input.setRegister "c"
+        input.useRegister "c"
         input.readPort1
 
         ; Update xVec
-        xor a                       ; xVec = 0
+        xor a                       ; xVec = 0 (default)
+
         input.if input.LEFT, +
             ld a, -1                ; xVec = -1
         +:
+
         input.if input.RIGHT, +
             ld a, 1                 ; xVec = 1
         +:
+
         ld (ix + Bubble.xVec), a    ; store xVec
 
         ; Update yVec
-        xor a                       ; yVec = 0
+        xor a                       ; yVec = 0 (default)
+
         input.if input.UP, +
             ld a, -1                ; yVec = -1
         +:
+
         input.if input.DOWN, +
             ld a, 1                 ; yVec = 1
         +:
-        ld (ix + Bubble.yVec), a    ; store yVec
 
+        ld (ix + Bubble.yVec), a    ; store yVec
         ret
 .ends
 

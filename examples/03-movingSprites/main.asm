@@ -4,7 +4,7 @@
 ; Create a sprite the can be controller with the directional input of joypad 1.
 ; Demonstrates VBlank handling using interrupts.asm
 ;====
-.sdsctag 1.10, "smslib sprites", "smslib static sprite tutorial", "lajohnston"
+.sdsctag 1.10, "smslib sprites", "smslib moving sprites tutorial", "lajohnston"
 
 ;====
 ; Tell smslib interrupts module to handle frame (VBlank) interrupts. This will

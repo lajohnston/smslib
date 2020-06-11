@@ -25,15 +25,15 @@
 ;
 ; @in register  the register ("a", "b", "c", "d", "e", "h", "l")
 ;====
-.macro "input.setRegister" args register
+.macro "input.useRegister" args register
     .redefine input.register register
 .endm
 
 ;====
 ; Reads the input from controller port 1 into the register specified by
-; input.setRegister
+; input.useRegister
 ;
-; @out  (a|b|c|d|e|h|l) -   depending on register given to input.setRegister
+; @out  (a|b|c|d|e|h|l) -   depending on register given to input.useRegister
 ;                           (default b)
 ;
 ; The reset bits represent the buttons currently pressed
@@ -53,7 +53,7 @@
 .endm
 
 ;====
-; Stores the read input value into the register given to input.setRegister
+; Stores the read input value into the register given to input.useRegister
 ; (default is b)
 ;====
 .macro "input._store"

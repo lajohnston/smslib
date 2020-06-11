@@ -83,7 +83,7 @@ input.if input.BUTTON1, +
 If needed you can change the register that holds the input value (default is `b`):
 
 ```
-input.setRegister "d"
+input.useRegister "d"
 input.readPort1     ; result stored in register d
 
 ; This will check input value in register d
