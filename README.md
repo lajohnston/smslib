@@ -47,7 +47,7 @@ The libs are also designed for ease of use so long as this doesn't reduce the sp
 
 ### Decoupled
 
-The smslib.asm file contains common functionality used by the other lib files, but other than that the separate files don't depend on each other and you can pick and choose which ones to include in your project.
+SMSLib modules are independent of one another so you can pick or choose only the ones you want.
 
 ### Namespaced prefixes
 
@@ -191,40 +191,41 @@ interrupts.getLine
 
 The Master System can only view 48KB of ROM memory at a time. Mappers control which portions of ROM are visible within this 48KB window and can dynamically switch portions at runtime to allow for much larger cartridge sizes. The included smslib mappers can abstract this complexity from you or can be used as examples to create your own.
 
-Include the mapper you wish to use before including `smslib.asm`. If you don't it will default to the basic 32KB mapper:
+SMSLib will default to using a basic 32KB mapper. To choose another one just include the mapper file before including `smslib.asm`:
 
 ```
 .incdir "lib/smslib"
-.include "mapper/waimanu.asm"
-.include "smslib.asm"
+.include "mapper/waimanu.asm"   ; use waimanu mapper
+.include "smslib.asm"           ; include smslib
 ```
 
-The mapper exposes FIXED_SLOT, PAGEABLE_SLOT and RAM_SLOT constants:
+Mappers define one or more fixed-sized 'slots' that can provide access to a small portion of the larger ROM at any given time. The portion of ROM they provide access to (called a 'bank') can be changed at runtime.
+
+Only one mapper can be used per project. All mappers expose `FIXED_SLOT`, `PAGEABLE_SLOT` and `RAM_SLOT` constants. Using these constants should make it easier for you to swap out a mapper at a later stage of development if you decide to do so:
 
 ```
-; Fixed slot is appropriate for code
+; Fixed slot is good for code to ensure it's always accessible
 .slot mapper.FIXED_SLOT
 .include "game.asm"
 
-; Pageable slot is appropriate for assets
+; Pageable slot is good for asset data that is only needed at certain times
 .slot mapper.PAGEABLE_SLOT
 .include "assets.asm"
 
-; RAM slot can be used for RAM sections
+; RAM slot should be used for RAM variables
 .ramsection "foo" slot mapper.RAM_SLOT
     bar     DB
 .ends
 ```
 
-Before loading assets remember to page the bank you want to access. You can use WLA-DX's
-colon prefix to retrieve a bank number for a given address:
+Before accessing data from the `PAGEABLE_SLOT` (e.g. when loading an asset) remember to first tell the mapper to 'page' to the bank you want to access. You can use WLA-DX's colon prefix to retrieve a bank number for a given address:
 
 ```
-mapper.pageBank :paletteData
-palette.load 0, paletteData, paletteDataEnd
+mapper.pageBank :paletteData                ; page to the paletteData
+palette.load 0, paletteData, paletteDataEnd ; paletteData is now accessible
 ```
 
-You can customise some mappers with additional paramters. Check the relevant mapper asm file to see which settings are supported.
+You can customise some mappers with additional parameters. Check the relevant mapper asm file to see which settings are supported.
 
 ```
 .define mapper.pageableBanks 4
@@ -233,13 +234,13 @@ You can customise some mappers with additional paramters. Check the relevant map
 
 ## palette.asm
 
-Handles the VDP color palettes. There are 31 color slots:
+Handles the VDP color palettes. There are 32 color slots:
 
-- Sprites can only use the last 16 slots (16-31).
 - Each background pattern (tile) can use either the first 16 slots (0-15) or
   the last 16 (16-31)
+- Sprites can only use the last 16 slots (16-31). Slot 16 is used for its transparent color
 
-Each color is a byte containing 2-bit RGB color values (--BBGGRR). You can call `palette.rgb` with the RGB values to generate a color byte with an approximate RGB value. Each color component can have the value of 0, 85, 170 or 255. Values inbetween these will be rounded to the closest factor.
+The color in each slot is a byte containing 2-bit RGB color values (--BBGGRR). You can call `palette.rgb` with the RGB values to generate a color byte with an approximate RGB value. Each color component can have the value of 0, 85, 170 or 255. Values inbetween these will be rounded to the closest factor.
 
 ```
 paletteData:
