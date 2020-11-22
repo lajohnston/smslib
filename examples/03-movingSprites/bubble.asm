@@ -31,8 +31,6 @@
 ;====
 .section "bubble.updateInput" free
     bubble.updateInput:
-        ; Read the port 1 into register b
-        input.useRegister "c"
         input.readPort1
 
         ; Update xVec

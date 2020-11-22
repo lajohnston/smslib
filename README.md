@@ -74,7 +74,7 @@ input.if input.LEFT, +
     ; Left has been pressed
 +:
 
-input.if input.BUTTON1, +
+input.if input.BUTTON_1, +
     ; Button 1 has been pressed
 +:
 

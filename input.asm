@@ -9,8 +9,8 @@
 .define input.DOWN      1
 .define input.LEFT      2
 .define input.RIGHT     3
-.define input.BUTTON1   4
-.define input.BUTTON2   5
+.define input.BUTTON_1   4
+.define input.BUTTON_2   5
 .define input.PORT_1    $dc
 .define input.PORT_2    $dd
 
@@ -105,7 +105,7 @@
 ;
 ; @in  a       the current input
 ; @in  button  the button to check, either input.UP, input.DOWN, input.LEFT,
-;              input.RIGHT, input.BUTTON1 or input.BUTTON2
+;              input.RIGHT, input.BUTTON_1 or input.BUTTON_2
 ;
 ; @out  f   z if the given button is pressed
 .macro "input.isPressed" args button
