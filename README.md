@@ -10,7 +10,8 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware. Its aim is t
 - [palette.asm](#paletteasm) - handles the color palettes
 - [patterns.asm](#patternsasm) - handles patterns (tile images)
 - [pause.asm](#pauseasm) - handles the pause button
-- [sprites.asm](#sprites) - manages a sprite table in a RAM and pushes to VRAM when required
+- [sprites.asm](#spritesasm) - manages a sprite table in a RAM and pushes to VRAM when required
+- [tilemap.asm](#tilemapasm) - handles the background tile
 - [vdpreg.asm](#vdpregasm) - defines and sets graphics chip register settings
 - [/mapper](#mappers)
 
