@@ -30,31 +30,11 @@
 .endif
 
 ;====
-; Loads patterns into VRAM.
-;
-; Each pattern is an 8x8 image of 4-bit pixels making a total of 32-bytes.
-;
-; Each pixel is a 4-bit color palette reference. This can reference slots 0-15
-; or 16-31 depending on the context where the pattern is used - sprites use
-; slots 16-31 whereas background tiles in the tilemap contain a bit that
-; determines which to use. If used as a sprite, color 0 is used as the
-; transparent color.
-;
-; Pixels are encoded in bitplanes so the bits of each are strewn across 2-bytes
-;
-; Example:
-;
-; Pixel 1 = 0110
-; Pixel 2 = 0011
-; Pixel 3 = 1010
-; Pixel 4 = 0001
-;
-; Pixel No.     1234 1234 1234 1234
-; Bits          0010 1000 1110 0101
+; Loads patterns into VRAM
 ;
 ; @in  dataAddress   the address of the first byte of data
 ; @in  size          the size of the data block, in bytes
-; @in  patternSlot  the first pattern slot
+; @in  patternSlot   the first pattern slot
 ;====
 .macro "patterns.load" args dataAddr slots offset
     .ifndef offset

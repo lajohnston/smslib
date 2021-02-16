@@ -8,7 +8,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware. Its aim is t
 - [input.asm](#inputasm) - interprets the joypad inputs
 - [interrupts.asm](#interruptsasm) - handles VBlank and HBlank interrupts
 - [palette.asm](#paletteasm) - handles the color palettes
-- [patterns.asm](#patternsasm) - handles patterns (tile images)
+- [patterns.asm](./docs/patterns) - handles patterns (tile images)
 - [pause.asm](#pauseasm) - handles the pause button
 - [sprites.asm](#spritesasm) - manages a sprite table in a RAM and pushes to VRAM when required
 - [tilemap.asm](#tilemapasm) - handles the background tile
@@ -267,24 +267,6 @@ palette.load paletteData, 5, 2  ; load 5, skipping first 2 (red, orange)
 
 ; ...append red and orange at the end (no need to call setSlot again)
 palette.load paletteData, 2
-```
-
-## patterns.asm
-
-Loads patterns (tiles) into the VRAM, which can be used for background images or sprites. See `patterns.asm` for documentation about the format requirement.
-
-This only deals with uncompressed tile data and is provided for example purposes to get you started. For an actual game you would want to compress pattern data using an algorithm such as zx7 or aPLib and use the appropriate lib to decompress and send to VRAM.
-
-```
-patternData:
-    .incbin 'tiles.bin'
-
-; Load 4 tiles into tile slot 0 onwards (0-4)
-patterns.setSlot 0
-patterns.load patternData, 5
-
-; ...then load pattern 10 into the next slot (5)
-patterns.load patternData, 1, 9 ; skip first 9
 ```
 
 ## pause.asm
