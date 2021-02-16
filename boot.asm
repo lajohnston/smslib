@@ -28,7 +28,7 @@
     im 1            ; interrupt mode 1
     ld sp, $dff0    ; set stack pointer
 
-    ; Initialise the system then jump to the init label
+    ; Initialise the system
     call boot.initSmslibModules
 
     ; Jump to init label, defined by user

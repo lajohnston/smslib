@@ -4,7 +4,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware. Its aim is t
 
 ## Contents
 
-- [boot.asm](#bootasm) - boots the system and initialises smslib modules
+- [boot.asm](./docs/boot) - boots the system and initialises smslib modules
 - [input.asm](#inputasm) - interprets the joypad inputs
 - [interrupts.asm](#interruptsasm) - handles VBlank and HBlank interrupts
 - [palette.asm](#paletteasm) - handles the color palettes
@@ -59,10 +59,6 @@ Each library file prefixes its labels with its name and a '.' (i.e. input.readPo
 The library routines don't generally PUSH or POP registers to preserve them, meaning they will happily 'clobber' registers if need be. This shifts the responsibility of preservation to the code calling the library, mainly for efficiency reasons: the calling code knows what registers it actually cares about, so only needs to preserve those.
 
 # Documentation
-
-## boot.asm
-
-Automatically initialises the system and smslib modules. Includes a section at address 0. When it is done it will call an `init` label that you must define in your code.
 
 ## input.asm
 
