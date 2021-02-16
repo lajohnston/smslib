@@ -5,7 +5,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware. Its aim is t
 ## Contents
 
 - [boot.asm](./docs/boot) - boots the system and initialises smslib modules
-- [input.asm](#inputasm) - interprets the joypad inputs
+- [input.asm](./docs/input) - interprets the joypad inputs
 - [interrupts.asm](#interruptsasm) - handles VBlank and HBlank interrupts
 - [palette.asm](#paletteasm) - handles the color palettes
 - [patterns.asm](./docs/patterns) - handles patterns (tile images)
@@ -59,35 +59,6 @@ Each library file prefixes its labels with its name and a '.' (i.e. input.readPo
 The library routines don't generally PUSH or POP registers to preserve them, meaning they will happily 'clobber' registers if need be. This shifts the responsibility of preservation to the code calling the library, mainly for efficiency reasons: the calling code knows what registers it actually cares about, so only needs to preserve those.
 
 # Documentation
-
-## input.asm
-
-Allows you to read input from the controller pads.
-
-```
-input.readPort1
-
-input.if input.LEFT, +
-    ; Left has been pressed
-+:
-
-input.if input.BUTTON_1, +
-    ; Button 1 has been pressed
-+:
-
-```
-
-If needed you can change the register that holds the input value (default is `b`):
-
-```
-input.useRegister "d"
-input.readPort1     ; result stored in register d
-
-; This will check input value in register d
-input.if input.LEFT, +
-    ; Left has been pressed
-+:
-```
 
 ## interrupts.asm
 
