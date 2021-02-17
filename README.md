@@ -7,13 +7,13 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware. Its aim is t
 - [boot.asm](./docs/boot) - boots the system and initialises smslib modules
 - [input.asm](./docs/input) - interprets the joypad inputs
 - [interrupts.asm](./docs/interrupts) - handles VBlank and HBlank interrupts
+- [/mapper/\*.asm](./docs/mappers)
 - [palette.asm](#paletteasm) - handles the color palettes
 - [patterns.asm](./docs/patterns) - handles patterns (tile images)
 - [pause.asm](#pauseasm) - handles the pause button
 - [sprites.asm](#spritesasm) - manages a sprite table in a RAM and pushes to VRAM when required
 - [tilemap.asm](#tilemapasm) - handles the background tile
 - [vdpreg.asm](./docs/vdpreg) - defines and sets graphics chip register settings
-- [/mapper](#mappers)
 
 ## Usage
 
@@ -59,51 +59,6 @@ Each library file prefixes its labels with its name and a '.' (i.e. input.readPo
 The library routines don't generally PUSH or POP registers to preserve them, meaning they will happily 'clobber' registers if need be. This shifts the responsibility of preservation to the code calling the library, mainly for efficiency reasons: the calling code knows what registers it actually cares about, so only needs to preserve those.
 
 # Documentation
-
-## mappers
-
-The Master System can only view 48KB of ROM memory at a time. Mappers control which portions of ROM are visible within this 48KB window and can dynamically switch portions at runtime to allow for much larger cartridge sizes. The included smslib mappers can abstract this complexity from you or can be used as examples to create your own.
-
-SMSLib will default to using a basic 32KB mapper. To choose another one just include the mapper file before including `smslib.asm`:
-
-```
-.incdir "lib/smslib"
-.include "mapper/waimanu.asm"   ; use waimanu mapper
-.include "smslib.asm"           ; include smslib
-```
-
-Mappers define one or more fixed-sized 'slots' that can provide access to a small portion of the larger ROM at any given time. The portion of ROM they provide access to (called a 'bank') can be changed at runtime.
-
-Only one mapper can be used per project. All mappers expose `FIXED_SLOT`, `PAGEABLE_SLOT` and `RAM_SLOT` constants. Using these constants should make it easier for you to swap out a mapper at a later stage of development if you decide to do so:
-
-```
-; Fixed slot is good for code to ensure it's always accessible
-.slot mapper.FIXED_SLOT
-.include "game.asm"
-
-; Pageable slot is good for asset data that is only needed at certain times
-.slot mapper.PAGEABLE_SLOT
-.include "assets.asm"
-
-; RAM slot should be used for RAM variables
-.ramsection "foo" slot mapper.RAM_SLOT
-    bar     DB
-.ends
-```
-
-Before accessing data from the `PAGEABLE_SLOT` (e.g. when loading an asset) remember to first tell the mapper to 'page' to the bank you want to access. You can use WLA-DX's colon prefix to retrieve a bank number for a given address:
-
-```
-mapper.pageBank :paletteData                ; page to the paletteData
-palette.load 0, paletteData, paletteDataEnd ; paletteData is now accessible
-```
-
-You can customise some mappers with additional parameters. Check the relevant mapper asm file to see which settings are supported.
-
-```
-.define mapper.pageableBanks 4
-.include "smslib/mapper/waimanu.asm"
-```
 
 ## palette.asm
 
