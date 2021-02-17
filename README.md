@@ -8,7 +8,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware. Its aim is t
 - [input.asm](./docs/input) - interprets the joypad inputs
 - [interrupts.asm](./docs/interrupts) - handles VBlank and HBlank interrupts
 - [/mapper/\*.asm](./docs/mappers)
-- [palette.asm](#paletteasm) - handles the color palettes
+- [palette.asm](./docs/palette) - handles the color palettes
 - [patterns.asm](./docs/patterns) - handles patterns (tile images)
 - [pause.asm](#pauseasm) - handles the pause button
 - [sprites.asm](#spritesasm) - manages a sprite table in a RAM and pushes to VRAM when required
@@ -59,42 +59,6 @@ Each library file prefixes its labels with its name and a '.' (i.e. input.readPo
 The library routines don't generally PUSH or POP registers to preserve them, meaning they will happily 'clobber' registers if need be. This shifts the responsibility of preservation to the code calling the library, mainly for efficiency reasons: the calling code knows what registers it actually cares about, so only needs to preserve those.
 
 # Documentation
-
-## palette.asm
-
-Handles the VDP color palettes. There are 32 color slots:
-
-- Each background pattern (tile) can use either the first 16 slots (0-15) or
-  the last 16 (16-31)
-- Sprites can only use the last 16 slots (16-31). Slot 16 is used for its transparent color
-
-The color in each slot is a byte containing 2-bit RGB color values (--BBGGRR). You can call `palette.rgb` with the RGB values to generate a color byte with an approximate RGB value. Each color component can have the value of 0, 85, 170 or 255. Values inbetween these will be rounded to the closest factor.
-
-```
-paletteData:
-    palette.rgb 255, 0, 0   ; red
-    palette.rgb 255, 170, 0 ; orange
-    palette.rgb 255, 255, 0 ; yellow
-    palette.rgb 0, 255, 0   ; green
-    palette.rgb 0, 0, 255   ; blue
-    palette.rgb 85, 0, 85   ; indigo
-    palette.rgb 170, 0, 255 ; violet
-```
-
-You can then load these into the VDP VRAM the following macros:
-
-```
-; load 7 colors into slot 0 onwards
-palette.setSlot 0
-palette.load paletteData, 7
-
-; load 5 colors into slot 16 onwards, skipping the first 2 (red, orange)
-palette.setSlot 16
-palette.load paletteData, 5, 2  ; load 5, skipping first 2 (red, orange)
-
-; ...append red and orange at the end (no need to call setSlot again)
-palette.load paletteData, 2
-```
 
 ## pause.asm
 
