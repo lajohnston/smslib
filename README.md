@@ -48,7 +48,7 @@ The libs are also designed for ease of use so long as this doesn't reduce the sp
 
 ### Decoupled
 
-SMSLib modules are independent of one another so you can pick or choose only the ones you want.
+SMSLib modules are independent of one another so you can pick or choose only the ones you want. For convenience you can just include `smslib.asm` and this will pull them all in for you and WLA-DX will only assemble the code you actually use.
 
 ### Namespaced prefixes
 
