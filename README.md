@@ -12,7 +12,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware. Its aim is t
 - [pause.asm](#pauseasm) - handles the pause button
 - [sprites.asm](#spritesasm) - manages a sprite table in a RAM and pushes to VRAM when required
 - [tilemap.asm](#tilemapasm) - handles the background tile
-- [vdpreg.asm](#vdpregasm) - defines and sets graphics chip register settings
+- [vdpreg.asm](./docs/vdpreg) - defines and sets graphics chip register settings
 - [/mapper](#mappers)
 
 ## Usage
@@ -71,7 +71,7 @@ You will need to enable interrupts in both the VDP and Z80. After you initialise
 - Enable HBlank - VDP register 0, bit 4
 - Enable VBlank - VDP register 1, bit 5
 
-You can use [vdpreg.asm](#vdpregasm) for this, taking care not to overwrite any other flags that are also stored within these registers (see vdpreg.asm file for documentation):
+You can use [vdpreg.asm](./docs/vdpreg) for this, taking care not to overwrite any other flags that are also stored within these registers (see vdpreg.asm file for documentation):
 
 ```
 vdpreg.enableHBlank
@@ -325,52 +325,4 @@ message:
 
 tilemap.setSlot 0, 0 ; top left tile slot
 tilemap.loadBytesUntil $ff message
-```
-
-## vdpreg.asm
-
-Handles the VDP registers and settings.
-
-Change register values using the provided macros. See vdpreg.asm for more details about each setting.
-
-```
-vdpreg.setBackgroundColorSlot 16
-vdpreg.setScrollX 100
-vdpreg.setScrollY 255
-
-vdpreg.enableDisplay
-vdpreg.disableDisplay
-
-vdpreg.enableVBlank
-vdpreg.disableVBlank
-
-vdpreg.enableTallSprites
-vdpreg.disableTallSprites
-
-vdpreg.enableSpriteZoom
-vdpreg.disableSpriteZoom
-
-vdpreg.enableHBlank
-vdpreg.disableHBlank
-
-vdpreg.enableSpriteShift
-vdpreg.disableSpriteShift
-
-vdpreg.hideLeftColumn
-vdpreg.showLeftColumn
-
-vdpreg.lockHScroll
-vdpreg.unlockHScroll
-
-vdpreg.lockVScroll
-vdpreg.unlockVScroll
-```
-
-Many settings are stored within the same VDP register, so if you are changing multiple settings then it's much more efficient to batch them together by wrapping them in calls to `vdpreg.startBatch` and `vdpreg.endBatch`:
-
-```
-vdpreg.startBatch
-vdpreg.enableDisplay
-vdpreg.enableVBlank
-vdpreg.endBatch
 ```
