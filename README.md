@@ -62,3 +62,9 @@ Each library file prefixes its labels with its name and a '.' (i.e. input.readPo
 ### Customisable
 
 Many of the lib files include settings that default to sensible values but can be overridden if required. These are defined in the 'Settings' section near the top of each file. The overrides must be defined at some point before you `.include` the relevant file.
+
+## Sources
+
+The code and techniques utilised by the lib try to credit original authors where known. Of particular help was the thread [A few hints on coding a medium/large sized game using WLA-DX](https://www.smspower.org/forums/15794-AFewHintsOnCodingAMediumLargeSizedGameUsingWLADX) on the smslib.org forums.
+
+Much of the information contained in the docs was learned from https://www.smspower.org, in particular the [Development documents](https://www.smspower.org/Development/Documents) section.
