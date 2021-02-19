@@ -1,10 +1,12 @@
 # Color Palette (palette.asm)
 
-Handles the VDP color palettes. There are 2 palettes of 16 color slots
+Handles the VDP color palettes. There are 2 palettes of 16 color slots:
 
 - Each background pattern (tile) can use either the first 16 slots (0-15) or
   the last 16 (16-31)
-- Sprites can only use the last 16 slots (16-31). Slot 16 is used for its transparent color
+- Sprites can only use the last 16 slots (16-31)
+
+The first color slot of each palette (slot 0 or slot 16) is used as the transparent color. This color will be omitted for sprites. Background tiles aren't affected by it unless they are marked as a 'priority' in the tilemap. Priority background patterns are rendered in front of sprites, except for the first color which is rendered behind.
 
 The color in each slot is a byte containing 2-bit RGB color values (--BBGGRR).
 
