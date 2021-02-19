@@ -10,7 +10,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware. Its aim is t
 - [/mapper/\*.asm](./docs/mappers)
 - [palette.asm](./docs/palette) - handles the color palettes
 - [patterns.asm](./docs/patterns) - handles patterns (tile images)
-- [pause.asm](#pauseasm) - handles the pause button
+- [pause.asm](./docs/pause) - handles the pause button
 - [sprites.asm](#spritesasm) - manages a sprite table in a RAM and pushes to VRAM when required
 - [tilemap.asm](#tilemapasm) - handles the background tile
 - [vdpreg.asm](./docs/vdpreg) - defines and sets graphics chip register settings
@@ -59,26 +59,6 @@ Each library file prefixes its labels with its name and a '.' (i.e. input.readPo
 The library routines don't generally PUSH or POP registers to preserve them, meaning they will happily 'clobber' registers if need be. This shifts the responsibility of preservation to the code calling the library, mainly for efficiency reasons: the calling code knows what registers it actually cares about, so only needs to preserve those.
 
 # Documentation
-
-## pause.asm
-
-Provides a pause handler that toggles a flag in RAM whenever the pause button is pressed. This flag can be detected at a safe position in your code such as at the start of the game loop.
-
-Basic pause functionality can be provided by simply waiting until the pause button is pressed again:
-
-```
-pause.waitIfPaused
-```
-
-If you wish to jp or call a label based on the pause state, you can use the following:
-
-```
-pause.jpIfPaused myPauseState
-pause.callIfPaused myPauseState
-
-myPauseState:
-    ...
-```
 
 ## sprites.asm
 
