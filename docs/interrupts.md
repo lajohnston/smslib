@@ -1,4 +1,4 @@
-# interrupts.asm
+# Interrupts (interrupts.asm)
 
 Handles VBlank and/or HBlank interrupts. When enabled, these interrupts allow the VDP to send a signal to the Z80 processor when it has finished drawing certain lines on the screen (HBlanks) and each time it's finished drawing the whole screen/frame (VBlanks). You can use these to time your game logic or add screen effects, such as changing the color palette for a portion of the screen.
 

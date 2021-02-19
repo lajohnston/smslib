@@ -11,7 +11,7 @@ Low level Z80 WLA-DX libs for handling Sega Master System hardware. Its aim is t
 - [palette.asm](./docs/palette) - handles the color palettes
 - [patterns.asm](./docs/patterns) - handles patterns (tile images)
 - [pause.asm](./docs/pause) - handles the pause button
-- [sprites.asm](#spritesasm) - manages a sprite table in a RAM and pushes to VRAM when required
+- [sprites.asm](./docs/sprites) - manages a sprite table in a RAM and pushes to VRAM when required
 - [tilemap.asm](./docs/tilemap) - handles the background tile
 - [vdpreg.asm](./docs/vdpreg) - defines and sets graphics chip register settings
 
@@ -57,57 +57,3 @@ Each library file prefixes its labels with its name and a '.' (i.e. input.readPo
 ### Unsafe register preservation
 
 The library routines don't generally PUSH or POP registers to preserve them, meaning they will happily 'clobber' registers if need be. This shifts the responsibility of preservation to the code calling the library, mainly for efficiency reasons: the calling code knows what registers it actually cares about, so only needs to preserve those.
-
-# Documentation
-
-## sprites.asm
-
-Manages a sprite table buffer in RAM and outputs it to VRAM when required.
-
-First, reset the sprite buffer at the start of each game loop:
-
-```
-sprites.reset
-```
-
-Add sprites to the buffer:
-
-```
-ld a, 100           ; yPos
-ld b, 80            ; xPos
-ld c, 5             ; pattern number
-sprites.add
-```
-
-Sprite groups allow you to add multiple sprites with their positions relative to an anchor point. The offsets must be positive numbers. If any sub-sprites fall off screen they will not be added:
-
-```
-; Create 2x2 sprite
-spriteGroup:
-    ; pattern number, relX, relY
-    sprites.sprite 1, 0, 0  ; top left
-    sprites.sprite 2, 8, 0  ; top right (x + 8)
-    sprites.sprite 3, 0, 8  ; bottom left (y + 8)
-    sprites.sprite 4, 8, 8  ; bottom right (x + 8, y + 8)
-    sprites.endGroup        ; end of group
-
-code:
-    ld hl, spriteGroup
-    ld b, 150   ; anchor x pos
-    ld c, 50    ; anchor y pos
-    sprites.addGroup
-```
-
-It is more efficient adding multiple sprites and/or sprite groups within a batch. This allows smslib avoid having to store and retrieve the next slot from RAM for each sprite, and instead can do it once at the beginning of the batch and once at the end. During a batch the next sprite slot will be kept in `de` and incremented each time so be careful not to clobber this:
-
-```
-sprites.startBatch
-... ; add multiple sprites
-sprites.endBatch
-```
-
-Transfer buffer to VRAM when safe to do so, when either the display is off or during VBlank:
-
-```
-sprites.copyToVram
-```
