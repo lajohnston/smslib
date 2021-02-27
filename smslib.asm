@@ -3,7 +3,7 @@
 ;
 ; Includes the full suite of SMSLib modules. Each module can be included
 ; inidividually if desired, but ensure you call their respective init macros
-; (if they exist). You can also use boot.asm to do this for you.
+; (if they exist). You can also use init.asm to do this for you.
 ;
 ; Usage:
 ;
@@ -27,4 +27,4 @@
 .include "tilemap.asm"      ; handles tilemap
 .include "vdpreg.asm"       ; handles vdp settings
 
-.include "boot.asm"         ; initialises system and smslib modules
+.include "init.asm"         ; initialises system and smslib modules

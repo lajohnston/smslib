@@ -29,7 +29,7 @@
     ld sp, $dff0    ; set stack pointer
 
     ; Initialise the system
-    call boot.initSmslibModules
+    call init.initSmslibModules
 
     ; Jump to init label, defined by user
     jp init
@@ -38,8 +38,8 @@
 ;====
 ; Initialise any SMSLib modules that are activated
 ;====
-.section "boot.initSmslibModules" free
-    boot.initSmslibModules:
+.section "init.initSmslibModules" free
+    init.initSmslibModules:
         ; initialise paging registers
         .ifdef mapper.ENABLED
             mapper.init
