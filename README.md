@@ -4,7 +4,7 @@ Low-level Sega Master System libs for the Z80 WLA-DX assembler. Its aim is to pr
 
 ## Docs
 
-- [boot.asm](./docs/boot.md) - boots the system and initialises smslib modules
+- [init.asm](./docs/init.md) - initialises the system and smslib modules
 - [input.asm](./docs/input.md) - interprets the joypad inputs
 - [interrupts.asm](./docs/interrupts.md) - handles VBlank and HBlank interrupts
 - [/mapper/\*.asm](./docs/mappers.md) - memory mapper handlers
