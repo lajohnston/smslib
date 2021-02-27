@@ -49,7 +49,7 @@
 ;====
 ; Constants
 ;====
-.define interrupts.VDP_STATUS_PORT $bf
+.define interrupts.VDP_PORT $bf ; read = status; write = command
 
 ;====
 ; RAM
@@ -96,7 +96,7 @@
         ret ; No handling necessary
     .else
         interrupts._preserveAF
-        in a, (interrupts.VDP_STATUS_PORT)  ; satisfy interrupt
+        in a, (interrupts.VDP_PORT)     ; satisfy interrupt
 
         ; If VBlank and HBlank are both enabled
         .if interrupts.handleVBlank + interrupts.handleHBlank == 2
@@ -172,7 +172,7 @@
 ;====
 .macro "interrupts.enable"
     ; Ensure there are no pending interrupts that will trigger unexpectedly
-    in a, (interrupts.VDP_STATUS_PORT)  ; reset status
+    in a, (interrupts.VDP_PORT) ; reset status
     ei
 .endm
 
@@ -204,9 +204,9 @@
         ld a, value - 1
     .endif
 
-    out (vdpreg.COMMAND_PORT), a
+    out (interrupts.VDP_PORT), a
     ld a, $8a   ; register 10
-    out (vdpreg.COMMAND_PORT), a
+    out (interrupts.VDP_PORT), a
 .endm
 
 ;====
