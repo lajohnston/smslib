@@ -36,7 +36,7 @@
     init:
         ; Load sprite palette
         palette.setSlot palette.SPRITE_PALETTE
-        palette.load bubble.palette, 6
+        palette.loadSlice bubble.palette, 6
 
         ; Load pattern data to draw sprites. Sprites use slots 256+ by default
         patterns.setSlot 256

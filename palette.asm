@@ -42,7 +42,7 @@
 ; @in       offset      (optional) how many colors to skip from the start
 ;                       of the data. Defaults to 0
 ;====
-.macro "palette.load" args dataAddr count offset
+.macro "palette.loadSlice" args dataAddr count offset
     .ifndef offset
         utils.vdp.outputArray dataAddr palette.SLOT_SIZE count 0
     .else

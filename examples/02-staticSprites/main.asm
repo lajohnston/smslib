@@ -20,7 +20,7 @@
     init:
         ; Load sprite palette
         palette.setSlot palette.SPRITE_PALETTE
-        palette.load paletteData, 6
+        palette.loadSlice paletteData, 6
 
         ; Load pattern data into slots 256+ (used for sprites, by default)
         patterns.setSlot 256

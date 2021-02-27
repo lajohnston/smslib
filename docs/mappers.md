@@ -32,8 +32,8 @@ Only one mapper can be used per project. All mappers expose `FIXED_SLOT`, `PAGEA
 Before accessing data from the `PAGEABLE_SLOT` (e.g. when loading an asset) remember to first tell the mapper to 'page' to the bank you want to access. You can use WLA-DX's colon prefix to retrieve a bank number for a given address:
 
 ```
-mapper.pageBank :paletteData                ; page to the paletteData
-palette.load 0, paletteData, paletteDataEnd ; paletteData is now accessible
+mapper.pageBank :paletteData        ; ensure the bank containing paletteData is accessible
+palette.loadSlice paletteData, 1    ; you can now use the data in paletteData
 ```
 
 You can customise some mappers with additional parameters. Check the relevant mapper asm file to see which settings are supported.

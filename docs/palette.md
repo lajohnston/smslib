@@ -32,14 +32,14 @@ paletteData:
 You can then load these into the VDP VRAM the following macros:
 
 ```
-; load 7 colors from slot 0 onwards
-palette.setSlot 0
-palette.load paletteData, 7
+palette.setSlot 0                     ; point to first slot
+palette.loadSlice paletteData, 3      ; load 3 colors from current slot onwards (slot 0, 1, 2)
+palette.loadSlice otherPaletteData, 2 ; then load 2 more colors (slots 3 and 4)
+```
 
-; load 5 colors from slot 16 onwards, skipping the first 2 in the data
-palette.setSlot 16
-palette.load paletteData, 5, 2  ; load 5, skipping first 2 in the data
+An optional third parameter lets you skip some colors in the data:
 
-; ...append additional colors at the end (no need to call setSlot again)
-palette.load paletteData, 2 ; load first 2 colors in the data
+```
+; Load 5 colors but skip the first 2
+palette.loadSlice paletteData, 5, 2
 ```
