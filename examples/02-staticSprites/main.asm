@@ -24,7 +24,7 @@
 
         ; Load pattern data into slots 256+ (used for sprites, by default)
         patterns.setSlot 256
-        patterns.load patternData, 6
+        patterns.loadSlice patternData, 6
 
         ; Reset the sprite buffer
         sprites.reset

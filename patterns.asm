@@ -36,7 +36,7 @@
 ; @in  size          the size of the data block, in bytes
 ; @in  patternSlot   the first pattern slot
 ;====
-.macro "patterns.load" args dataAddr slots offset
+.macro "patterns.loadSlice" args dataAddr slots offset
     .ifndef offset
         utils.vdp.outputArray dataAddr patterns.SLOT_SIZE slots 0
     .else

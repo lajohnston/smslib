@@ -40,7 +40,7 @@
 
         ; Load pattern data to draw sprites. Sprites use slots 256+ by default
         patterns.setSlot 256
-        patterns.load bubble.patterns, 6
+        patterns.loadSlice bubble.patterns, 6
 
         ; Initialise bubble with default values
         ld ix, bubbleInstance

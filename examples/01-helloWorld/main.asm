@@ -21,8 +21,8 @@
         palette.loadSlice paletteData, 2    ; load 2 colors from paletteData
 
         ; Load font tiles
-        patterns.setSlot 0          ; point to first pattern slot
-        patterns.load fontData, 95  ; load 95 patterns from 'fontData' (see assets below)
+        patterns.setSlot 0                  ; point to first pattern slot
+        patterns.loadSlice fontData, 95     ; load 95 patterns from 'fontData' (see assets below)
 
         ; Display font tiles on screen
         tilemap.setSlot 0, 0                ; Set tilemap slot x0, y0 (top left)

@@ -6,16 +6,27 @@ This only deals with uncompressed tile data and is provided for example purposes
 
 ## Usage
 
+## patterns.loadSlice
+
+Lets you pick out certain tiles from binary data and load them individually.
+
 ```
 myUncompressedPatternData:
     .incbin 'tiles.bin'
 
 ; Load 4 patterns into pattern slot 0 onwards (slots 0-3)
 patterns.setSlot 0
-patterns.load patternData, 4
+patterns.loadSlice myUncompressedPatternData, 4
 
-; ...then load 10th pattern into the next slot (slot 4)
-patterns.load patternData, 1, 9 ; load 1 pattern from data; skip first 9 patterns in data
+; ...then load another pattern into the next slot (slot 4)
+patterns.loadSlice myUncompressedPatternData, 1
+```
+
+An optional third parameter lets you skip a certain number of patterns in the data:
+
+```
+; load another pattern, skipping the first 9
+patterns.loadSlice otherPatternData, 1, 9
 ```
 
 ## Data format
