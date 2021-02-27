@@ -25,6 +25,6 @@
 .include "pause.asm"        ; handles pause button
 .include "sprites.asm"      ; handles sprites
 .include "tilemap.asm"      ; handles tilemap
-.include "vdpreg.asm"       ; handles vdp settings
+.include "vdp.asm"          ; handles vdp settings
 
 .include "init.asm"         ; initialises system and smslib modules

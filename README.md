@@ -13,7 +13,7 @@ Low-level Sega Master System libs for the Z80 WLA-DX assembler. Its aim is to pr
 - [pause.asm](./docs/pause.md) - handles the pause button
 - [sprites.asm](./docs/sprites.md) - manages a sprite table in a RAM and pushes to VRAM when required
 - [tilemap.asm](./docs/tilemap.md) - handles the background tile
-- [vdpreg.asm](./docs/vdpreg.md) - defines and sets graphics chip register settings
+- [vdp.asm](./docs/vdp.md) - defines and sets graphics chip register settings
 
 ## Quick start
 

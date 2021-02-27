@@ -3,7 +3,7 @@
 ; interrupt mode 1 (im 1).
 ;
 ; VBlanks and HBlanks will still need to be enabled in the VDP registers. You
-; can use smslib vdpreg.asm for this:
+; can use smslib vdp.asm for this:
 ;
 ; Enable HBlank - VDP register 0, bit 4
 ; Enable VBlank - VDP register 1, bit 5

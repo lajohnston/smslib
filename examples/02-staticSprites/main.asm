@@ -58,7 +58,7 @@
         sprites.copyToVram
 
         ; Enable the display then stop
-        vdpreg.enableDisplay
+        vdp.enableDisplay
         -: jr -
 .ends
 

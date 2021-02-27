@@ -2,7 +2,7 @@
 ; Manages the VDP registers
 ;====
 
-.define vdpreg.ENABLED 1
+.define vdp.ENABLED 1
 
 ;====
 ; Dependencies
@@ -12,7 +12,7 @@
 ;====
 ; Default register values
 ;====
-.define vdpreg.register0Default     %00000110;  Mode control 1
+.define vdp.register0Default     %00000110;  Mode control 1
                                     ;|||||||`-  Sync enable; always 0
                                     ;||||||`--  Extra height enable/TMS9918 mode select; always 1
                                     ;|||||`---  Mode 4 enable; always 1
@@ -22,7 +22,7 @@
                                     ;|`-------  Horizontal scroll lock
                                     ;`--------  Vertical scroll lock
 
-.define vdpreg.register1Default     %10000000;  Mode control 2
+.define vdp.register1Default     %10000000;  Mode control 2
                                     ;|||||||`-  Zoomed sprites -> 16x16 pixels
                                     ;||||||`--  Tall sprites -> 2 tiles per sprite, 8x16
                                     ;|||||`---  Mega Drive mode 5 enable
@@ -32,37 +32,37 @@
                                     ;|`-------  Enable display
                                     ;`--------  Unused; always 1
 
-.define vdpreg.register2Default     %11111111;  Tilemap base address (default = $3800)
+.define vdp.register2Default     %11111111;  Tilemap base address (default = $3800)
                                     ;|||||||`-  Mask bit (SMS1)
                                     ;```````--  Name table base address
 
-.define vdpreg.register3Default     %11111111   ; Palette base address (always $ff for SMS1)
-.define vdpreg.register4Default     %00000111   ; Pattern base address (last 3 bits always set for SMS1)
-.define vdpreg.register5Default     %11111111   ; Sprite table base address (usually $ff)
-.define vdpreg.register6Default     %11111111   ; Sprite pattern generator base address (always $ff)
-.define vdpreg.register7Default     %00000000   ; Overscan/backdrop color slot (bits 0-3)
-.define vdpreg.register8Default     %00000000   ; Background X scroll
-.define vdpreg.register9Default     %00000000   ; Background Y scroll
-.define vdpreg.register10Default    %11111111   ; Line interrupt counter
+.define vdp.register3Default     %11111111   ; Palette base address (always $ff for SMS1)
+.define vdp.register4Default     %00000111   ; Pattern base address (last 3 bits always set for SMS1)
+.define vdp.register5Default     %11111111   ; Sprite table base address (usually $ff)
+.define vdp.register6Default     %11111111   ; Sprite pattern generator base address (always $ff)
+.define vdp.register7Default     %00000000   ; Overscan/backdrop color slot (bits 0-3)
+.define vdp.register8Default     %00000000   ; Background X scroll
+.define vdp.register9Default     %00000000   ; Background Y scroll
+.define vdp.register10Default    %11111111   ; Line interrupt counter
 
 ;====
 ; Batch variables
 ; Batches together setting changes so they can be applied together
 ;====
-.define vdpreg.batchInProgress 0
+.define vdp.batchInProgress 0
 
 ; Pending register 0 changes
-.define vdpreg.batchRegister0Enable    0
-.define vdpreg.batchRegister0Disable   0
+.define vdp.batchRegister0Enable    0
+.define vdp.batchRegister0Disable   0
 
 ; Pending register 1 changes
-.define vdpreg.batchRegister1Enable    0
-.define vdpreg.batchRegister1Disable   0
+.define vdp.batchRegister1Enable    0
+.define vdp.batchRegister1Disable   0
 
 ;====
 ; Constants
 ;====
-.define vdpreg.COMMAND_PORT             $bf   ; write (issue command to vdp)
+.define vdp.COMMAND_PORT             $bf   ; write (issue command to vdp)
 
 ;====
 ; RAM
@@ -70,43 +70,43 @@
 
 ; Buffer for setting the mode control registers, to allow settings to be changed
 ; without overwriting existing ones
-.ramsection "vdpreg.ram" slot utils.ram.SLOT
-    vdpreg.ram.register0Buffer: db
-    vdpreg.ram.register1Buffer: db
+.ramsection "vdp.ram" slot utils.ram.SLOT
+    vdp.ram.register0Buffer: db
+    vdp.ram.register1Buffer: db
 .ends
 
 ;====
-; Defines the default register values ready to be loaded with vdpreg.load
+; Defines the default register values ready to be loaded with vdp.load
 ;====
-.section "vdpreg.initData" free
-    vdpreg.initData:
-        .db vdpreg.register0Default, $80
-        .db vdpreg.register1Default, $81
-        .db vdpreg.register2Default, $82
-        .db vdpreg.register3Default, $83
-        .db vdpreg.register4Default, $84
-        .db vdpreg.register5Default, $85
-        .db vdpreg.register6Default, $86
-        .db vdpreg.register7Default, $87
-        .db vdpreg.register8Default, $88
-        .db vdpreg.register9Default, $89
-        .db vdpreg.register10Default, $8a
-    vdpreg.initDataEnd:
+.section "vdp.initData" free
+    vdp.initData:
+        .db vdp.register0Default, $80
+        .db vdp.register1Default, $81
+        .db vdp.register2Default, $82
+        .db vdp.register3Default, $83
+        .db vdp.register4Default, $84
+        .db vdp.register5Default, $85
+        .db vdp.register6Default, $86
+        .db vdp.register7Default, $87
+        .db vdp.register8Default, $88
+        .db vdp.register9Default, $89
+        .db vdp.register10Default, $8a
+    vdp.initDataEnd:
 .ends
 
 ;====
 ; Initialises the vdp registers with sensible defaults
 ;====
-.macro "vdpreg.init"
-    vdpreg.load vdpreg.initData, vdpreg.initDataEnd
+.macro "vdp.init"
+    vdp.load vdp.initData, vdp.initDataEnd
 
     ; Set register buffers
-    ld de, vdpreg.ram.register0Buffer
-    ld a, vdpreg.register0Default
+    ld de, vdp.ram.register0Buffer
+    ld a, vdp.register0Default
     ld (de), a
 
     inc de  ; point to register1 buffer
-    ld a, vdpreg.register1Default
+    ld a, vdp.register1Default
     ld (de), a
 .endm
 
@@ -119,59 +119,59 @@
 ; @in   end     end address of the data
 ; @clobs        bc, hl
 ;====
-.macro "vdpreg.load" args start end
+.macro "vdp.load" args start end
     ld hl, start
-    ld c, vdpreg.COMMAND_PORT
+    ld c, vdp.COMMAND_PORT
     ld b, end - start
     otir
 .endm
 
 ;====
 ; Begins a batch of setting changes for registers 0 and 1. Once the changes have
-; been specified the batch can be ended/applied using vdpreg.endBatch
+; been specified the batch can be ended/applied using vdp.endBatch
 ;====
-.macro "vdpreg.startBatch"
-    .ifeq vdpreg.batchInProgress 1
-        .print "vdpreg.startBatch: Batch already in progress."
-        .print " Ensure you also call vdpreg.endBatch\n\n"
+.macro "vdp.startBatch"
+    .ifeq vdp.batchInProgress 1
+        .print "vdp.startBatch: Batch already in progress."
+        .print " Ensure you also call vdp.endBatch\n\n"
     .endif
 
-    .redefine vdpreg.batchInProgress 1
+    .redefine vdp.batchInProgress 1
 .endm
 
 ;====
-; Applies the pending changes specified since calling vdpreg.startBatch
+; Applies the pending changes specified since calling vdp.startBatch
 ;====
-.macro "vdpreg.endBatch"
-    vdpreg._applyBatch
+.macro "vdp.endBatch"
+    vdp._applyBatch
 .endm
 
 ;====
 ; Enable the display
 ;====
-.macro "vdpreg.enableDisplay"
-    vdpreg._addSettingToBatch 1 $40 1
+.macro "vdp.enableDisplay"
+    vdp._addSettingToBatch 1 $40 1
 .endm
 
 ;====
 ; Disable the display
 ;====
-.macro "vdpreg.disableDisplay"
-    vdpreg._addSettingToBatch 1 $40 0
+.macro "vdp.disableDisplay"
+    vdp._addSettingToBatch 1 $40 0
 .endm
 
 ;====
 ; Enables frame interrupts, which occur when a frame has finished being drawn
 ;====
-.macro "vdpreg.enableVBlank"
-    vdpreg._addSettingToBatch 1 $20 1
+.macro "vdp.enableVBlank"
+    vdp._addSettingToBatch 1 $20 1
 .endm
 
 ;====
 ; Disables frame interrupts
 ;====
-.macro "vdpreg.disableVBlank"
-    vdpreg._addSettingToBatch 1 $20 0
+.macro "vdp.disableVBlank"
+    vdp._addSettingToBatch 1 $20 0
 .endm
 
 ;====
@@ -179,15 +179,15 @@
 ; pattern number rounded down to the nearest even number. The top sprite will be
 ; the next pattern (odd number)
 ;====
-.macro "vdpreg.enableTallSprites"
-    vdpreg._addSettingToBatch 1 $02 1
+.macro "vdp.enableTallSprites"
+    vdp._addSettingToBatch 1 $02 1
 .endm
 
 ;====
 ; Disables tall sprites
 ;====
-.macro "vdpreg.disableTallSprites"
-    vdpreg._addSettingToBatch 1 $02 0
+.macro "vdp.disableTallSprites"
+    vdp._addSettingToBatch 1 $02 0
 .endm
 
 ;====
@@ -195,63 +195,63 @@
 ; 4 sprites per scanline in this way, and the rest on the scanline will only be
 ; zoomed vertically leading to distortion
 ;====
-.macro "vdpreg.enableSpriteZoom"
-    vdpreg._addSettingToBatch 1 $01 1
+.macro "vdp.enableSpriteZoom"
+    vdp._addSettingToBatch 1 $01 1
 .endm
 
 ;====
 ; Disables zoomed sprites
 ;====
-.macro "vdpreg.disableSpriteZoom"
-    vdpreg._addSettingToBatch 1 $01 0
+.macro "vdp.disableSpriteZoom"
+    vdp._addSettingToBatch 1 $01 0
 .endm
 
 ;====
 ; Enable horizontal blank interrupts, which occur when the line counter falls
-; below 0. The line counter can be set using vdpreg.setLineCounter. The counter
+; below 0. The line counter can be set using vdp.setLineCounter. The counter
 ; is decremented after each line is drawn
 ;====
-.macro "vdpreg.enableHBlank"
-    vdpreg._addSettingToBatch 0 $10 1
+.macro "vdp.enableHBlank"
+    vdp._addSettingToBatch 0 $10 1
 .endm
 
 ;====
 ; Disables line interrupts
 ;====
-.macro "vdpreg.disableHBlank"
-    vdpreg._addSettingToBatch 0 $10 0
+.macro "vdp.disableHBlank"
+    vdp._addSettingToBatch 0 $10 0
 .endm
 
 ;====
 ; Shift all sprites 8-pixels to the left. Useful to allow sprites to move
 ; on/off the left-side of the screen smoothly, as an alternative to
-; vdpreg.hideLeftColumn
+; vdp.hideLeftColumn
 ;====
-.macro "vdpreg.enableSpriteShift"
-    vdpreg._addSettingToBatch 0 $08 1
+.macro "vdp.enableSpriteShift"
+    vdp._addSettingToBatch 0 $08 1
 .endm
 
 ;====
 ; Disables the option to shift sprite positions to the left. This is the default
 ; behaviour
 ;====
-.macro "vdpreg.disableSpriteShift"
-    vdpreg._addSettingToBatch 0 $08 0
+.macro "vdp.disableSpriteShift"
+    vdp._addSettingToBatch 0 $08 0
 .endm
 
 ;====
 ; Hide the left-most column (8-pixels). Useful to allow sprites to move on/off
-; the left-side of the screen smoothly as an alternative to vdpreg.shiftSprites
+; the left-side of the screen smoothly as an alternative to vdp.shiftSprites
 ;====
-.macro "vdpreg.hideLeftColumn"
-    vdpreg._addSettingToBatch 0 $20 1
+.macro "vdp.hideLeftColumn"
+    vdp._addSettingToBatch 0 $20 1
 .endm
 
 ;====
 ; Displays the left-most column (the default)
 ;====
-.macro "vdpreg.showLeftColumn"
-    vdpreg._addSettingToBatch 0 $20 0
+.macro "vdp.showLeftColumn"
+    vdp._addSettingToBatch 0 $20 0
 .endm
 
 ;====
@@ -259,15 +259,15 @@
 ; vertically which can cause unwanted effects. Often used to implement status
 ; bars
 ;====
-.macro "vdpreg.lockHScroll"
-    vdpreg._addSettingToBatch 0 $40 1
+.macro "vdp.lockHScroll"
+    vdp._addSettingToBatch 0 $40 1
 .endm
 
 ;====
 ; Allows the top two rows to scroll horizontally (the default)
 ;====
-.macro "vdpreg.unlockHScroll"
-    vdpreg._addSettingToBatch 0 $40 0
+.macro "vdp.unlockHScroll"
+    vdp._addSettingToBatch 0 $40 0
 .endm
 
 ;====
@@ -275,15 +275,15 @@
 ; scroll horizontally which can cause unwanted effects. Often used to implement
 ; status bars
 ;====
-.macro "vdpreg.lockVScroll"
-    vdpreg._addSettingToBatch 0 $80 1
+.macro "vdp.lockVScroll"
+    vdp._addSettingToBatch 0 $80 1
 .endm
 
 ;====
 ; Allows the right-most 8-columns to scroll vertically (the default)
 ;====
-.macro "vdpreg.unlockVScroll"
-    vdpreg._addSettingToBatch 0 $80 0
+.macro "vdp.unlockVScroll"
+    vdp._addSettingToBatch 0 $80 0
 .endm
 
 ;====
@@ -291,13 +291,13 @@
 ;
 ; @in   value   the palette slot to use. Must be slot 16-31 (the sprite palette)
 ;====
-.macro "vdpreg.setBackgroundColorSlot" args value
+.macro "vdp.setBackgroundColorSlot" args value
     .if value < 16
         .redefine value 16
-        .print "Warning: vdpreg.setBackgroundColorSlot slot must be between 16 and 31\n"
+        .print "Warning: vdp.setBackgroundColorSlot slot must be between 16 and 31\n"
     .endif
 
-    vdpreg._setRegister 7 (value - 16)
+    vdp._setRegister 7 (value - 16)
 .endm
 
 ;====
@@ -305,8 +305,8 @@
 ;
 ; @in   value
 ;====
-.macro "vdpreg.setLineCounter" args value
-    vdpreg._setRegister 10 value
+.macro "vdp.setLineCounter" args value
+    vdp._setRegister 10 value
 .endm
 
 ;====
@@ -314,8 +314,8 @@
 ;
 ; @in   value
 ;====
-.macro "vdpreg.setScrollX" args value
-    vdpreg._setRegister 8 value
+.macro "vdp.setScrollX" args value
+    vdp._setRegister 8 value
 .endm
 
 ;====
@@ -323,8 +323,8 @@
 ;
 ; @in   value
 ;====
-.macro "vdpreg.setScrollY" args value
-    vdpreg._setRegister 9 value
+.macro "vdp.setScrollY" args value
+    vdp._setRegister 9 value
 .endm
 
 ;====
@@ -333,14 +333,14 @@
 ; @in   number  the register number (0-10)
 ; @in   a|value the register value. If ommitted the value in register a is used
 ;====
-.macro "vdpreg._setRegister" args number registerValue
+.macro "vdp._setRegister" args number registerValue
     .ifdef registerValue
         ld a, registerValue
     .endif
 
-    out (vdpreg.COMMAND_PORT), a
+    out (vdp.COMMAND_PORT), a
     ld a, $80 + number
-    out (vdpreg.COMMAND_PORT), a
+    out (vdp.COMMAND_PORT), a
 .endm
 
 ;====
@@ -351,7 +351,7 @@
 ; @in   enableMask  the bits to set (bits that are set will be set to 1)
 ; @in   disableMask the bits to reset (bits that are set will be set to 0)
 ;====
-.macro "vdpreg._applyRegisterBatch" args register enableMask disableMask
+.macro "vdp._applyRegisterBatch" args register enableMask disableMask
     ; Load bufferer value
     ld a, (de)
 
@@ -369,37 +369,37 @@
     ld (de), a
 
     ; Send value to VDP
-    vdpreg._setRegister register
+    vdp._setRegister register
 .endm
 
 ;====
 ; Apply batched changes
 ;====
-.macro "vdpreg._applyBatch"
+.macro "vdp._applyBatch"
     ; If changes are pending for register 0
-    .if vdpreg.batchRegister0Enable + vdpreg.batchRegister0Disable > 0
-        ld de, vdpreg.ram.register0Buffer
-        vdpreg._applyRegisterBatch 0 vdpreg.batchRegister0Enable vdpreg.batchRegister0Disable
+    .if vdp.batchRegister0Enable + vdp.batchRegister0Disable > 0
+        ld de, vdp.ram.register0Buffer
+        vdp._applyRegisterBatch 0 vdp.batchRegister0Enable vdp.batchRegister0Disable
     .endif
 
     ; If changes are pending for register 1
-    .if vdpreg.batchRegister1Enable + vdpreg.batchRegister1Disable > 0
+    .if vdp.batchRegister1Enable + vdp.batchRegister1Disable > 0
         ; If register 0 was changed, just inc de to point to register1 buffer
-        .if vdpreg.batchRegister0Enable + vdpreg.batchRegister0Disable > 0
+        .if vdp.batchRegister0Enable + vdp.batchRegister0Disable > 0
             inc de
         .else
-            ld de, vdpreg.ram.register1Buffer
+            ld de, vdp.ram.register1Buffer
         .endif
 
-        vdpreg._applyRegisterBatch 1 vdpreg.batchRegister1Enable vdpreg.batchRegister1Disable
+        vdp._applyRegisterBatch 1 vdp.batchRegister1Enable vdp.batchRegister1Disable
     .endif
 
     ; Reset mask buffers
-    .redefine vdpreg.batchInProgress        0
-    .redefine vdpreg.batchRegister0Enable   0
-    .redefine vdpreg.batchRegister0Disable  0
-    .redefine vdpreg.batchRegister1Enable   0
-    .redefine vdpreg.batchRegister1Disable  0
+    .redefine vdp.batchInProgress        0
+    .redefine vdp.batchRegister0Enable   0
+    .redefine vdp.batchRegister0Disable  0
+    .redefine vdp.batchRegister1Enable   0
+    .redefine vdp.batchRegister1Disable  0
 .endm
 
 ;====
@@ -410,25 +410,25 @@
 ; @in   mask        the bit mask to apply to alter the current value with
 ; @in   value       whether the bits should be set (1) or reset (0)
 ;====
-.macro "vdpreg._addSettingToBatch" args register mask value
+.macro "vdp._addSettingToBatch" args register mask value
     .if register == 0
         .if value == 1
-            .redefine vdpreg.batchRegister0Enable vdpreg.batchRegister0Enable|mask
+            .redefine vdp.batchRegister0Enable vdp.batchRegister0Enable|mask
         .else
-            .redefine vdpreg.batchRegister0Disable vdpreg.batchRegister0Disable|mask
+            .redefine vdp.batchRegister0Disable vdp.batchRegister0Disable|mask
         .endif
     .endif
 
     .if register == 1
         .if value == 1
-            .redefine vdpreg.batchRegister1Enable vdpreg.batchRegister1Enable|mask
+            .redefine vdp.batchRegister1Enable vdp.batchRegister1Enable|mask
         .else
-            .redefine vdpreg.batchRegister1Disable vdpreg.batchRegister1Disable|mask
+            .redefine vdp.batchRegister1Disable vdp.batchRegister1Disable|mask
         .endif
     .endif
 
     ; If batch not in progress, apply changes now
-    .if vdpreg.batchInProgress == 0
-        vdpreg._applyBatch
+    .if vdp.batchInProgress == 0
+        vdp._applyBatch
     .endif
 .endm

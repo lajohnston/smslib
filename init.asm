@@ -46,8 +46,8 @@
         .endif
 
         ; initialise vdp registers
-        .ifdef vdpreg.ENABLED
-            vdpreg.init
+        .ifdef vdp.ENABLED
+            vdp.init
         .endif
 
         ; initialise pause handler

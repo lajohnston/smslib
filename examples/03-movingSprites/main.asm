@@ -47,11 +47,11 @@
         bubble.init
 
         ; Enable the display and interrupts
-        vdpreg.startBatch
-            vdpreg.enableDisplay
-            vdpreg.enableVBlank
-            vdpreg.hideLeftColumn
-        vdpreg.endBatch
+        vdp.startBatch
+            vdp.enableDisplay
+            vdp.enableVBlank
+            vdp.hideLeftColumn
+        vdp.endBatch
 
         ; Begin
         interrupts.enable

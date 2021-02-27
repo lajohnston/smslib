@@ -9,11 +9,11 @@ You will need to enable interrupts in both the VDP and Z80. After you initialise
 - Enable HBlank - VDP register 0, bit 4
 - Enable VBlank - VDP register 1, bit 5
 
-You can use [vdpreg.asm](./vdpreg) for this, taking care not to overwrite any other flags that are also stored within these registers (see vdpreg.asm file for documentation):
+You can use [vdp.asm](./vdp.md) for this, taking care not to overwrite any other flags that are also stored within these registers (see `vdp.asm` file for documentation):
 
 ```
-vdpreg.enableHBlank
-vdpreg.enableVBlank
+vdp.enableHBlank
+vdp.enableVBlank
 ```
 
 You also need to enable interrupts within the Z80 CPU:
