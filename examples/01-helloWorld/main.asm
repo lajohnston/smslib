@@ -6,8 +6,33 @@
 ;====
 ; Import smslib
 ;====
-.incdir "../../"            ; back to smslib directory
+.incdir "../../"            ; point to smslib directory
 .include "smslib.asm"
+.incdir "."                 ; point back to current working directory
+
+;====
+; Define asset data
+;====
+
+; Map ASCII data to byte values so we can use .asc later (see wla-dx docs)
+.asciitable
+    map " " to "~" = 0
+.enda
+
+.section "assets" free
+    paletteData:
+        palette.rgb 0, 0, 0         ; black
+        palette.rgb 255, 255, 255   ; white
+
+    fontData:
+        ; font.bin contains uncompressed graphics representing the letters of the
+        ; alphabet. Here we include it and set fontDataSize to its total size
+        .incbin "font.bin" fsize fontDataSize
+
+    message:
+        .asc "Hello, world!"
+        .db $ff                     ; terminator byte
+.ends
 
 ;====
 ; Initialise program
@@ -21,8 +46,8 @@
         palette.loadSlice paletteData, 2    ; load 2 colors from paletteData
 
         ; Load font tiles
-        patterns.setSlot 0                  ; point to first pattern slot
-        patterns.loadSlice fontData, 95     ; load 95 patterns from 'fontData' (see assets below)
+        patterns.setSlot 0                      ; point to first pattern slot
+        patterns.load fontData, fontDataSize    ; load uncompressed font data into pattern VRAM
 
         ; Display font tiles on screen
         tilemap.setSlot 0, 0                ; Set tilemap slot x0, y0 (top left)
@@ -33,27 +58,4 @@
 
         ; End program with infinite loop
         -: jr -
-.ends
-
-;====
-; Assets
-;====
-
-; Maps ASCII data to bytes so we can use .asc later (see wla-dx docs)
-.asciitable
-    map " " to "~" = 0
-.enda
-
-.section "assets" free
-    paletteData:
-        palette.rgb 0, 0, 0         ; black
-        palette.rgb 255, 255, 255   ; white
-
-    fontData:
-        .incdir "."                 ; back to current working directory
-        .incbin "font.bin"
-
-    message:
-        .asc "Hello, world!"
-        .db $ff                     ; terminator byte
 .ends

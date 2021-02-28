@@ -45,6 +45,20 @@
 .endm
 
 ;====
+; Load uncompressed patterns into VRAM
+;
+; @in address   start address of the data
+; @in size      data size in bytes. Due to WLA-DX limitations this must be an immediate
+;               value, i.e. it can't be calculate from a size calculation like end - start
+;               It can be a size label (such as using .incbin "file.bin" fsize size)
+;               so long as this label is defined before this macro is called.
+;====
+.macro "patterns.load" args address size
+    ld hl, address
+    utils.vdp.callOutiBlock size
+.endm
+
+;====
 ; Set the current pattern slot ready to load data into
 ; @in   slot    the slot number (0-512)
 ;====
