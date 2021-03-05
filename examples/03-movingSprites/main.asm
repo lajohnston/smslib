@@ -17,9 +17,9 @@
 ; Import smslib
 .incdir "../../"            ; back to smslib directory
 .include "smslib.asm"       ; base library
+.incdir "."                 ; return to current directory
 
 ; Import bubble entity
-.incdir "."                 ; current directory
 .include "bubble.asm"
 
 ;====
@@ -36,25 +36,34 @@
     init:
         ; Load sprite palette
         palette.setSlot palette.SPRITE_PALETTE
-        palette.loadSlice bubble.palette, 6
+        palette.load bubble.palette, bubble.paletteSize
 
         ; Load pattern data to draw sprites. Sprites use slots 256+ by default
         patterns.setSlot 256
-        patterns.loadSlice bubble.patterns, 6
+        patterns.load bubble.patterns, bubble.patternsSize
 
         ; Initialise bubble with default values
         ld ix, bubbleInstance
         bubble.init
 
+        ;====
         ; Enable the display and interrupts
+        ; When changing multiple vdp settings it's more efficient (but optional)
+        ; to specify changes within a 'batch'
+        ;====
         vdp.startBatch
             vdp.enableDisplay
             vdp.enableVBlank
+
+            ; hide the left-most column - allows sprites to scroll more smoothly
+            ; off the left side of the screen
             vdp.hideLeftColumn
         vdp.endBatch
 
-        ; Begin
+        ; Now we've finished initialising, enable interrupts
         interrupts.enable
+
+        ; Begin
         jp mainLoop
 .ends
 

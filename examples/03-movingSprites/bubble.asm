@@ -69,14 +69,14 @@
 .section "bubble.updateMovement" free
     bubble.updateMovement:
         ; xPos = xPos + yVec
-        ld a, (ix + Bubble.xPos)    ; load xPos
+        ld a, (ix + Bubble.xPos)    ; load xPos into a
         add a, (ix + Bubble.xVec)   ; add xVec to xPos
-        ld (ix + Bubble.xPos), a    ; store in xPos
+        ld (ix + Bubble.xPos), a    ; store updated xPos
 
         ; yPos = yPos + yVec
-        ld a, (ix + Bubble.yPos)    ; load yPos
+        ld a, (ix + Bubble.yPos)    ; load yPos into a
         add a, (ix + Bubble.yVec)   ; add yVec to yPos
-        ld (ix + Bubble.yPos), a    ; store in yPos
+        ld (ix + Bubble.yPos), a    ; store updated yPos
         ret
 .ends
 
@@ -100,21 +100,10 @@
 ;====
 .section "bubble assets" free
     bubble.palette:
-        .db $00 $11 $22 $32 $36 $3F
+        .incbin "../assets/bubble/palette.bin" fsize bubble.paletteSize
 
     bubble.patterns:
-        ; Tile index $000
-        .db $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00
-        ; Tile index $001
-        .db $08 $07 $00 $00 $04 $1C $03 $00 $10 $30 $0F $00 $20 $60 $1F $00 $80 $40 $3F $00 $40 $C0 $3F $00 $00 $80 $7F $00 $00 $80 $7F $00
-        ; Tile index $002
-        .db $10 $E0 $00 $00 $20 $38 $C0 $00 $08 $0C $F0 $00 $64 $06 $F8 $00 $11 $02 $FC $00 $0A $03 $FC $00 $08 $01 $FE $00 $00 $01 $FE $00
-        ; Tile index $003
-        .db $00 $80 $7F $00 $00 $80 $7F $00 $40 $C0 $3F $00 $80 $40 $3F $00 $20 $60 $1F $00 $10 $30 $0F $00 $04 $1C $03 $00 $08 $07 $00 $00
-        ; Tile index $004
-        .db $00 $01 $FE $00 $00 $01 $FE $00 $02 $03 $FC $00 $01 $02 $FC $00 $04 $06 $F8 $00 $08 $0C $F0 $00 $20 $38 $C0 $00 $10 $E0 $00 $00
-        ; Tile index $005
-        .db $42 $3C $00 $00 $81 $42 $3C $00 $08 $81 $7E $00 $04 $81 $7E $00 $00 $81 $7E $00 $00 $81 $7E $00 $81 $42 $3C $00 $42 $3C $00 $00
+        .incbin "../assets/bubble/patterns.bin" fsize bubble.patternsSize
 
     bubble.spriteGroup:
         ; pattern, relativeX, relativeY
