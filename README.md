@@ -2,15 +2,21 @@
 
 Low-level Sega Master System libs for the Z80 WLA-DX assembler. Its aim is to provide a consistent API for the hardware with zero/very low cost abstractions and to minimise the boilerplate required to get homebrew projects up and running quickly.
 
-## Quick start
+## Quick Start
 
 ```
 .incdir "lib/smslib"    ; set the working directory to the smslib directory
 .include "smslib.asm"   ; include the libs
 
-; SMSLib will call 'init' label once it has booted the system
+; SMSLib will jump to the 'init' label once it has booted the system
 init:
-    ...
+    ; Load palette colors
+    palette.setSlot 0
+    palette.load myPalette, myPaletteSize
+
+    ; Load patterns (tile graphics)
+    patterns.setSlot 0
+    patterns.load myPatterns, myPatternsSize
 ```
 
 Each module is decoupled from the others and can be imported individually. `smslib.asm` is just a file that just pulls in all the modules for convenience.
