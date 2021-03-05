@@ -34,6 +34,20 @@
 .endm
 
 ;====
+; Load colors into Color RAM
+;
+; @in address   start address of the palette data
+; @in size      data size in bytes. Due to WLA-DX limitations this must be an immediate
+;               value, i.e. it can't be calculate from a size calculation like end - start
+;               It can be a size label (such as using .incbin "file.bin" fsize size)
+;               so long as this label is defined before this macro is called.
+;====
+.macro "palette.load" args address size
+    ld hl, address
+    utils.vdp.callOutiBlock size
+.endm
+
+;====
 ; Loads colors into the palette. Each color should be a byte containing an RGB
 ; value in the format --bbggrr
 ;

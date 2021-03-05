@@ -29,7 +29,23 @@ paletteData:
     palette.rgb 170, 0, 255 ; violet
 ```
 
-You can then load these into the VDP VRAM the following macros:
+You can then load these into the VDP VRAM the following macros.
+
+### palette.load
+
+Load palette data from a binary file to VRAM.
+
+```
+myPaletteData:
+  .incbin "myPalette.inc" fsize myPaletteDataSize
+
+palette.setSlot 0
+palette.load myPaletteData, myPaletteDataSize
+```
+
+### palette.loadSlice
+
+Load specific colors from the data.
 
 ```
 palette.setSlot 0                     ; point to first slot

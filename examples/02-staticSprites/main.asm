@@ -20,7 +20,7 @@
         .incbin "../assets/bubble/patterns.bin" fsize bubblePatternsSize
 
     bubblePalette:
-        .db $00 $11 $22 $32 $36 $3F
+        .incbin "../assets/bubble/palette.bin" fsize bubblePaletteSize
 
     spriteGroup:
         ; pattern, relativeX, relativeY
