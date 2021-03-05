@@ -2,19 +2,6 @@
 
 Low-level Sega Master System libs for the Z80 WLA-DX assembler. Its aim is to provide a consistent API for the hardware with zero/very low cost abstractions and to minimise the boilerplate required to get homebrew projects up and running quickly.
 
-## Docs
-
-- [init.asm](./docs/init.md) - initialises the system and smslib modules
-- [input.asm](./docs/input.md) - interprets the joypad inputs
-- [interrupts.asm](./docs/interrupts.md) - handles VBlank and HBlank interrupts
-- [/mapper/\*.asm](./docs/mappers.md) - memory mapper handlers
-- [palette.asm](./docs/palette.md) - handles the color palettes
-- [patterns.asm](./docs/patterns.md) - handles patterns (tile images)
-- [pause.asm](./docs/pause.md) - handles the pause button
-- [sprites.asm](./docs/sprites.md) - manages a sprite table in a RAM and pushes to VRAM when required
-- [tilemap.asm](./docs/tilemap.md) - handles the background tile
-- [vdp.asm](./docs/vdp.md) - defines and sets graphics chip register settings
-
 ## Quick start
 
 ```
@@ -31,6 +18,19 @@ Each module is decoupled from the others and can be imported individually. `smsl
 ## Examples
 
 See example programs in the `examples` directory. Build the examples using the `build.sh` script (Linux). `wlalink` and `wla-z80` should be in your system path. The compiled .sms ROM will appear in the `examples/build` directory ready to be run in an emulator.
+
+## Docs
+
+- [init.asm](./docs/init.md) - initialises the system and smslib modules
+- [input.asm](./docs/input.md) - interprets the joypad inputs
+- [interrupts.asm](./docs/interrupts.md) - handles VBlank and HBlank interrupts
+- [/mapper/\*.asm](./docs/mappers.md) - memory mapper handlers
+- [palette.asm](./docs/palette.md) - handles the color palettes
+- [patterns.asm](./docs/patterns.md) - handles patterns (tile images)
+- [pause.asm](./docs/pause.md) - handles the pause button
+- [sprites.asm](./docs/sprites.md) - manages a sprite table in a RAM and pushes to VRAM when required
+- [tilemap.asm](./docs/tilemap.md) - handles the background tile
+- [vdp.asm](./docs/vdp.md) - defines and sets graphics chip register settings
 
 ## Design Principles
 
