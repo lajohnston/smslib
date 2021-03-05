@@ -27,7 +27,7 @@
     fontData:
         ; font.bin contains uncompressed graphics representing the letters of the
         ; alphabet. Here we include it and set fontDataSize to its total size
-        .incbin "font.bin" fsize fontDataSize
+        .incbin "../assets/font.bin" fsize fontDataSize
 
     message:
         .asc "Hello, world!"

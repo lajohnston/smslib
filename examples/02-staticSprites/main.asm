@@ -10,6 +10,26 @@
 ;====
 .incdir "../../"            ; back to smslib directory
 .include "smslib.asm"       ; base library
+.incdir "."                 ; back to current directory
+
+;====
+; Assets we'll refer to in the code
+;====
+.section "assets" free
+    bubblePatterns:
+        .incbin "../assets/bubble/patterns.bin" fsize bubblePatternsSize
+
+    bubblePalette:
+        .db $00 $11 $22 $32 $36 $3F
+
+    spriteGroup:
+        ; pattern, relativeX, relativeY
+        sprites.sprite 1, 0, 0  ; top left      (x0, y0)
+        sprites.sprite 2, 8, 0  ; top right     (x+8, y0)
+        sprites.sprite 3, 0, 8  ; bottom left   (x0, y+8)
+        sprites.sprite 4, 8, 8  ; bottom right  (x+8, y+8)
+        sprites.endGroup
+.ends
 
 ;====
 ; Initialise program
@@ -20,11 +40,11 @@
     init:
         ; Load sprite palette
         palette.setSlot palette.SPRITE_PALETTE
-        palette.loadSlice paletteData, 6
+        palette.loadSlice bubblePalette, 6
 
         ; Load pattern data into slots 256+ (used for sprites, by default)
         patterns.setSlot 256
-        patterns.loadSlice patternData, 6
+        patterns.load bubblePatterns, bubblePatternsSize
 
         ; Reset the sprite buffer
         sprites.reset
@@ -60,35 +80,4 @@
         ; Enable the display then stop
         vdp.enableDisplay
         -: jr -
-.ends
-
-;====
-; Assets
-;====
-
-.section "assets" free
-    paletteData:
-        .db $00 $11 $22 $32 $36 $3F
-
-    patternData:
-        ; Tile index $000
-        .db $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00 $00
-        ; Tile index $001
-        .db $08 $07 $00 $00 $04 $1C $03 $00 $10 $30 $0F $00 $20 $60 $1F $00 $80 $40 $3F $00 $40 $C0 $3F $00 $00 $80 $7F $00 $00 $80 $7F $00
-        ; Tile index $002
-        .db $10 $E0 $00 $00 $20 $38 $C0 $00 $08 $0C $F0 $00 $64 $06 $F8 $00 $11 $02 $FC $00 $0A $03 $FC $00 $08 $01 $FE $00 $00 $01 $FE $00
-        ; Tile index $003
-        .db $00 $80 $7F $00 $00 $80 $7F $00 $40 $C0 $3F $00 $80 $40 $3F $00 $20 $60 $1F $00 $10 $30 $0F $00 $04 $1C $03 $00 $08 $07 $00 $00
-        ; Tile index $004
-        .db $00 $01 $FE $00 $00 $01 $FE $00 $02 $03 $FC $00 $01 $02 $FC $00 $04 $06 $F8 $00 $08 $0C $F0 $00 $20 $38 $C0 $00 $10 $E0 $00 $00
-        ; Tile index $005
-        .db $42 $3C $00 $00 $81 $42 $3C $00 $08 $81 $7E $00 $04 $81 $7E $00 $00 $81 $7E $00 $00 $81 $7E $00 $81 $42 $3C $00 $42 $3C $00 $00
-
-    spriteGroup:
-        ; pattern, relativeX, relativeY
-        sprites.sprite 1, 0, 0  ; top left      (x0, y0)
-        sprites.sprite 2, 8, 0  ; top right     (x+8, y0)
-        sprites.sprite 3, 0, 8  ; bottom left   (x0, y+8)
-        sprites.sprite 4, 8, 8  ; bottom right  (x+8, y+8)
-        sprites.endGroup
 .ends
