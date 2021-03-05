@@ -46,14 +46,12 @@
         patterns.setSlot 256
         patterns.load bubblePatterns, bubblePatternsSize
 
-        ; Reset the sprite buffer
-        sprites.reset
-
         ; It's more efficient (but optional) to add multiple sprites within a
         ; batch, so start a new batch
         sprites.startBatch
 
-        ; Add a sprite to the buffer
+        ; Add a sprite to the buffer. See sprites.add documentation in sprite.asm
+        ; for details about which parameters it expects in which registers
         ld a, 100   ; y position
         ld b, 80    ; x position
         ld c, 5     ; pattern number
