@@ -15,9 +15,9 @@ sprites.reset
 ## Adding Sprites
 
 ```
-ld a, 100           ; yPos
-ld b, 80            ; xPos
-ld c, 5             ; pattern number
+ld a, 100           ; a = yPos
+ld b, 80            ; b = xPos
+ld c, 5             ; c = pattern number
 sprites.add
 ```
 
@@ -28,19 +28,20 @@ Sprite groups allow you to conveniently add multiple sprites with positions rela
 ```
 ; Define a sprite group of 2x2 sprites
 spriteGroup:
-    ; pattern number, relX, relY
-    sprites.sprite 1, 0, 0  ; top left
-    sprites.sprite 2, 8, 0  ; top right (x + 8)
-    sprites.sprite 3, 0, 8  ; bottom left (y + 8)
-    sprites.sprite 4, 8, 8  ; bottom right (x + 8, y + 8)
+    sprites.startGroup
+        ; pattern number, relX, relY
+        sprites.sprite 1, 0, 0  ; top left
+        sprites.sprite 2, 8, 0  ; top right (x + 8)
+        sprites.sprite 3, 0, 8  ; bottom left (y + 8)
+        sprites.sprite 4, 8, 8  ; bottom right (x + 8, y + 8)
     sprites.endGroup        ; end of group
 
 ; Add the group to the buffer
 code:
-    ld hl, spriteGroup
-    ld b, 150   ; anchor x pos
-    ld c, 50    ; anchor y pos
-    sprites.addGroup
+    ld hl, spriteGroup  ; hl = pointer to our sprite group
+    ld b, 150           ; b  = anchor x pos
+    ld c, 50            ; c  = anchor y pos
+    sprites.addGroup    ; add the sprites to the sprite table
 ```
 
 ## Batching

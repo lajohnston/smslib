@@ -106,10 +106,11 @@
         .incbin "../assets/bubble/patterns.bin" fsize bubble.patternsSize
 
     bubble.spriteGroup:
-        ; pattern, relativeX, relativeY
-        sprites.sprite 1, 0, 0  ; top left      (x0, y0)
-        sprites.sprite 2, 8, 0  ; top right     (x+8, y0)
-        sprites.sprite 3, 0, 8  ; bottom left   (x0, y+8)
-        sprites.sprite 4, 8, 8  ; bottom right  (x+8, y+8)
+        sprites.startGroup
+            ; pattern, relativeX, relativeY
+            sprites.sprite 1, 0, 0  ; top left      (x0, y0)
+            sprites.sprite 2, 8, 0  ; top right     (x+8, y0)
+            sprites.sprite 3, 0, 8  ; bottom left   (x0, y+8)
+            sprites.sprite 4, 8, 8  ; bottom right  (x+8, y+8)
         sprites.endGroup
 .ends

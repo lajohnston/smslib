@@ -93,6 +93,14 @@
 .endm
 
 ;====
+; Marks the start of a group of sprites. Doesn't currently do anything but is
+; provided for semantics
+;====
+.macro "sprites.startGroup"
+    ; do nothing - macro provided for semantics
+.endm
+
+;====
 ; Marks the end of a group of sprites
 ;====
 .macro "sprites.endGroup"
