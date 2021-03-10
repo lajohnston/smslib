@@ -35,6 +35,10 @@
     .include "utils/vdp.asm"
 .endif
 
+.ifndef utils.outiBlock
+    .include "utils/outiBlock.asm"
+.endif
+
 ;====
 ; Constants and variables
 ;====
@@ -260,7 +264,7 @@
         jp z, _noSprites                ; jp if no sprites
         ld b, iyh                       ; load size into b
         inc l                           ; point to y positions in buffer
-        call utils.vdp.sendUpTo128Bytes ; send data
+        call utils.outiBlock.sendUpTo128Bytes ; send data
 
         ; Output sprite terminator at end of y positions
         ld a, iyh                       ; load counter into a
@@ -278,7 +282,7 @@
         ld b, iyh                       ; restore sprite count
         pop iy                          ; restore iy
         rlc b                           ; double to get xPos + pattern
-        jp utils.vdp.sendUpTo128Bytes   ; send bytes, then ret
+        jp utils.outiBlock.sendUpTo128Bytes   ; send bytes, then ret
 
     ; No sprites in buffer - cap table with sprite terminator then return
     ; VRAM address must be set

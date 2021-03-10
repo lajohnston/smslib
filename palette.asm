@@ -19,6 +19,14 @@
     .include "utils/vdp.asm"
 .endif
 
+.ifndef utils.outiBlock
+    .include "utils/outiBlock.asm"
+.endif
+
+;====
+; Procedures
+;====
+
 ;====
 ; Defines a byte with an approximate RGB value. Each color component is rounded
 ; to the nearest 85 (0, 85, 170, 255)
@@ -44,7 +52,7 @@
 ;====
 .macro "palette.load" args address size
     ld hl, address
-    utils.vdp.callOutiBlock size
+    utils.outiBlock.send size
 .endm
 
 ;====
@@ -58,9 +66,9 @@
 ;====
 .macro "palette.loadSlice" args dataAddr count offset
     .ifndef offset
-        utils.vdp.outputArray dataAddr palette.SLOT_SIZE count 0
+        utils.outiBlock.sendSlice dataAddr palette.SLOT_SIZE count 0
     .else
-        utils.vdp.outputArray dataAddr palette.SLOT_SIZE count offset
+        utils.outiBlock.sendSlice dataAddr palette.SLOT_SIZE count offset
     .endif
 .endm
 

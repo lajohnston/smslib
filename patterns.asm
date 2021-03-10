@@ -29,6 +29,10 @@
     .include "utils/vdp.asm"
 .endif
 
+.ifndef utils.outiBlock
+    .include "utils/outiBlock.asm"
+.endif
+
 ;====
 ; Loads patterns into VRAM
 ;
@@ -38,9 +42,9 @@
 ;====
 .macro "patterns.loadSlice" args dataAddr slots offset
     .ifndef offset
-        utils.vdp.outputArray dataAddr patterns.SLOT_SIZE slots 0
+        utils.outiBlock.sendSlice dataAddr patterns.SLOT_SIZE slots 0
     .else
-        utils.vdp.outputArray dataAddr patterns.SLOT_SIZE slots offset
+        utils.outiBlock.sendSlice dataAddr patterns.SLOT_SIZE slots offset
     .endif
 .endm
 
@@ -55,7 +59,7 @@
 ;====
 .macro "patterns.load" args address size
     ld hl, address
-    utils.vdp.callOutiBlock size
+    utils.outiBlock.send size
 .endm
 
 ;====
