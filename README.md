@@ -69,6 +69,16 @@ Each library file prefixes its labels with its name and a '.' (i.e. input.readPo
 
 Many of the lib files include settings that default to sensible values but can be overridden if required. These are defined in the 'Settings' section near the top of each file. The overrides must be defined at some point before you `.include` the relevant file.
 
+## Tricks and Optimisations
+
+The library includes a number of optimisations and quality of life tricks, including:
+
+- An 'OUTI block' - the fastest way to send data to the VDP
+- Sprite buffer offset - table is offset in RAM to allow efficient sprite adding
+- Fast sprite buffer send - only used sprite slots are sent to the VDP
+- VDP register buffer - allows changing of settings without affecting other settings
+- Fast interrupt handling - HBlank handling pretty as fast as practical (OutRun handler)
+
 ## Sources
 
 The code and techniques utilised by the lib try to credit original authors where known. Of particular help was the thread [A few hints on coding a medium/large sized game using WLA-DX](https://www.smspower.org/forums/15794-AFewHintsOnCodingAMediumLargeSizedGameUsingWLADX) on the smslib.org forums.
