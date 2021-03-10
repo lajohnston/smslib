@@ -1,4 +1,4 @@
-## Pause (pause.asm)
+# Pause (pause.asm)
 
 Provides a pause handler that toggles a flag in RAM whenever the pause button is pressed. This flag can be detected at a safe position in your code such as at the start of the game loop.
 

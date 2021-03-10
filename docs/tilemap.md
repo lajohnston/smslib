@@ -1,8 +1,8 @@
-## Tilemap (tilemap.asm)
+# Tilemap (tilemap.asm)
 
-Manages the tilemap, which utilises patterns to create the background image.
+Manages the tilemap, which places patterns/tiles in a grid to create the background image.
 
-Output ASCII data:
+## Output ASCII data
 
 ```
 .asciitable

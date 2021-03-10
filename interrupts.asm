@@ -100,9 +100,12 @@
 
         ; If VBlank and HBlank are both enabled
         .if interrupts.handleVBlank + interrupts.handleHBlank == 2
-            or a                        ; analyse a
+            or a                        ; analyse vdp status in 'a'
+
+            ; HBlank
             jp p, interrupts.onHBlank   ; jp if 7th bit (VBlank) is reset
 
+            ; VBlank
             .if interrupts.useShadowRegisters == 1
                 exx
             .endif

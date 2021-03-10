@@ -1,4 +1,4 @@
-## Sprites (sprites.asm)
+# Sprites (sprites.asm)
 
 The VDP holds a sprite table in VRAM containing the tile patterns and x and y positions of up to 64 on-screen sprites. It's generally advisable to work with a copy of this table in normal RAM so you can edit it efficiently. You can then transfer it to VRAM in bulk when it's safe to do so without causing graphical corruption i.e when the display is off or during VBlank (see [interrupts](./interrupts.md))
 
