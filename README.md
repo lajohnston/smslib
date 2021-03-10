@@ -19,7 +19,7 @@ init:
     patterns.load myPatterns, myPatternsSize
 ```
 
-Each module is decoupled from the others and can be imported individually. `smslib.asm` is just a file that just pulls in all the modules for convenience.
+Each module is decoupled from the others and can be imported individually. `smslib.asm` is just a file that pulls in all the modules for convenience.
 
 ## Examples
 
