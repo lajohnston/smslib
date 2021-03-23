@@ -37,14 +37,14 @@
 ; Loads patterns into VRAM
 ;
 ; @in  dataAddress   the address of the first byte of data
-; @in  size          the size of the data block, in bytes
-; @in  patternSlot   the first pattern slot
+; @in  count         the number of patterns to load (1-based)
+; @in  [offset=0]    the number of patterns to skip at the beginning of the data
 ;====
-.macro "patterns.loadSlice" args dataAddr slots offset
+.macro "patterns.loadSlice" args dataAddr count offset
     .ifndef offset
-        utils.outiBlock.sendSlice dataAddr patterns.SLOT_SIZE slots 0
+        utils.outiBlock.sendSlice dataAddr patterns.SLOT_SIZE count 0
     .else
-        utils.outiBlock.sendSlice dataAddr patterns.SLOT_SIZE slots offset
+        utils.outiBlock.sendSlice dataAddr patterns.SLOT_SIZE count offset
     .endif
 .endm
 

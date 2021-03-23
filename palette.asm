@@ -61,8 +61,7 @@
 ;
 ; @in       dataAddr    the address of the data to load
 ; @in       count       the number of colors to load
-; @in       offset      (optional) how many colors to skip from the start
-;                       of the data. Defaults to 0
+; @in       [offset=0]  how many colors to skip from the start of the data
 ;====
 .macro "palette.loadSlice" args dataAddr count offset
     .ifndef offset
