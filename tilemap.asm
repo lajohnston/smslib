@@ -26,21 +26,22 @@
 
 ;====
 ; Tile attributes
-; Combine using OR (|), i.e. tilemap.HIGH_BIT | tilemap.FLIPX
+; Combine using OR (|), i.e. (tilemap.HIGH_BIT | tilemap.FLIP_X)
 ;====
 
-.define tilemap.HIGH_BIT    %00000001   ; 9th bit for the pattern ref, allows refs 256+
-.define tilemap.FLIPX       %00000010   ; Flip horizontally
-.define tilemap.FLIPY       %00000100   ; Flip vertically
-.define tilemap.PALETTE2    %00001000   ; Use palette 2 (sprite palette)
+.define tilemap.HIGH_BIT        %00000001   ; 9th bit for the pattern ref, allows refs 256+
+.define tilemap.FLIP_X          %00000010   ; Flip horizontally
+.define tilemap.FLIP_Y          %00000100   ; Flip vertically
+.define tilemap.SPRITE_PALETTE  %00001000   ; Use palette 2 (sprite palette)
 
 ; Place in front of sprites. Color 0 acts as transparent
-.define tilemap.PRIORITY    %00010000
+.define tilemap.PRIORITY        %00010000
 
 ; Spare bits - unused by VDP but some games use them to hold custom attributes
-.define tilemap.CUSTOM1     %00100000
-.define tilemap.CUSTOM2     %01000000
-.define tilemap.CUSTOM3     %10000000
+; such as whether the tile is a hazard that costs the player health
+.define tilemap.CUSTOM_1        %00100000
+.define tilemap.CUSTOM_2        %01000000
+.define tilemap.CUSTOM_3        %10000000
 
 ;====
 ; Constants
