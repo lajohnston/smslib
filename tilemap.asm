@@ -84,8 +84,8 @@
 ;
 ; @in   terminator  value that signifies the end of the data
 ; @in   dataAddr    address of the first byte of ASCII data
-; @in   attributes  (optional) tile attributes to use for all the tiles.
-;                   See tile attribute options at top
+; @in   [attributes] tile attributes to use for all the tiles (see tile
+;                    attribute options at top)
 ;====
 .macro "tilemap.loadBytesUntil" args terminator dataAddr attributes
     ld d, terminator
@@ -98,4 +98,46 @@
     .endif
 
     call tilemap.loadBytesUntil
+.endm
+
+;====
+; Loads bytes of data representing tile pattern refs
+;
+; @in   hl  the address of the data to load
+; @in   b   the number of bytes to load
+; @in   c   tile attributes to use for all the tiles (see tile
+;           attribute options at top)
+;====
+.section "tilemap.loadBytes" free
+    _nextByte:
+        inc hl                          ; next byte
+
+    tilemap.loadBytes:
+        ld a, (hl)                      ; read byte
+        out (tilemap.VDP_DATA_PORT), a  ; output pattern ref
+        ld a, c                         ; load attributes
+        out (tilemap.VDP_DATA_PORT), a  ; output attributes
+        djnz _nextByte                  ; repeat until b = 0
+        ret
+.ends
+
+;====
+; Loads bytes of data representing tile pattern refs
+;
+; @in   address         the address of the data to load
+; @in   count           the number of bytes to load
+; @in   [attributes]    the attributes to use for each tile
+;                       See tile attribute options at top
+;====
+.macro "tilemap.loadBytes" args address count attributes
+    ld hl, address
+    ld b,  count
+
+    .ifdef attributes
+        ld c, attributes
+    .else
+        ld c, 0
+    .endif
+
+    call tilemap.loadBytes
 .endm
