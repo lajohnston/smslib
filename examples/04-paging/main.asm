@@ -11,9 +11,11 @@
 ; Import smslib
 ;====
 .define interrupts.handleVBlank 1   ; enable VBlanks
+.define mapper.enableCartridgeRam 1
 
 .incdir "../../"                ; point to smslib directory
-.include "mapper/waimanu.asm"   ; select waimanu mapper
+.include "mapper/sega.asm"      ; select Sega mapper. Note: if you swap this
+                                ; another one this example should still work
 .include "smslib.asm"           ; include rest of smslib lib
 
 ;====

@@ -24,6 +24,13 @@
     .define mapper.pageableBanks 6
 .endif
 
+; Ensure enableCartridgeRam hasn't been enabled
+.ifeq mapper.enableCartridgeRam 1
+     ; Waimanu uses slot 2 for paging which is needed for on-cartridge RAM
+    .print "waimanu mapper doesn't support on-cartridge RAM\n"
+    .fail
+.endif
+
 ;====
 ; Constants
 ;====
@@ -45,11 +52,11 @@
     slot 1 $7ff0
 
     ; ROM (pageable)
-    slotsize $4000
+    slotsize $4000  ; 16KB
     slot mapper.PAGE_SLOT_A $8000
 
     ; RAM
-    slotsize $2000
+    slotsize $2000  ; 8KB
     slot mapper.RAM_SLOT $c000
 .endme
 
@@ -61,7 +68,7 @@
     banksize $7ff0 ; 32KB minus 16 bytes
     banks 1
 
-    banksize $0010 ; 16 bytes, for SEGA ROM header
+    banksize $0010 ; 16-bytes, for SEGA ROM header
     banks 1
 
     banksize $4000 ; 16KB
@@ -71,24 +78,8 @@
 ;===
 ; Initialise the paging registers
 ;===
-.section "mapper.init" free
-    mapper.init:
-        ld de, $fffc
-        ld hl, _mapperInitValues
-        ld bc, _mapperInitValuesEnd - _mapperInitValues
-        ldir
-        ret
-
-    _mapperInitValues:
-        .db $00 ; $fffc - Cartridge RAM mapping (disabled)
-        .db $00 ; $fffd - ROM Bank 0 - use slot 0
-        .db $01 ; $fffe - ROM Bank 1 - use slot 1
-        .db $02 ; $ffff - ROM Bank 2 - use slot 2
-    _mapperInitValuesEnd:
-.ends
-
 .macro "mapper.init"
-    call mapper.init
+    ; nothing to initialise
 .endm
 
 ;===

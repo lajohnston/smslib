@@ -7,6 +7,7 @@ DIRECTORY=$(cd `dirname $0` && pwd)
 cd $DIRECTORY
 
 # Prep build directory
+rm -r ./build
 mkdir -p ./build/tmp
 
 EXAMPLES=( $(ls -d [0-9][0-9]-*) )
