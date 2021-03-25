@@ -4,7 +4,7 @@
 .define mapper.ENABLED 1
 
 .define mapper.FIXED_SLOT = 0
-.define mapper.PAGEABLE_SLOT = 0 ; none
+.define mapper.PAGE_SLOT_A = 0 ; none
 .define mapper.RAM_SLOT = 1
 
 .memorymap

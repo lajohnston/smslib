@@ -12,16 +12,16 @@ SMSLib will default to using a basic 32KB mapper. To choose another one just inc
 
 Mappers define one or more fixed-sized 'slots' that can provide access to a small portion of the larger ROM at any given time. The portion of ROM they provide access to (called a 'bank') can be changed at runtime.
 
-Only one mapper can be used per project. All mappers expose `FIXED_SLOT`, `PAGEABLE_SLOT` and `RAM_SLOT` constants. Using these constants should make it easier for you to swap out a mapper at a later stage of development if you decide to do so:
+Only one mapper can be used per project. All mappers expose `FIXED_SLOT`, `PAGE_SLOT_A`, `PAGE_SLOT_B` and `RAM_SLOT` constants. Using these constants should make it easier for you to swap out a mapper at a later stage of development if you decide to do so:
 
 ```
+; Pageable slot is good for asset data that is only needed at certain times
+.slot mapper.PAGE_SLOT_A
+.include "assets.asm"
+
 ; Fixed slot is good for code to ensure it's always accessible
 .slot mapper.FIXED_SLOT
 .include "game.asm"
-
-; Pageable slot is good for asset data that is only needed at certain times
-.slot mapper.PAGEABLE_SLOT
-.include "assets.asm"
 
 ; RAM slot should be used for RAM variables
 .ramsection "foo" slot mapper.RAM_SLOT
@@ -29,7 +29,9 @@ Only one mapper can be used per project. All mappers expose `FIXED_SLOT`, `PAGEA
 .ends
 ```
 
-Before accessing data from the `PAGEABLE_SLOT` (e.g. when loading an asset) remember to first tell the mapper to 'page' to the bank you want to access. You can use WLA-DX's colon prefix to retrieve a bank number for a given address:
+Some mappers also provide a second pageable slot `PAGE_SLOT_B`. It's generally simpler to stick to the one (PAGE_SLOT_A) but if you happened to have an asset over 16KB in size then both of these 16KB slots could be used together to map the whole asset at once.
+
+Before accessing data from the page slots (e.g. when loading an asset) remember to first tell the mapper to 'page' to the bank you want to access. You can use WLA-DX's colon prefix to retrieve a bank number for a given address:
 
 ```
 mapper.pageBank :paletteData        ; ensure the bank containing paletteData is accessible
