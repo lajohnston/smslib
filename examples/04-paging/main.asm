@@ -1,8 +1,8 @@
 ;====
 ; SMSLib Mapper example
 ;
-; The Master System can only view 48KB of ROM. For larger ROMs we will only be
-; able to view portions of it at a time. We will therefore need to 'page'
+; The Master System can only view 48KB of ROM at a time. For larger ROMs we will
+; only be able to view portions of it at a time. We will therefore need to 'page'
 ; these chunks into the memory map when we need them
 ;====
 .sdsctag 1.10, "smslib mapper example", "smslib mapper example", "lajohnston"
