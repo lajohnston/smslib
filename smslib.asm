@@ -13,9 +13,9 @@
 ; See README.md for documentation regarding each module
 ;====
 
-; Use basic mapper if none defined
+; Use basic 48k mapper if none defined
 .ifndef mapper.ENABLED
-    .include "mapper/basic.asm"
+    .include "mapper/48k.asm"
 .endif
 
 .include "input.asm"        ; handles input

@@ -2,7 +2,7 @@
 
 The Master System can only view 48KB of ROM memory at a time. Mappers control which portions of ROM are visible within this 48KB window and can dynamically switch portions at runtime to allow for much larger cartridge sizes. The included smslib mappers can abstract this complexity from you or can be used as examples to create your own.
 
-SMSLib will default to using a basic 32KB mapper. To choose another one just include the mapper file before including `smslib.asm`:
+SMSLib will default to using a basic 48KB mapper. To choose another one just include the mapper file before including `smslib.asm`:
 
 ```
 .incdir "lib/smslib"

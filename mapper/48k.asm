@@ -1,17 +1,18 @@
 ;===
-; Simple 32KB ROM with no paging
+; Simple 48KB ROM with no paging
 ;===
 .define mapper.ENABLED 1
 
 .define mapper.FIXED_SLOT = 0
-.define mapper.PAGE_SLOT_A = 0 ; none
+.define mapper.PAGE_SLOT_A = 0 ; no paging
+.define mapper.PAGE_SLOT_B = 0 ; no paging
 .define mapper.RAM_SLOT = 1
 
 .memorymap
     defaultslot mapper.FIXED_SLOT
 
-    ; 32KB ROM
-    slotsize $8000
+    ; 48KB ROM
+    slotsize $C000
     slot mapper.FIXED_SLOT $0000
 
     ; 8KB RAM
@@ -20,10 +21,9 @@
 .endme
 
 .rombankmap
+    ; Single 48KB bank
     bankstotal 1
-
-    ; Single 32KB bank
-    banksize $8000
+    banksize $C000
     banks 1
 .endro
 
