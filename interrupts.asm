@@ -176,6 +176,8 @@
 .macro "interrupts.enable"
     ; Ensure there are no pending interrupts that will trigger unexpectedly
     in a, (interrupts.VDP_PORT) ; reset status
+
+    ; Enable interrupts on the Z80
     ei
 .endm
 
