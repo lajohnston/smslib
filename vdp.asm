@@ -12,38 +12,38 @@
 ;====
 ; Default register values
 ;====
-.define vdp.register0Default     %00000110;  Mode control 1
-                                    ;|||||||`-  Sync enable; always 0
-                                    ;||||||`--  Extra height enable/TMS9918 mode select; always 1
-                                    ;|||||`---  Mode 4 enable; always 1
-                                    ;||||`----  Shift sprites left 8 pixels
-                                    ;|||`-----  Enable line interrupts
-                                    ;||`------  Hide leftmost 8 pixels
-                                    ;|`-------  Horizontal scroll lock
-                                    ;`--------  Vertical scroll lock
+.define vdp.register0Default    %00000110;  Mode control 1
+                                ;|||||||`-  Sync enable; always 0
+                                ;||||||`--  Extra height enable/TMS9918 mode select; always 1
+                                ;|||||`---  Mode 4 enable; always 1
+                                ;||||`----  Shift sprites left 8 pixels
+                                ;|||`-----  Enable line interrupts
+                                ;||`------  Hide leftmost 8 pixels
+                                ;|`-------  Horizontal scroll lock
+                                ;`--------  Vertical scroll lock
 
-.define vdp.register1Default     %10000000;  Mode control 2
-                                    ;|||||||`-  Zoomed sprites -> 16x16 pixels
-                                    ;||||||`--  Tall sprites -> 2 tiles per sprite, 8x16
-                                    ;|||||`---  Mega Drive mode 5 enable
-                                    ;||||`----  30 row/240 line mode (SMS2 only)
-                                    ;|||`-----  28 row/224 line mode (SMS2 only)
-                                    ;||`------  Enable VBlank interrupts
-                                    ;|`-------  Enable display
-                                    ;`--------  Unused; always 1
+.define vdp.register1Default    %10000000;  Mode control 2
+                                ;|||||||`-  Zoomed sprites -> 16x16 pixels
+                                ;||||||`--  Tall sprites -> 2 tiles per sprite, 8x16
+                                ;|||||`---  Mega Drive mode 5 enable
+                                ;||||`----  30 row/240 line mode (SMS2 only)
+                                ;|||`-----  28 row/224 line mode (SMS2 only)
+                                ;||`------  Enable VBlank interrupts
+                                ;|`-------  Enable display
+                                ;`--------  Unused; always 1
 
-.define vdp.register2Default     %11111111;  Tilemap base address (default = $3800)
-                                    ;|||||||`-  Mask bit (SMS1)
-                                    ;```````--  Name table base address
+.define vdp.register2Default    %11111111;  Tilemap base address (default = $3800)
+                                ;|||||||`-  Mask bit (SMS1)
+                                ;```````--  Name table base address
 
-.define vdp.register3Default     %11111111   ; Palette base address (always $ff for SMS1)
-.define vdp.register4Default     %00000111   ; Pattern base address (last 3 bits always set for SMS1)
-.define vdp.register5Default     %11111111   ; Sprite table base address (usually $ff)
-.define vdp.register6Default     %11111111   ; Sprite pattern generator base address (always $ff)
-.define vdp.register7Default     %00000000   ; Overscan/backdrop color slot (bits 0-3)
-.define vdp.register8Default     %00000000   ; Background X scroll
-.define vdp.register9Default     %00000000   ; Background Y scroll
-.define vdp.register10Default    %11111111   ; Line interrupt counter
+.define vdp.register3Default    %11111111   ; Palette base address (always $ff for SMS1)
+.define vdp.register4Default    %00000111   ; Pattern base address (last 3 bits always set for SMS1)
+.define vdp.register5Default    %11111111   ; Sprite table base address (usually $ff)
+.define vdp.register6Default    %11111111   ; Sprite pattern generator base address (always $ff)
+.define vdp.register7Default    %00000000   ; Overscan/backdrop color slot (bits 0-3)
+.define vdp.register8Default    %00000000   ; Background X scroll
+.define vdp.register9Default    %00000000   ; Background Y scroll
+.define vdp.register10Default   %11111111   ; Line interrupt counter
 
 ;====
 ; Batch variables
