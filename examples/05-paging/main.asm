@@ -93,7 +93,7 @@
         patterns.load fontData, fontDataSize
 
         ; Display font tiles on screen
-        tilemap.setSlot 6, 0
+        tilemap.setSlot 0, 6
         mapper.pageBank :instructions       ; ensure instructions is visible
         tilemap.loadBytesUntil $ff instructions
 
@@ -123,7 +123,7 @@
 
         ; If button 1 pressed, page-in and display part of lotsOf1s
         input.if input.BUTTON_1, +
-            tilemap.setSlot 10, 0
+            tilemap.setSlot 0, 10
             mapper.pageBank :lotsOf1s       ; make lotsOf1s available
             tilemap.loadBytes lotsOf1s, 224 ; load first 224 bytes
             jp _end
@@ -131,7 +131,7 @@
 
         ; If button 2 pressed, page-in and display part of lotsOf2s
         input.if input.BUTTON_2, +
-            tilemap.setSlot 10, 0
+            tilemap.setSlot 0, 10
             mapper.pageBank :lotsOf2s       ; make lotsOf2s available
             tilemap.loadBytes lotsOf2s, 224 ; load first 224 bytes
         +:

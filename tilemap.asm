@@ -47,6 +47,8 @@
 ; Constants
 ;====
 .define tilemap.VDP_DATA_PORT $be
+.define tilemap.SCREEN_TILE_WIDTH 32
+.define tilemap.SLOT_SIZE 2
 
 ;====
 ; Set the tile slot ready to write to
@@ -54,8 +56,8 @@
 ; @in   col     column number (x)
 ; @in   row     row number (y)
 ;====
-.macro "tilemap.setSlot" args col row
-    utils.vdp.prepWrite (tilemap.vramAddress + (col * 64) + (row * 2))
+.macro "tilemap.setSlot" args colX rowY
+    utils.vdp.prepWrite (tilemap.vramAddress + (rowY * tilemap.SCREEN_TILE_WIDTH * tilemap.SLOT_SIZE) + (colX * tilemap.SLOT_SIZE))
 .endm
 
 ;====
