@@ -53,11 +53,20 @@
 ;====
 ; Set the tile slot ready to write to
 ;
+; @in   slotNumber  0 is top left tile
+;====
+.macro "tilemap.setSlot" args slotNumber
+    utils.vdp.prepWrite (tilemap.vramAddress + slotNumber)
+.endm
+
+;====
+; Set the tile slot ready to write to
+;
 ; @in   col     column number (x)
 ; @in   row     row number (y)
 ;====
-.macro "tilemap.setSlot" args colX rowY
-    utils.vdp.prepWrite (tilemap.vramAddress + (rowY * tilemap.SCREEN_TILE_WIDTH * tilemap.SLOT_SIZE) + (colX * tilemap.SLOT_SIZE))
+.macro "tilemap.setColRow" args colX rowY
+    tilemap.setSlot ((rowY * tilemap.SCREEN_TILE_WIDTH * tilemap.SLOT_SIZE) + (colX * tilemap.SLOT_SIZE))
 .endm
 
 ;====

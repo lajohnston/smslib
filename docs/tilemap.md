@@ -13,7 +13,7 @@ message:
     .asc "Hello, world"
     .db $ff ; terminator byte
 
-tilemap.setSlot 0, 0 ; top left tile slot
+tilemap.setColRow 0, 0              ; top left tile
 tilemap.loadBytesUntil $ff message  ; load from 'message' label until $ff reached
 ```
 
@@ -25,7 +25,7 @@ Load bytes of data representing pattern refs. Each tile will contain the same [t
 message:
     .asc "Hello, world"
 
-tilemap.setSlot 5, 10           ; column 5, row 10
+tilemap.setColRow 5, 10         ; column 5, row 10
 tilemap.loadBytes message 5     ; load first 5 bytes of message ('Hello')
 
 ; load 12 bytes, all flipped horizontally and vertically
