@@ -60,6 +60,11 @@
             sprites.init
         .endif
 
+        ; initialise input handler
+        .ifdef input.ENABLED
+            input.init
+        .endif
+
         ; initialise interrupt handler
         .ifdef interrupts.ENABLED
             interrupts.init

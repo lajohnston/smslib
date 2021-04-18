@@ -3,7 +3,7 @@
 Interprets input from the controller pads.
 
 ```
-input.readPort1
+input.readPort1 ; you can also use input.readPort2
 
 input.if input.LEFT, +
     ; Left has been pressed
@@ -21,16 +21,4 @@ input.RIGHT
 input.BUTTON_1
 input.BUTTON_2
 
-```
-
-If needed you can change the register that holds the input value (default is `b`):
-
-```
-input.useRegister "d"
-input.readPort1     ; result stored in register d
-
-; This will check input value in register d
-input.if input.LEFT, +
-    ; Left has been pressed
-+:
 ```

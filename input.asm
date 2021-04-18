@@ -4,37 +4,37 @@
 ; Reads and interprets joypad inputs
 ;====
 
+.define input.ENABLED 1
+
+; Dependencies
+.include "./utils/ram.asm"
+
 ; Constants
 .define input.UP        0
 .define input.DOWN      1
 .define input.LEFT      2
 .define input.RIGHT     3
-.define input.BUTTON_1   4
-.define input.BUTTON_2   5
+.define input.BUTTON_1  4
+.define input.BUTTON_2  5
 .define input.PORT_1    $dc
 .define input.PORT_2    $dd
 
 ; Variables
-
-; The register to store the input data once parsed
-.define input.register "b"
+.ramsection "input.ram" slot utils.ram.SLOT
+    input.ram.value: db
+.ends
 
 ;====
-; Set the register used to hold the input value for processing
-; The default is register b
-;
-; @in register  the register ("a", "b", "c", "d", "e", "h", "l")
+; Initialises the input handler in RAM
 ;====
-.macro "input.useRegister" args register
-    .redefine input.register register
+.macro "input.init"
+    xor a
+    ld de, input.ram.value
+    ld (de), a
 .endm
 
 ;====
-; Reads the input from controller port 1 into the register specified by
-; input.useRegister
-;
-; @out  (a|b|c|d|e|h|l) -   depending on register given to input.useRegister
-;                           (default b)
+; Reads the input from controller port 1 into the ram buffer
 ;
 ; The reset bits represent the buttons currently pressed
 ;
@@ -49,40 +49,11 @@
 ;====
 .macro "input.readPort1"
     in a, input.PORT_1
-    input._store
+    ld (input.ram.value), a
 .endm
 
-;====
-; Stores the read input value into the register given to input.useRegister
-; (default is b)
-;====
-.macro "input._store"
-    .if input.register == "b"
-        ld b, a
-    .endif
-
-    .if input.register == "c"
-        ld c, a
-    .endif
-
-    .if input.register == "d"
-        ld d, a
-    .endif
-
-    .if input.register == "e"
-        ld e, a
-    .endif
-
-    .if input.register == "h"
-        ld h, a
-    .endif
-
-    .if input.register == "l"
-        ld l, a
-    .endif
-.endm
-
-; See input.readPort1 doc
+; Reads the input from controller port 2 into the ram buffer
+; See input.readPort1 documentation for details
 .macro "input.readPort2"
     ; Retrieve up and down buttons, which are stored within input1 byte
     in a, input.PORT_1
@@ -97,7 +68,8 @@
     rlca
     rlca
 
-    input._store
+    ; Store in ram buffer
+    ld (input.ram.value), a
 .endm
 
 ;====
@@ -107,35 +79,10 @@
 ; @in  button  the button to check, either input.UP, input.DOWN, input.LEFT,
 ;              input.RIGHT, input.BUTTON_1 or input.BUTTON_2
 ;
-; @out  f   z if the given button is pressed
+; @out  f       z if the given button is pressed
 .macro "input.isPressed" args button
-    .if input.register == "a"
-        bit button, a
-    .endif
-
-    .if input.register == "b"
-        bit button, b
-    .endif
-
-    .if input.register == "c"
-        bit button, c
-    .endif
-
-    .if input.register == "d"
-        bit button, d
-    .endif
-
-    .if input.register == "e"
-        bit button, e
-    .endif
-
-    .if input.register == "h"
-        bit button, h
-    .endif
-
-    .if input.register == "l"
-        bit button, l
-    .endif
+    ld a, (input.ram.value)
+    bit button, a
 .endm
 
 ;===
