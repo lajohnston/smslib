@@ -1,42 +1,49 @@
 #!/bin/bash
 
+###
+# Build examples on Linux
+###
+
 set -e # exit on errors
 
 # cd to script directory
-DIRECTORY=$(cd `dirname $0` && pwd)
-cd $DIRECTORY
+EXAMPLES_DIRECTORY=$(cd `dirname $0` && pwd)
+cd $EXAMPLES_DIRECTORY
 
 # Prep build directory
-rm -r ./build
-mkdir -p ./build/tmp
+BUILD_DIR=$(realpath build)
+TEMP_DIR=$BUILD_DIR/tmp
+
+rm -rf $BUILD_DIR
+mkdir $BUILD_DIR
+mkdir $TEMP_DIR
+
+# Build examples
 
 EXAMPLES=( $(ls -d [0-9][0-9]-*) )
-for i in "${EXAMPLES[@]}"
+
+for EXAMPLE in "${EXAMPLES[@]}"
 do
-    BUILD_DIR=../build
-    TEMP_DIR=$BUILD_DIR/tmp
+    cd $EXAMPLES_DIRECTORY/$EXAMPLE
 
-    cd ./$i
-    PROJECT_NAME=$i
-
-    printf "\nBuilding example ${PROJECT_NAME}:\n\n"
+    printf "\nBuilding example ${EXAMPLE}:\n\n"
 
     # Create simple linkfile
     LINKFILE=$TEMP_DIR/linkfile
     echo [objects] > $LINKFILE
-    echo $PROJECT_NAME.o >> $LINKFILE
+    echo $EXAMPLE.o >> $LINKFILE
 
     # Assemble objects
-    wla-z80 -o $TEMP_DIR/$PROJECT_NAME.o main.asm
+    wla-z80 -o $TEMP_DIR/$EXAMPLE.o main.asm
 
     # Link objects
     cd $TEMP_DIR
-    wlalink -d -v -S -A linkfile $PROJECT_NAME.sms
+    wlalink -d -v -S -A linkfile $EXAMPLE.sms
     cd - # return to former directory
 
     # Place output in build directory
-    mv $TEMP_DIR/$PROJECT_NAME.sms $BUILD_DIR
-    mv $TEMP_DIR/$PROJECT_NAME.sym $BUILD_DIR
+    mv $TEMP_DIR/$EXAMPLE.sms $BUILD_DIR
+    mv $TEMP_DIR/$EXAMPLE.sym $BUILD_DIR
 
-    cd ../
+    cd $EXAMPLES_DIRECTORY
 done
