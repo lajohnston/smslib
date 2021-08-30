@@ -25,10 +25,12 @@
 .endif
 
 ; Ensure enableCartridgeRam hasn't been enabled
-.ifeq mapper.enableCartridgeRam 1
-     ; Waimanu uses slot 2 for paging which is needed for on-cartridge RAM
-    .print "waimanu mapper doesn't support on-cartridge RAM\n"
-    .fail
+.ifdef mapper.enableCartridgeRam
+    .ifeq mapper.enableCartridgeRam 1
+        ; Waimanu uses slot 2 for paging which is needed for on-cartridge RAM
+        .print "waimanu mapper doesn't support on-cartridge RAM. mapper.enableCartridgeRam must not be set to 1\n"
+        .fail
+    .endif
 .endif
 
 ;====
