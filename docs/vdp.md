@@ -6,8 +6,6 @@ Change register values using the provided macros. See vdp.asm for more details a
 
 ```
 vdp.setBackgroundColorSlot 16
-vdp.setScrollX 100
-vdp.setScrollY 255
 
 vdp.enableDisplay
 vdp.disableDisplay
@@ -29,6 +27,9 @@ vdp.disableSpriteShift
 
 vdp.showLeftColumn
 vdp.hideLeftColumn
+
+vdp.setScrollX 100
+vdp.setScrollY 255
 
 vdp.lockHScroll
 vdp.unlockHScroll

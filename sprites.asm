@@ -86,7 +86,7 @@
 .endst
 
 ;====
-; Define data for a sprite.Sprite instance
+; Define data for a sprites.Sprite instance
 ;
 ; @in   pattern     the pattern number
 ; @in   relativeX   the relativeX position
