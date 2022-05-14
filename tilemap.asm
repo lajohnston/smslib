@@ -56,7 +56,7 @@
 ; @in   slotNumber  0 is top left tile
 ;====
 .macro "tilemap.setSlot" args slotNumber
-    utils.vdp.prepWrite (tilemap.vramAddress + slotNumber)
+    utils.vdp.prepWrite (tilemap.vramAddress + (slotNumber * tilemap.SLOT_SIZE))
 .endm
 
 ;====
@@ -66,7 +66,7 @@
 ; @in   row     row number (y)
 ;====
 .macro "tilemap.setColRow" args colX rowY
-    tilemap.setSlot ((rowY * tilemap.SCREEN_TILE_WIDTH * tilemap.SLOT_SIZE) + (colX * tilemap.SLOT_SIZE))
+    tilemap.setSlot ((rowY * tilemap.SCREEN_TILE_WIDTH) + colX)
 .endm
 
 ;====
