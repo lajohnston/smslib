@@ -34,27 +34,12 @@
         ; Read the input from port 1
         input.readPort1
 
-        ; Reset movement vectors
-        ld (ix + Bubble.xVec), 0        ; set xVec to 0
-        ld (ix + Bubble.yVec), 0        ; set yVec to 0
+        ; Set movement vectors based on input
+        input.loadADirX 2           ; left = -2; right = 2; none = 0
+        ld (ix + Bubble.xVec), a    ; update x movement based on input
 
-        ; Update x movement
-        input.if input.LEFT, +
-            ld (ix + Bubble.xVec), -2   ; set xVec to -2
-        +:
-
-        input.if input.RIGHT, +
-            ld (ix + Bubble.xVec), 2    ; set xVec to 2
-        +:
-
-        ; Update y movement
-        input.if input.UP, +
-            ld (ix + Bubble.yVec), -2   ; set yVec to -2
-        +:
-
-        input.if input.DOWN, +
-            ld (ix + Bubble.yVec), 2    ; set yVec to 2
-        +:
+        input.loadADirY 2           ; up = -2; down = 2; none = 0
+        ld (ix + Bubble.yVec), a    ; update y movement based on input
 
         ret
 .ends

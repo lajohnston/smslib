@@ -16,6 +16,7 @@
 .define input.RIGHT     3
 .define input.BUTTON_1  4
 .define input.BUTTON_2  5
+
 .define input.PORT_1    $dc
 .define input.PORT_2    $dd
 
@@ -29,8 +30,7 @@
 ;====
 .macro "input.init"
     xor a
-    ld de, input.ram.value
-    ld (de), a
+    ld (input.ram.value), a
 .endm
 
 ;====
@@ -93,4 +93,84 @@
 .macro "input.if" args button else
     input.isPressed button
     jp nz, else
+.endm
+
+;====
+; Load the X direction (left/right) into register A. By default, -1 = left,
+; 1 = right, 0 = none. The result is multiplied by the optional multiplier
+; at assemble time
+;
+; Ensure you have called input.readPort1 or input.readPort2
+;
+; @in   [multiplier]    optional multiplier for the result (default 1)
+; @out  a               -1 = left, 1 = right, 0 = none. This value will be
+;                       multiplied by the multiplier at assemble time
+;====
+.macro "input.loadADirX" args multiplier
+    .ifndef multiplier
+        .redefine multiplier 1
+    .endif
+
+    ld a, (input.ram.value)     ; read input data
+
+    ; Check if left is being pressed
+    bit input.LEFT, a
+    jp nz, +
+        ; Left is pressed
+        ld a, -1 * multiplier
+        jp \.\@end
+    +:
+
+    ; Check if right is being pressed
+    bit input.RIGHT, a
+    jp nz, +
+        ; Right is pressed
+        ld a, 1 * multiplier
+        jp \.\@end
+    +:
+
+    ; Nothing pressed
+    xor a   ; a = 0
+
+    \.\@end:
+.endm
+
+;====
+; Load the Y direction (up/down) into register A. By default, -1 = up,
+; 1 = down, 0 = none. The result is multiplied by the optional multiplier
+; at assemble time
+;
+; Ensure you have called input.readPort1 or input.readPort2
+;
+; @in   [multiplier]    optional multiplier for the result (default 1)
+; @out  a               -1 = up, 1 = down, 0 = none. This will be multiplied
+;                       by the multiplier at assemble time
+;====
+.macro "input.loadADirY" isolated args multiplier
+    .ifndef multiplier
+        .redefine multiplier 1
+    .endif
+
+    ld a, (input.ram.value)     ; read input data
+
+    ; Check if up is being pressed
+    bit input.UP, a
+    jp nz, +
+        ; Up is pressed
+        ld a, -1 * multiplier
+        jp \.\@end
+    +:
+
+    ; Check if down is being pressed
+    bit input.DOWN, a
+    jp nz, +
+        ; Down is pressed
+        ld a, 1 * multiplier
+        jp \.\@end
+    +:
+
+    ; Nothing pressed
+    xor a   ; a = 0
+
+    \.\@end:
 .endm
