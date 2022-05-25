@@ -33,12 +33,31 @@
 ;====
 .macro "palette.rgb" args red green blue
     ; Round to nearest 85 then AND with $ff to calculate floor
-    .define _palette.redAdj\@ = (red + 42.5) / 85 & $ff
-    .define _palette.greenAdj\@ = (green + 42.5) / 85 & $ff
-    .define _palette.blueAdj\@ = (blue + 42.5) / 85 & $ff
+    .define \.\@red = (red + 42.5) / 85 & $ff
+    .define \.\@green = (green + 42.5) / 85 & $ff
+    .define \.\@blue = (blue + 42.5) / 85 & $ff
 
     ; Convert to --bbggrr
-    .db _palette.redAdj\@ + (_palette.greenAdj\@ * 4) + (_palette.blueAdj\@ * 16)
+    .db (\.\@blue * 16) + (\.\@green * 4) + \.\@red
+.endm
+
+;====
+; Load an approximate RGB value into the current palette slot. Each value
+; will be rounded to the nearest of: 0, 85, 170, 255
+;
+; @in   red     red value
+; @in   green   green value
+; @in   blue    blue value
+;====
+.macro "palette.loadRGB" args red, green, blue
+    ; Round to nearest 85 then AND with $ff to calculate floor
+    .define \.\@red = (red + 42.5) / 85 & $ff
+    .define \.\@green = (green + 42.5) / 85 & $ff
+    .define \.\@blue = (blue + 42.5) / 85 & $ff
+
+    ; Convert to --bbggrr
+    ld a, (\.\@blue * 16) + (\.\@green * 4) + \.\@red
+    out (c), a  ;   output color
 .endm
 
 ;====

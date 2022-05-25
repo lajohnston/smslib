@@ -59,3 +59,12 @@ An optional third parameter lets you skip some colors in the data:
 ; Load 5 colors but skip the first 2
 palette.loadSlice paletteData, 5, 2
 ```
+
+### palette.loadRGB
+
+Loads an approximate RGB value into the current palette slot. Each component is rounded to the nearest of the following values: 0, 85, 170, 255.
+
+```
+palette.setSlot 0
+palette.loadRGB 255, 0, 0  ;  a bright red
+```
