@@ -1,7 +1,7 @@
 ;====
 ; SMSLib moving sprites example
 ;
-; Create a sprite the can be controller with the directional input of joypad 1.
+; Create a sprite that can be controlled with the directional input of joypad 1.
 ; Demonstrates VBlank handling using interrupts.asm
 ;====
 .sdsctag 1.10, "smslib sprites", "smslib moving sprites tutorial", "lajohnston"

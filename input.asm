@@ -75,7 +75,6 @@
 ;====
 ; Checks whether a button is currently being pressed
 ;
-; @in  a       the current input
 ; @in  button  the button to check, either input.UP, input.DOWN, input.LEFT,
 ;              input.RIGHT, input.BUTTON_1 or input.BUTTON_2
 ;

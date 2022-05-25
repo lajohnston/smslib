@@ -31,33 +31,31 @@
 ;====
 .section "bubble.updateInput" free
     bubble.updateInput:
+        ; Read the input from port 1
         input.readPort1
 
-        ; Update xVec
-        xor a                       ; xVec = 0 (default)
+        ; Reset movement vectors
+        ld (ix + Bubble.xVec), 0        ; set xVec to 0
+        ld (ix + Bubble.yVec), 0        ; set yVec to 0
 
+        ; Update x movement
         input.if input.LEFT, +
-            ld a, -1                ; xVec = -1
+            ld (ix + Bubble.xVec), -2   ; set xVec to -2
         +:
 
         input.if input.RIGHT, +
-            ld a, 1                 ; xVec = 1
+            ld (ix + Bubble.xVec), 2    ; set xVec to 2
         +:
 
-        ld (ix + Bubble.xVec), a    ; store xVec
-
-        ; Update yVec
-        xor a                       ; yVec = 0 (default)
-
+        ; Update y movement
         input.if input.UP, +
-            ld a, -1                ; yVec = -1
+            ld (ix + Bubble.yVec), -2   ; set yVec to -2
         +:
 
         input.if input.DOWN, +
-            ld a, 1                 ; yVec = 1
+            ld (ix + Bubble.yVec), 2    ; set yVec to 2
         +:
 
-        ld (ix + Bubble.yVec), a    ; store yVec
         ret
 .ends
 
