@@ -40,6 +40,7 @@ These can be ORed together to create a byte containing all the attributes (i.e. 
 tilemap.HIGH_BIT        ; 9th bit for the pattern ref, allows pattern refs 256+
 tilemap.FLIP_X          ; Flip horizontally
 tilemap.FLIP_Y          ; Flip vertically
+tilemap.FLIP_XY         ; Flip horizontally and vertically
 tilemap.SPRITE_PALETTE  ; Use the sprite palette for the tile
 
 ; Place tile in front of sprites. Color 0 acts as transparent

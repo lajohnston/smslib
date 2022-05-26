@@ -28,10 +28,10 @@
 ; Tile attributes
 ; Combine using OR (|), i.e. (tilemap.HIGH_BIT | tilemap.FLIP_X)
 ;====
-
 .define tilemap.HIGH_BIT        %00000001   ; 9th bit for the pattern ref, allows refs 256+
 .define tilemap.FLIP_X          %00000010   ; Flip horizontally
 .define tilemap.FLIP_Y          %00000100   ; Flip vertically
+.define tilemap.FLIP_XY         %00000110   ; Flip horizontally and vertically
 .define tilemap.SPRITE_PALETTE  %00001000   ; Use palette 2 (sprite palette)
 
 ; Place in front of sprites. Color 0 acts as transparent
