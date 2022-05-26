@@ -49,6 +49,7 @@
 .define tilemap.VDP_DATA_PORT $be
 .define tilemap.SCREEN_TILE_WIDTH 32
 .define tilemap.SLOT_SIZE 2
+.define tilemap.ROW_SIZE_BYTES tilemap.SCREEN_TILE_WIDTH * tilemap.SLOT_SIZE
 
 ;====
 ; Set the tile slot ready to write to
@@ -173,4 +174,15 @@
     .endif
 
     call tilemap.loadBytes
+.endm
+
+;====
+; Load a row (32-tiles) of uncompressed data. Each tile is 2-bytes - the
+; first is the patternRef and the second is the tile's attributes.
+;
+; @in   hl  pointer to the raw data
+;====
+.macro "tilemap.loadRawRow"
+    ; Output 1 row of data
+    utils.outiBlock.send tilemap.ROW_SIZE_BYTES
 .endm

@@ -62,3 +62,20 @@ tilemap.loadBytes message 5     ; load first 5 bytes of message ('Hello')
 ; load 12 bytes, all flipped horizontally and vertically
 tilemap.loadBytes message 12 (tilemap.FLIP_X|tilemap.FLIP_Y)
 ```
+
+## Load tiles
+
+### tilemap.loadRawRow
+
+Load 32 uncompressed tiles.
+
+```
+myRow:
+    .repeat 32
+        tilemap.tile 5
+    .endr
+
+tilemap.setColRow 0, 0  ; write from column 0, row 0 onwards
+ld hl, myRow            ; point to data
+tilemap.loadRawRow      ; load data (32 tiles)
+```
