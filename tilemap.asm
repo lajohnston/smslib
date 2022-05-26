@@ -70,6 +70,27 @@
 .endm
 
 ;====
+; Define tile data
+;
+; @in   patternSlot the pattern slot (0-511)
+; @in   attributes  (optional) the tile attributes (see Tile attributes section).
+;                   Note, if patternRef is greater than 255, tilemap.HIGH_BIT
+;                   is set automatically
+;====
+.macro "tilemap.tile" args patternSlot attributes
+    .ifndef attributes
+        .define attributes $00
+    .endif
+
+    .ifgr patternSlot 255
+        .redefine attributes attributes | tilemap.HIGH_BIT
+    .endif
+
+    .db <(patternSlot)  ; low byte of patternSlot
+    .db attributes
+.endm
+
+;====
 ; Reads pattern ref bytes and sends to the tilemap until a terminator byte is
 ; reached.
 ;
