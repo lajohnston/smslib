@@ -164,9 +164,9 @@
 ; Initialises the interrupt handler in RAM, if necessary
 ;====
 .macro "interrupts.init"
-    ld de, interrupts.ram.vBlankFlag
-    xor a       ; a = 0
-    ld (de), a  ; set vBlankFlag to zero
+    ; Set vBlankFlag to 0
+    xor a ; a = 0
+    ld (interrupts.ram.vBlankFlag), a
 .endm
 
 ;====
@@ -187,15 +187,14 @@
 .macro "interrupts.waitForVBlank"
     ; Poll VBlank flag in RAM
     -:
-    halt        ; wait for next interrupt (pause, VBlank, HBlank)
-    ld de, interrupts.ram.vBlankFlag
-    ld a, (de)  ; load vBlankFlag
-    or a        ; analyze a
-    jp z, -     ; if zero, wait again
+        halt        ; wait for next interrupt (pause, VBlank, HBlank)
+        ld a, (interrupts.ram.vBlankFlag)  ; load vBlankFlag
+        or a        ; analyze a
+    jp z, -         ; if wasn't VBlank, wait again
 
     ; VBlank occurred - reset flag then continue
-    xor a       ; set a to 0
-    ld (de), a  ; reset VBlank flag
+    xor a   ; set a to 0
+    ld (interrupts.ram.vBlankFlag), a
 .endm
 
 ;====

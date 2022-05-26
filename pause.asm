@@ -47,8 +47,7 @@
 ;====
 .macro "pause.init"
     xor a
-    ld de, pause.ram.pauseFlag
-    ld (de), a
+    ld (pause.ram.pauseFlag), a
 .endm
 
 ;====
@@ -57,10 +56,9 @@
 ;====
 .macro "pause.waitIfPaused"
     -:
-    ld de, pause.ram.pauseFlag
-    ld a, (de)  ; read pauseFlag
+    ld a, (pause.ram.pauseFlag) ; read pauseFlag
     or a        ; analyse flag
-    jp z, +     ; not paused; continue
+    jp z, +     ; jp if not paused
         halt    ; wait for an interrupt (pause, vBlank, hBlank)
         jp -    ; check again
     +:
