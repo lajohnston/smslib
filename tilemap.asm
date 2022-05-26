@@ -20,6 +20,14 @@
 ;====
 ; Dependencies
 ;====
+.ifndef utils.math
+    .include "utils/math.asm"
+.endif
+
+.ifndef utils.outiBlock
+    .include "utils/outiBlock.asm"
+.endif
+
 .ifndef utils.vdp
     .include "utils/vdp.asm"
 .endif
@@ -49,6 +57,7 @@
 .define tilemap.VDP_DATA_PORT $be
 .define tilemap.SCREEN_TILE_WIDTH 32
 .define tilemap.SLOT_SIZE 2
+.define tilemap.VISIBLE_ROWS 25
 .define tilemap.ROW_SIZE_BYTES tilemap.SCREEN_TILE_WIDTH * tilemap.SLOT_SIZE
 
 ;====
@@ -185,4 +194,37 @@
 .macro "tilemap.loadRawRow"
     ; Output 1 row of data
     utils.outiBlock.send tilemap.ROW_SIZE_BYTES
+.endm
+
+;====
+; Load tile data from an uncompressed map. Each tile is 2-bytes - the first is
+; the tileRef and the second is the tile's attributes.
+;
+; @in   a   the amount to increment the pointer by each row i.e. the number of
+;           columns in the full map * 2 (as each tile is 2-bytes)
+; @in   b   number of rows to load
+; @in   hl  pointer to the first tile to load
+;====
+.section "tilemap.loadRawRows"
+    _nextRow:
+        ld ixh, a               ; preserve A
+            utils.math.addHLA   ; add 1 row to full tilemap pointer
+        ld a, ixh               ; restore A
+
+    tilemap.loadRawRows:
+        push hl                 ; preserve HL
+        ld ixl, b               ; preserve B
+            tilemap.loadRawRow  ; load a row of data
+        ld b, ixl               ; restore B
+        pop hl                  ; restore HL
+
+        djnz _nextRow
+        ret
+.ends
+
+;====
+; Alias for tilemap.loadRawRows
+;====
+.macro "tilemap.loadRawRows"
+    call tilemap.loadRawRows
 .endm

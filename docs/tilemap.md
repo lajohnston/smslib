@@ -79,3 +79,27 @@ tilemap.setColRow 0, 0  ; write from column 0, row 0 onwards
 ld hl, myRow            ; point to data
 tilemap.loadRawRow      ; load data (32 tiles)
 ```
+
+### tilemap.loadRawRows
+
+Load multiple rows from an uncompressed tilemap. The visible tilemap is 32 tiles wide (columns) by 25 tiles high (rows) but the full map can be larger than the screen.
+
+```
+.define MAP_ROWS 64
+.define MAP_COLS 64
+
+myTilemap:
+    .repeat MAP_ROWS
+        .repeat MAP_COLS
+            tilemap.tile 0
+        .endr
+    .endr
+
+tilemap.setColRow 0, 0      ; load from column 0, row 0 onwards
+ld hl, myTilemap            ; point to top left corner to load
+ld b, tilemap.VISIBLE_ROWS  ; number of rows to load; all visible rows (25)
+ld a, tilemap.MAP_COLS * 2  ; number of full map columns * 2 (each tile is 2 bytes)
+
+tilemap.loadRawRows         ; load rows
+
+```
