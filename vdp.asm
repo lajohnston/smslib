@@ -47,7 +47,7 @@
 
 ;====
 ; Batch variables
-; Batches together setting changes so they can be applied together
+; Batches setting changes so they can be applied together
 ;====
 .define vdp.batchInProgress 0
 
@@ -301,37 +301,51 @@
 .endm
 
 ;====
-; Sets the line interrupt counter
+; Sets the background horizontal scroll value. Decreasing the value moves
+; the screen from right to left
 ;
-; @in   value
-;====
-.macro "vdp.setLineCounter" args value
-    vdp._setRegister 10 value
-.endm
-
-;====
-; Sets the background horizontal scroll value
-;
-; @in   value
+; @in   a|value the register value
 ;====
 .macro "vdp.setScrollX" args value
-    vdp._setRegister 8 value
+    .ifdef value
+        vdp._setRegister 8 value
+    .else
+        vdp._setRegister 8
+    .endif
 .endm
 
 ;====
-; Sets the background horizontal scroll value
+; Sets the background vertical scroll value. Value should be between 0-223 for
+; the standard 192-line mode
 ;
-; @in   value
+; @in   a|value the register value
 ;====
 .macro "vdp.setScrollY" args value
-    vdp._setRegister 9 value
+    .ifdef value
+        vdp._setRegister 9 value
+    .else
+        vdp._setRegister 9
+    .endif
+.endm
+
+;====
+; Sets the line interrupt counter
+;
+; @in   a|value the register value
+;====
+.macro "vdp.setLineCounter" args value
+    .ifdef value
+        vdp._setRegister 10 value
+    .else
+        vdp._setRegister 10
+    .endif
 .endm
 
 ;====
 ; Sets the value of the given register
 ;
 ; @in   number  the register number (0-10)
-; @in   a|value the register value. If ommitted the value in register a is used
+; @in   a|value the register value
 ;====
 .macro "vdp._setRegister" args number registerValue
     .ifdef registerValue

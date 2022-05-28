@@ -28,6 +28,7 @@ vdp.disableSpriteShift
 vdp.showLeftColumn
 vdp.hideLeftColumn
 
+; If parameter omitted, the value in register A is used
 vdp.setScrollX 100
 vdp.setScrollY 255
 
@@ -36,6 +37,8 @@ vdp.unlockHScroll
 
 vdp.lockVScroll
 vdp.unlockVScroll
+
+vdp.setLineInterrupt 5
 ```
 
 ## Batches
