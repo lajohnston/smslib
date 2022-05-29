@@ -295,10 +295,10 @@
 ;
 ; @in   value   the palette slot to use. Must be slot 16-31 (the sprite palette)
 ;====
-.macro "vdp.setBackgroundColorSlot" args value
+.macro "vdp.setBorderColorSlot" args value
     .if value < 16
         .redefine value 16
-        .print "Warning: vdp.setBackgroundColorSlot slot must be between 16 and 31\n"
+        .print "Warning: vdp.setBorderColorSlot slot must be between 16 and 31\n"
     .endif
 
     utils.vdp.setRegister utils.vdp.BORDER_COLOR_SLOT_REGISTER (value - 16)

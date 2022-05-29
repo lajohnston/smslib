@@ -5,7 +5,7 @@ Handles the general VDP (graphics chip) registers and settings. More specific as
 Change register values using the provided macros. See vdp.asm for more details about each setting.
 
 ```
-vdp.setBackgroundColorSlot 16
+vdp.setBorderColorSlot 16
 
 vdp.enableDisplay
 vdp.disableDisplay
