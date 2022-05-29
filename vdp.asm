@@ -9,6 +9,10 @@
 ;====
 .include "./utils/ram.asm"
 
+.ifndef utils.vdp
+    .include "utils/vdp.asm"
+.endif
+
 ;====
 ; Default register values
 ;====
@@ -297,7 +301,7 @@
         .print "Warning: vdp.setBackgroundColorSlot slot must be between 16 and 31\n"
     .endif
 
-    vdp._setRegister 7 (value - 16)
+    utils.vdp.setRegister utils.vdp.BORDER_COLOR_SLOT_REGISTER (value - 16)
 .endm
 
 ;====
@@ -308,9 +312,9 @@
 ;====
 .macro "vdp.setScrollX" args value
     .ifdef value
-        vdp._setRegister 8 value
+        utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER value
     .else
-        vdp._setRegister 8
+        utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
     .endif
 .endm
 
@@ -322,9 +326,9 @@
 ;====
 .macro "vdp.setScrollY" args value
     .ifdef value
-        vdp._setRegister 9 value
+        utils.vdp.setRegister utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER value
     .else
-        vdp._setRegister 9
+        utils.vdp.setRegister utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER
     .endif
 .endm
 
@@ -335,26 +339,10 @@
 ;====
 .macro "vdp.setLineCounter" args value
     .ifdef value
-        vdp._setRegister 10 value
+        utils.vdp.setRegister utils.vdp.LINE_COUNTER_REGISTER value
     .else
-        vdp._setRegister 10
+        utils.vdp.setRegister utils.vdp.LINE_COUNTER_REGISTER
     .endif
-.endm
-
-;====
-; Sets the value of the given register
-;
-; @in   number  the register number (0-10)
-; @in   a|value the register value
-;====
-.macro "vdp._setRegister" args number registerValue
-    .ifdef registerValue
-        ld a, registerValue
-    .endif
-
-    out (vdp.COMMAND_PORT), a
-    ld a, $80 + number
-    out (vdp.COMMAND_PORT), a
 .endm
 
 ;====
@@ -383,7 +371,7 @@
     ld (de), a
 
     ; Send value to VDP
-    vdp._setRegister register
+    utils.vdp.setRegister register
 .endm
 
 ;====

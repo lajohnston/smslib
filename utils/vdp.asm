@@ -19,6 +19,12 @@
 .define utils.vdp.VDP_COMMAND_PORT $bf
 .define utils.vdp.VDP_DATA_PORT $be
 
+; Registers
+.define utils.vdp.BORDER_COLOR_SLOT_REGISTER 7
+.define utils.vdp.SCROLL_X_REGISTER 8
+.define utils.vdp.SCROLL_Y_REGISTER 9
+.define utils.vdp.LINE_COUNTER_REGISTER 10
+
 ;====
 ; Prepares the VDP to write to the given VRAM write address
 ;
@@ -70,4 +76,20 @@
 ; Macro alias for call utils.vdp.clearVram
 .macro "utils.vdp.clearVram"
     call utils.vdp.clearVram
+.endm
+
+;====
+; Sets the value of the given VDP register
+;
+; @in   registerNumber  the register number (0-10)
+; @in   a|registerValue the register value
+;====
+.macro "utils.vdp.setRegister" args registerNumber registerValue
+    .ifdef registerValue
+        ld a, registerValue             ; load A with value if one is given
+    .endif
+
+    out (utils.vdp.VDP_COMMAND_PORT), a ; send the register value first
+    ld a, %10000000 | registerNumber    ; load write command with register number
+    out (utils.vdp.VDP_COMMAND_PORT), a ; send the register write command
 .endm
