@@ -103,3 +103,27 @@ ld a, tilemap.MAP_COLS * 2  ; number of full map columns * 2 (each tile is 2 byt
 tilemap.loadRawRows         ; load rows
 
 ```
+
+## Scrolling
+
+The tilemap supports 8-direction scrolling. This is optimised for use with a maximum of 8 pixels per frame for each axis (8 pixels for X-axis plus 8 pixels for Y-Axis) but the limit is not enforced. See `examples/07-scrolling` example for a working demo.
+
+```
+; Initialise
+tilemap.reset           ; initialise RAM and scroll registers to 0
+
+; Adjust once per frame
+ld a, 1                 ; amount to scroll (1 pixel right)
+tilemap.adjustXPixels   ; positive values scroll right; negative scroll left
+
+; Detect if a column needs scrolling
+tilemap.ifColScroll left, right, +
+    left:
+        ; handle left scroll
+    right:
+        ; handle right scroll
++:
+
+; During VBlank
+tilemap.setScrollRegisters
+```

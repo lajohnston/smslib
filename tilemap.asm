@@ -28,6 +28,8 @@
     .include "utils/outiBlock.asm"
 .endif
 
+.include "./utils/ram.asm"
+
 .ifndef utils.vdp
     .include "utils/vdp.asm"
 .endif
@@ -59,6 +61,35 @@
 .define tilemap.SLOT_SIZE 2
 .define tilemap.VISIBLE_ROWS 25
 .define tilemap.ROW_SIZE_BYTES tilemap.SCREEN_TILE_WIDTH * tilemap.SLOT_SIZE
+
+; Bit locations of flags within tilemap.ram.flags
+.define tilemap.SCROLL_UP_PENDING_BIT       0
+.define tilemap.SCROLL_DOWN_PENDING_BIT     1
+.define tilemap.SCROLL_LEFT_PENDING_BIT     2
+.define tilemap.SCROLL_RIGHT_PENDING_BIT    3
+
+.define tilemap.X_SCROLL_RESET_MASK %11110011
+
+;====
+; RAM
+;====
+.ramsection "tilemap.ram" slot utils.ram.SLOT
+    tilemap.ram.xScrollBuffer:  db  ; VDP x-axis scroll register buffer
+    tilemap.ram.flags:          db  ; see constants for flag definitions
+.ends
+
+;====
+; Reset the RAM buffers and scroll values to 0
+;====
+.macro "tilemap.reset"
+    ; Zero values
+    xor a   ; set A to 0
+    ld (tilemap.ram.xScrollBuffer), a
+    ld (tilemap.ram.flags), a
+
+    ; Zero scroll registers
+    tilemap.updateScrollRegisters
+.endm
 
 ;====
 ; Set the tile slot ready to write to
@@ -227,4 +258,94 @@
 ;====
 .macro "tilemap.loadRawRows"
     call tilemap.loadRawRows
+.endm
+
+;====
+; See tilemap.adjustXPixels
+;
+; @in   a   the number of x pixels to adjust. Positive values scroll right in
+;           the game world (shifting the tiles left). Negative values scroll
+;           left (shifting the tiles right)
+;====
+.section "tilemap._adjustXPixels" free
+    tilemap._adjustXPixels:
+        neg                     ; negate A so positive values scroll right
+        jp z, _noColumnScroll   ; if adjust is zero, no scroll needed
+
+        ; Add xAdjust to current xScrollBuffer
+        ld hl, tilemap.ram.xScrollBuffer
+        ld b, a                 ; preserve xAdjust in B
+        ld c, (hl)              ; load xScrollBuffer in C
+        add a, c                ; add xAdjust to xScrollBuffer
+        ld (hl), a              ; store result
+
+        ; Check if col scroll needed (if upper 5-bits change; every 8 pixels)
+        xor c                   ; compare xScrollBuffer against old value in C
+        and %11111000           ; zero lower bits (we only care about upper bits)
+        jp nz, _columnScroll    ; scroll if not zero (upper 5 bits are different)
+
+        ; No scroll needed
+        _noColumnScroll:
+            ld hl, tilemap.ram.flags
+            ld a, tilemap.X_SCROLL_RESET_MASK
+            and (hl)            ; reset X scroll flags with mask
+            ld (hl), a          ; update flags
+            ret
+
+        ; Set left or right column scroll flag
+        _columnScroll:
+            inc hl              ; point to flags
+            bit 7, b            ; check sign bit of (negated) xAdjust in B
+            jp z, +
+                ; xAdjust was positive - scroll right
+                set tilemap.SCROLL_RIGHT_PENDING_BIT, (hl)
+                ret
+            +:
+
+            ; xAdjust was negative - scroll left
+            set tilemap.SCROLL_LEFT_PENDING_BIT, (hl)
+            ret
+.ends
+
+;====
+; Adjusts the buffered tilemap scroll value by a given number of pixels. If this
+; results in a new column needing to be drawn it sets flags in RAM indicating
+; whether the left or right column needs reloading. You can interpret these flags
+; using tilemap.ifColScroll.
+;
+; The scroll value won't apply until you call tilemap.updateScrollRegisters
+;
+; @in   a   the number of x pixels to adjust. Positive values scroll right in
+;           the game world (shifting the tiles left). Negative values scroll
+;           left (shifting the tiles right)
+;====
+.macro "tilemap.adjustXPixels"
+    call tilemap._adjustXPixels
+.endm
+
+;====
+; Jumps to the relevant labels if a column scroll is needed after a call to
+; tilemap.adjustXPixels
+;
+; @in   left    jump to this label if the left column needs loading
+; @in   right   jump to this label if the right column needs loading
+; @in   else    jump to this label if no columns need loading
+;====
+.macro "tilemap.ifColScroll" args left, right, else
+    ld a, (tilemap.ram.flags)
+    and tilemap.X_SCROLL_RESET_MASK ~ $ff   ; remove other flags (negate reset mask)
+    jp z, else                              ; no column to scroll
+
+    bit tilemap.SCROLL_RIGHT_PENDING_BIT, a
+    jp nz, right                            ; scroll right
+    jp left                                 ; otherwise scroll left
+.endm
+
+;====
+; Sends the buffered scroll register values to the VDP. This should be called
+; when the display is off or during a V or H interrupt
+;====
+.macro "tilemap.updateScrollRegisters"
+    ld a, (tilemap.ram.xScrollBuffer)
+    utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
 .endm
