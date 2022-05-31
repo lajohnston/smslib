@@ -68,7 +68,9 @@
 .define tilemap.SCROLL_LEFT_PENDING_BIT     2
 .define tilemap.SCROLL_RIGHT_PENDING_BIT    3
 
+; AND masks to reset the scroll flags for a given axis
 .define tilemap.X_SCROLL_RESET_MASK %11110011
+.define tilemap.Y_SCROLL_RESET_MASK %11111100
 
 ;====
 ; RAM
@@ -76,6 +78,7 @@
 .ramsection "tilemap.ram" slot utils.ram.SLOT
     tilemap.ram.xScrollBuffer:  db  ; VDP x-axis scroll register buffer
     tilemap.ram.flags:          db  ; see constants for flag definitions
+    tilemap.ram.yScrollBuffer:  db  ; VDP y-axis scroll register buffer
 .ends
 
 ;====
@@ -86,6 +89,7 @@
     xor a   ; set A to 0
     ld (tilemap.ram.xScrollBuffer), a
     ld (tilemap.ram.flags), a
+    ld (tilemap.ram.yScrollBuffer), a
 
     ; Zero scroll registers
     tilemap.updateScrollRegisters
@@ -261,6 +265,17 @@
 .endm
 
 ;====
+; Set the pending y-axis scroll direction
+;
+; @in   hl          pointer to tilemap.ram.flags
+; @in   direction   tilemap.SCROLL_UP_PENDING_BIT or
+;                   tilemap.SCROLL_DOWN_PENDING_BIT
+;====
+.macro "tilemap._setYAxisScroll" args direction
+    set direction, (hl)
+.endm
+
+;====
 ; See tilemap.adjustXPixels
 ;
 ; @in   a   the number of x pixels to adjust. Positive values scroll right in
@@ -281,7 +296,7 @@
 
         ; Check if col scroll needed (if upper 5-bits change; every 8 pixels)
         xor c                   ; compare xScrollBuffer against old value in C
-        and %11111000           ; zero lower bits (we only care about upper bits)
+        and %11111000           ; zero lower bits (we only care about upper 5)
         jp nz, _columnScroll    ; scroll if not zero (upper 5 bits are different)
 
         ; No scroll needed
@@ -308,7 +323,86 @@
 .ends
 
 ;====
-; Adjusts the buffered tilemap scroll value by a given number of pixels. If this
+; See tilemap.adjustYPixels
+;
+; @in   a   the number of y pixels to adjust. Positive values scroll down in
+;           the game world (shifting the tiles up). Negative values scroll
+;           up (shifting the tiles down)
+;====
+.section "tilemap._adjustYPixels" free
+    tilemap._adjustYPixels:
+        or a                    ; analyse yAdjust
+        jp z, _noRowScroll      ; jump if nothing to adjust
+
+        ; Adjust yScrollBuffer
+        ld b, a                 ; preserve yAdjust in B
+        ld hl, tilemap.ram.yScrollBuffer
+        ld c, (hl)              ; load current yScrollBuffer into C
+        add a, c                ; add yAdjust to yScrollBuffer
+
+        ; Check if value has gone out of 0-223 range
+        cp 224                  ; compare with 224
+        jp nc, _wrapValue       ; jump if value is > 223 (out of range)
+
+        ; Check if row scroll needed (if upper 5-bits change; every 8 pixels)
+        _checkRowScroll:
+            ld (hl), a              ; store new yScrollBuffer
+            xor c                   ; compare yScrollBuffer against old value in C
+            and %11111000           ; zero lower bits (we only care about upper 5)
+            jp nz, _rowScroll       ; scroll if not zero (upper 5 bits are different)
+
+            _noRowScroll:
+                ld hl, tilemap.ram.flags
+                ld a, tilemap.Y_SCROLL_RESET_MASK
+                and (hl)            ; reset Y scroll flags with mask
+                ld (hl), a          ; update flags
+                ret
+
+    ;===
+    ; When a new row needs scrolling
+    ; @in   b   the yAdjust value
+    ; @in   hl  pointer to yScrollBuffer
+    ;===
+    _rowScroll:
+        dec hl              ; point to flags
+        bit 7, b            ; check sign bit of yAdjust in B
+        jp z, +
+            ; yAdjust was negative - scroll up
+            tilemap._setYAxisScroll tilemap.SCROLL_UP_PENDING_BIT
+            ret
+        +:
+
+        ; yAdjust was positive - scroll down
+        tilemap._setYAxisScroll tilemap.SCROLL_DOWN_PENDING_BIT
+        ret
+
+    ;===
+    ; When the yScrollBuffer value has gone out of the 0-223 range
+    ; @in   b   the yAdjust value
+    ; @in   hl  pointer to yScrollBuffer
+    ;===
+    _wrapValue:
+        bit 7, b            ; check sign bit of yAdjust
+        jp z, _wrapOverflow ; jp if yAdjust was positive, so value overflowed
+
+        _wrapUnderflow:
+            ; Sub 32 bring underflow back into range; -1/255 becomes 223
+            sub 32
+            ld (hl), a      ; store new yScrollBuffer
+            dec hl          ; point to flags
+            tilemap._setYAxisScroll tilemap.SCROLL_UP_PENDING_BIT
+            ret
+
+        _wrapOverflow:
+            sub 224             ; sub 224; 224 becomes 0
+            ld (hl), a          ; store updated yScrollBuffer
+            dec hl              ; point to flags
+            tilemap._setYAxisScroll tilemap.SCROLL_DOWN_PENDING_BIT
+            ret
+.ends
+
+;====
+; Adjusts the buffered tilemap xScroll value by a given number of pixels. If this
 ; results in a new column needing to be drawn it sets flags in RAM indicating
 ; whether the left or right column needs reloading. You can interpret these flags
 ; using tilemap.ifColScroll.
@@ -324,10 +418,26 @@
 .endm
 
 ;====
+; Adjusts the buffered tilemap yScroll value by a given number of pixels. If this
+; results in a new row needing to be drawn it sets flags in RAM indicating
+; whether the top or bottom rows need reloading. You can interpret these flags
+; using tilemap.ifRowScroll.
+;
+; The scroll value won't apply until you call tilemap.updateScrollRegisters
+;
+; @in   a   the number of y pixels to adjust. Positive values scroll down in
+;           the game world (shifting the tiles up). Negative values scroll
+;           up (shifting the tiles down)
+;====
+.macro "tilemap.adjustYPixels"
+    call tilemap._adjustYPixels
+.endm
+
+;====
 ; Jumps to the relevant labels if a column scroll is needed after a call to
 ; tilemap.adjustXPixels
 ;
-; @in   left    jump to this label if the left column needs loading
+; @in   left    continue to this label if the left column needs loading
 ; @in   right   jump to this label if the right column needs loading
 ; @in   else    jump to this label if no columns need loading
 ;====
@@ -338,7 +448,25 @@
 
     bit tilemap.SCROLL_RIGHT_PENDING_BIT, a
     jp nz, right                            ; scroll right
-    jp left                                 ; otherwise scroll left
+    ; ...otherwise continue to left label
+.endm
+
+;====
+; Jumps to the relevant labels if a row scroll is needed after a call to
+; tilemap.adjustYPixels
+;
+; @in   up      continue to this label if the top row needs loading
+; @in   down    jump to this label if the bottom row needs loading
+; @in   else    jump to this label if no rows need loading
+;====
+.macro "tilemap.ifRowScroll" args up, down, else
+    ld a, (tilemap.ram.flags)
+    and tilemap.Y_SCROLL_RESET_MASK ~ $ff   ; remove other flags (negate reset mask)
+    jp z, else                              ; no row to scroll
+
+    bit tilemap.SCROLL_DOWN_PENDING_BIT, a
+    jp nz, down                             ; scroll down
+    ; ...otherwise continue to 'up' label
 .endm
 
 ;====
@@ -348,4 +476,7 @@
 .macro "tilemap.updateScrollRegisters"
     ld a, (tilemap.ram.xScrollBuffer)
     utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
+
+    ld a, (tilemap.ram.yScrollBuffer)
+    utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER
 .endm

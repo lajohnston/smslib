@@ -91,6 +91,8 @@
         input.readPort1         ; read the state of joypad 1
         input.loadADirX         ; load A with x direction (-1 = left, 1 = right; 0 = none)
         tilemap.adjustXPixels   ; adjust tilemap x by this many pixels
+        input.loadADirY         ; load A with y direction (-1 = up, 1 = down; 0 = none)
+        tilemap.adjustYPixels   ; adjust tilemap y by this many pixels
 
         ;====
         ; Adjust the tilemap pointer based on scroll direction
@@ -108,6 +110,23 @@
                 ; Inc ram.tilemapPointer by 1 tile (2-bytes)
                 inc (hl)
                 inc (hl)
+        +:
+
+        tilemap.ifRowScroll _up, _down, +
+            _up:
+                ; Subtract 1 row from ram.tilemapPointer
+                ld hl, (ram.tilemapPointer) ; load current pointer
+                ld de, -MAP_COLS * 2        ; bytes to subtract (2-bytes per tile)
+                add hl, de                  ; add (subtract) row
+                ld (ram.tilemapPointer), hl ; store result
+                jp +                        ; jump over _down handler
+
+            _down:
+                ; Add 1 row to ram.tilemapPointer
+                ld hl, (ram.tilemapPointer) ; load current pointer
+                ld de, MAP_COLS * 2         ; bytes to add (2-bytes per tile)
+                add hl, de                  ; add row
+                ld (ram.tilemapPointer), hl ; store result
         +:
 
         jp update   ; start loop again

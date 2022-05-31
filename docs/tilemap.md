@@ -113,15 +113,30 @@ The tilemap supports 8-direction scrolling. This is optimised for use with a max
 tilemap.reset           ; initialise RAM and scroll registers to 0
 
 ; Adjust once per frame
-ld a, 1                 ; amount to scroll (1 pixel right)
+ld a, 1                 ; amount to scroll x (1 pixel right)
 tilemap.adjustXPixels   ; positive values scroll right; negative scroll left
+
+ld a, -1                ; amount to scroll y (1 pixel up)
+tilemap.adjustYPixels   ; positive values scroll down; negative scroll up
 
 ; Detect if a column needs scrolling
 tilemap.ifColScroll left, right, +
     left:
         ; handle left scroll
+        jp +    ; (skip right label)
+
     right:
         ; handle right scroll
++:
+
+; Detect if a row needs scrolling
+tilemap.ifColScroll up, down, +
+    up:
+        ; handle up scroll
+        jp +    ; (skip down label)
+
+    down:
+        ; handle down scroll
 +:
 
 ; During VBlank
