@@ -58,8 +58,8 @@
         tilemap.reset               ; set scroll values to 0
         tilemap.setColRow 0, 0      ; set write address to col 0, row 0
         ld hl, (ram.tilemapPointer) ; load pointer to top left of our tilemap
-        ld b, tilemap.VISIBLE_ROWS  ; number of rows to output
-        ld a, MAP_COLS * 2          ; number of full columns * 2 (2 bytes per tile)
+        ld d, tilemap.VISIBLE_ROWS  ; number of rows to output
+        ld e, MAP_COLS * 2          ; number of full columns * 2 (2 bytes per tile)
         tilemap.loadRawRows         ; load a full screen of rows
 
         ; Enable the display

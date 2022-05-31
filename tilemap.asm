@@ -235,25 +235,23 @@
 ; Load tile data from an uncompressed map. Each tile is 2-bytes - the first is
 ; the tileRef and the second is the tile's attributes.
 ;
-; @in   a   the amount to increment the pointer by each row i.e. the number of
+; @in   d   number of rows to load
+; @in   e   the amount to increment the pointer by each row i.e. the number of
 ;           columns in the full map * 2 (as each tile is 2-bytes)
-; @in   b   number of rows to load
 ; @in   hl  pointer to the first tile to load
 ;====
 .section "tilemap.loadRawRows"
     _nextRow:
-        ld ixh, a               ; preserve A
-            utils.math.addHLA   ; add 1 row to full tilemap pointer
-        ld a, ixh               ; restore A
+        ld a, e                 ; load row width into A
+        utils.math.addHLA       ; add 1 row to full tilemap pointer
 
     tilemap.loadRawRows:
         push hl                 ; preserve HL
-        ld ixl, b               ; preserve B
             tilemap.loadRawRow  ; load a row of data
-        ld b, ixl               ; restore B
         pop hl                  ; restore HL
 
-        djnz _nextRow
+        dec d
+        jp nz, _nextRow
         ret
 .ends
 
