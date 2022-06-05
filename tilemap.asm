@@ -72,6 +72,12 @@
 .define tilemap.X_SCROLL_RESET_MASK %11110011
 .define tilemap.Y_SCROLL_RESET_MASK %11111100
 
+; OR masks to set the scroll flags
+.define tilemap.SCROLL_UP_SET_MASK      %00000001
+.define tilemap.SCROLL_DOWN_SET_MASK    %00000010
+.define tilemap.SCROLL_LEFT_SET_MASK    %00000100
+.define tilemap.SCROLL_RIGHT_SET_MASK   %00001000
+
 ;====
 ; RAM
 ;====
@@ -265,12 +271,15 @@
 ;====
 ; Set the pending y-axis scroll direction
 ;
-; @in   hl          pointer to tilemap.ram.flags
-; @in   direction   tilemap.SCROLL_UP_PENDING_BIT or
-;                   tilemap.SCROLL_DOWN_PENDING_BIT
+; @in   hl                  pointer to tilemap.ram.flags
+; @in   setDirectionMask    tilemap.SCROLL_UP_SET_MASK or
+;                           tilemap.SCROLL_DOWN_SET_MASK
 ;====
-.macro "tilemap._setYAxisScroll" args direction
-    set direction, (hl)
+.macro "tilemap._setYAxisScroll" args setDirectionMask
+    ld a, (hl)                      ; load flags into A
+    and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
+    or setDirectionMask             ; set new scroll flag
+    ld (hl), a                      ; store result
 .endm
 
 ;====
@@ -307,16 +316,21 @@
 
         ; Set left or right column scroll flag
         _columnScroll:
-            inc hl              ; point to flags
+            inc hl                          ; point to flags
+            ld a, (hl)                      ; load flags into A
+            and tilemap.X_SCROLL_RESET_MASK ; reset previous x scroll flags
+
             bit 7, b            ; check sign bit of (negated) xAdjust in B
             jp z, +
                 ; xAdjust was positive - scroll right
-                set tilemap.SCROLL_RIGHT_PENDING_BIT, (hl)
+                or tilemap.SCROLL_RIGHT_SET_MASK
+                ld (hl), a
                 ret
             +:
 
             ; xAdjust was negative - scroll left
-            set tilemap.SCROLL_LEFT_PENDING_BIT, (hl)
+            or tilemap.SCROLL_LEFT_SET_MASK
+            ld (hl), a
             ret
 .ends
 
@@ -366,12 +380,12 @@
         bit 7, b            ; check sign bit of yAdjust in B
         jp z, +
             ; yAdjust was negative - scroll up
-            tilemap._setYAxisScroll tilemap.SCROLL_UP_PENDING_BIT
+            tilemap._setYAxisScroll tilemap.SCROLL_UP_SET_MASK
             ret
         +:
 
         ; yAdjust was positive - scroll down
-        tilemap._setYAxisScroll tilemap.SCROLL_DOWN_PENDING_BIT
+        tilemap._setYAxisScroll tilemap.SCROLL_DOWN_SET_MASK
         ret
 
     ;===
@@ -384,18 +398,18 @@
         jp z, _wrapOverflow ; jp if yAdjust was positive, so value overflowed
 
         _wrapUnderflow:
-            ; Sub 32 bring underflow back into range; -1/255 becomes 223
+            ; Sub 32 brings underflow back into range; -1/255 becomes 223
             sub 32
             ld (hl), a      ; store new yScrollBuffer
             dec hl          ; point to flags
-            tilemap._setYAxisScroll tilemap.SCROLL_UP_PENDING_BIT
+            tilemap._setYAxisScroll tilemap.SCROLL_UP_SET_MASK
             ret
 
         _wrapOverflow:
             sub 224             ; sub 224; 224 becomes 0
             ld (hl), a          ; store updated yScrollBuffer
             dec hl              ; point to flags
-            tilemap._setYAxisScroll tilemap.SCROLL_DOWN_PENDING_BIT
+            tilemap._setYAxisScroll tilemap.SCROLL_DOWN_SET_MASK
             ret
 .ends
 
