@@ -85,6 +85,10 @@
     tilemap.ram.xScrollBuffer:  db  ; VDP x-axis scroll register buffer
     tilemap.ram.flags:          db  ; see constants for flag definitions
     tilemap.ram.yScrollBuffer:  db  ; VDP y-axis scroll register buffer
+
+    ; VRAM column and row to write next
+    tilemap.ram.vramCol:        db
+    tilemap.ram.vramRow:        db
 .ends
 
 ;====
@@ -96,6 +100,8 @@
     ld (tilemap.ram.xScrollBuffer), a
     ld (tilemap.ram.flags), a
     ld (tilemap.ram.yScrollBuffer), a
+    ld (tilemap.ram.vramCol), a
+    ld (tilemap.ram.vramRow), a
 
     ; Zero scroll registers
     tilemap.updateScrollRegisters
@@ -269,17 +275,32 @@
 .endm
 
 ;====
-; Set the pending y-axis scroll direction
+; Set the y-axis row scroll direction
 ;
 ; @in   hl                  pointer to tilemap.ram.flags
 ; @in   setDirectionMask    tilemap.SCROLL_UP_SET_MASK or
 ;                           tilemap.SCROLL_DOWN_SET_MASK
+; @in   vramRow             (optional) the value to set the vram row
 ;====
-.macro "tilemap._setYAxisScroll" args setDirectionMask
+.macro "tilemap._setRowScroll" args setDirectionMask vramRow
     ld a, (hl)                      ; load flags into A
     and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
     or setDirectionMask             ; set new scroll flag
     ld (hl), a                      ; store result
+
+    ld hl, tilemap.ram.vramRow      ; point to vram row
+
+    .ifdef vramRow
+        ld (hl), vramRow
+    .else
+        .if setDirectionMask == tilemap.SCROLL_UP_SET_MASK
+            ; Scrolling up - decrement VRAM row
+            dec (hl)
+        .else
+            ; Scrolling down - increment VRAM row
+            inc (hl)
+        .endif
+    .endif
 .endm
 
 ;====
@@ -325,12 +346,20 @@
                 ; xAdjust was positive - scroll right
                 or tilemap.SCROLL_RIGHT_SET_MASK
                 ld (hl), a
+
+                ; Increment VRAM column
+                ld hl, tilemap.ram.vramCol
+                inc (hl)
                 ret
             +:
 
             ; xAdjust was negative - scroll left
             or tilemap.SCROLL_LEFT_SET_MASK
             ld (hl), a
+
+            ; Decrement VRAM column
+            ld hl, tilemap.ram.vramCol
+            dec (hl)
             ret
 .ends
 
@@ -380,12 +409,12 @@
         bit 7, b            ; check sign bit of yAdjust in B
         jp z, +
             ; yAdjust was negative - scroll up
-            tilemap._setYAxisScroll tilemap.SCROLL_UP_SET_MASK
+            tilemap._setRowScroll tilemap.SCROLL_UP_SET_MASK
             ret
         +:
 
         ; yAdjust was positive - scroll down
-        tilemap._setYAxisScroll tilemap.SCROLL_DOWN_SET_MASK
+        tilemap._setRowScroll tilemap.SCROLL_DOWN_SET_MASK
         ret
 
     ;===
@@ -402,14 +431,14 @@
             sub 32
             ld (hl), a      ; store new yScrollBuffer
             dec hl          ; point to flags
-            tilemap._setYAxisScroll tilemap.SCROLL_UP_SET_MASK
+            tilemap._setRowScroll tilemap.SCROLL_UP_SET_MASK 27
             ret
 
         _wrapOverflow:
             sub 224             ; sub 224; 224 becomes 0
             ld (hl), a          ; store updated yScrollBuffer
             dec hl              ; point to flags
-            tilemap._setYAxisScroll tilemap.SCROLL_DOWN_SET_MASK
+            tilemap._setRowScroll tilemap.SCROLL_DOWN_SET_MASK 0
             ret
 .ends
 
