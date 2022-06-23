@@ -106,7 +106,7 @@
 ; @out  a               -1 = left, 1 = right, 0 = none. This value will be
 ;                       multiplied by the multiplier at assemble time
 ;====
-.macro "input.loadADirX" args multiplier
+.macro "input.loadADirX" isolated args multiplier
     .ifndef multiplier
         .redefine multiplier 1
     .endif
