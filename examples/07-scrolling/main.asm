@@ -60,7 +60,7 @@
         ld hl, (ram.tilemapPointer) ; load pointer to top left of our tilemap
         ld d, tilemap.VISIBLE_ROWS  ; number of rows to output
         ld e, MAP_COLS * 2          ; number of full columns * 2 (2 bytes per tile)
-        tilemap.loadRawRows         ; load a full screen of rows
+        tilemap.loadRows            ; load a full screen of rows
 
         ; Enable the display
         vdp.startBatch

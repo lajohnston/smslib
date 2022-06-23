@@ -65,7 +65,7 @@ tilemap.loadBytes message 12 (tilemap.FLIP_X|tilemap.FLIP_Y)
 
 ## Load tiles
 
-### tilemap.loadRawRow
+### tilemap.loadRow
 
 Load 32 uncompressed tiles.
 
@@ -77,10 +77,10 @@ myRow:
 
 tilemap.setColRow 0, 0  ; write from column 0, row 0 onwards
 ld hl, myRow            ; point to data
-tilemap.loadRawRow      ; load data (32 tiles)
+tilemap.loadRow         ; load data (32 tiles)
 ```
 
-### tilemap.loadRawRows
+### tilemap.loadRows
 
 Load multiple rows from an uncompressed tilemap. The visible tilemap is 32 tiles wide (columns) by 25 tiles high (rows) but the full map can be larger than the screen.
 
@@ -100,7 +100,7 @@ ld hl, myTilemap            ; point to top left corner to load
 ld d, tilemap.VISIBLE_ROWS  ; number of rows to load; all visible rows (25)
 ld e, tilemap.MAP_COLS * 2  ; number of full map columns * 2 (each tile is 2 bytes)
 
-tilemap.loadRawRows         ; load rows
+tilemap.loadRows            ; load row data
 
 ```
 

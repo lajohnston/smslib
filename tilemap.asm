@@ -238,7 +238,7 @@
 ;
 ; @in   hl  pointer to the raw data
 ;====
-.macro "tilemap.loadRawRow"
+.macro "tilemap.loadRow"
     ; Output 1 row of data
     utils.outiBlock.send tilemap.ROW_SIZE_BYTES
 .endm
@@ -252,14 +252,14 @@
 ;           columns in the full map * 2 (as each tile is 2-bytes)
 ; @in   hl  pointer to the first tile to load
 ;====
-.section "tilemap.loadRawRows"
+.section "tilemap.loadRows"
     _nextRow:
         ld a, e                 ; load row width into A
         utils.math.addHLA       ; add 1 row to full tilemap pointer
 
-    tilemap.loadRawRows:
+    tilemap.loadRows:
         push hl                 ; preserve HL
-            tilemap.loadRawRow  ; load a row of data
+            tilemap.loadRow     ; load a row of data
         pop hl                  ; restore HL
 
         dec d
@@ -268,10 +268,10 @@
 .ends
 
 ;====
-; Alias for tilemap.loadRawRows
+; Alias for tilemap.loadRows
 ;====
-.macro "tilemap.loadRawRows"
-    call tilemap.loadRawRows
+.macro "tilemap.loadRows"
+    call tilemap.loadRows
 .endm
 
 ;====
