@@ -92,6 +92,9 @@
     ; VRAM column and row to write next (top left visible tile)
     tilemap.ram.vramCol:        db
     tilemap.ram.vramRow:        db
+
+    ; VRAM write command/address for row scrolling
+    tilemap.ram.vramRowWrite:   dw
 .ends
 
 ;====
@@ -105,6 +108,9 @@
     ld (tilemap.ram.yScrollBuffer), a
     ld (tilemap.ram.vramCol), a
     ld (tilemap.ram.vramRow), a
+
+    ld (tilemap.ram.vramRowWrite), a
+    ld (tilemap.ram.vramRowWrite + 1), a
 
     ; Zero scroll registers
     tilemap.updateScrollRegisters
@@ -475,6 +481,73 @@
 ;====
 .macro "tilemap.adjustYPixels"
     call tilemap._adjustYPixels
+.endm
+
+;====
+; Calculates the adjustments made with tilemap.adjustXPixels/adjustYPixels
+; and applies them to the RAM variables.
+;
+; Sets tilemap.ram.vramRowWrite to the VRAM write address if up/down scroll
+; flags are set, otherwise it's left unchanged
+;====
+.section "tilemap._prepScroll" free
+    tilemap._prepScroll:
+        ld a, (tilemap.ram.flags)   ; load scroll flags in A
+        ld c, a                     ; preserve flags in C
+
+    _updateRowScroll:
+        ; Check UP scroll
+        bit tilemap.SCROLL_UP_PENDING_BIT, c
+        jp z, +
+            ; Scrolling up - set row to vramRow, and col to 0
+            ld a, (tilemap.ram.vramRow) ; load vram row
+            rrca                    ; rotate right (y0---y4y3y2y1)
+            rrca                    ; rotate right again (y1y0---y4y3y2)
+            ld b, a                 ; preserve in B
+            and %00000111           ; mask y4,y3,y2
+            or %01000000 | >tilemap.vramAddress    ; add base address + write command
+            ld h, a                 ; store in H
+            ld a, b                 ; restore rotated Y (y1y0---y4y3y2)
+            and %11000000           ; mask y1y0
+            ld l, a                 ; store in L
+            ld (tilemap.ram.vramRowWrite), hl   ; set vramRowWrite
+            ret
+        +:
+
+        ; Check down scroll
+        bit tilemap.SCROLL_DOWN_PENDING_BIT, c
+        jp z, +
+            ; Scrolling down
+            ; Set col to 0; Set row to (vramRow + 24) mod total rows;
+            ld a, (tilemap.ram.vramRow) ; load vram row
+            add 24                      ; add 24 rows
+            cp tilemap.ROWS             ; compare with number of rows
+            jp c, ++
+                ; Number is greater than number of rows
+                sub tilemap.ROWS        ; wrap number back to 0
+            ++:
+
+            rrca                    ; rotate row/y right
+            rrca                    ; rotate right again (y1y0---y4y3y2)
+            ld b, a                 ; preserve in B
+            and %00000111           ; mask y4,y3,y2
+            or %01000000 | >tilemap.vramAddress ; add base address + write command
+            ld h, a                 ; store in H
+            ld a, b                 ; restore rotated Y (y1y0---y4y3y2) into A
+            and %11000000           ; mask y1y0
+            ld l, a                 ; store in L
+            ld (tilemap.ram.vramRowWrite), hl   ; set vramRowWrite
+        +:
+
+        ret
+.ends
+
+;====
+; Calculates the adjustments made with tilemap.adjustXPixels/adjustYPixels
+; and applies them to the RAM variables
+;====
+.macro "tilemap.prepScroll"
+    call tilemap._prepScroll
 .endm
 
 ;====
