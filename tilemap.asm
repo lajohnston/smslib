@@ -57,10 +57,13 @@
 ; Constants
 ;====
 .define tilemap.VDP_DATA_PORT $be
-.define tilemap.SCREEN_TILE_WIDTH 32
-.define tilemap.SLOT_SIZE 2
+.define tilemap.ROWS 28
+.define tilemap.COLS 32
 .define tilemap.VISIBLE_ROWS 25
-.define tilemap.ROW_SIZE_BYTES tilemap.SCREEN_TILE_WIDTH * tilemap.SLOT_SIZE
+.define tilemap.VISIBLE_COLS 32 ; note: includes the hidden left-most column
+.define tilemap.TILE_SIZE_BYTES 2
+.define tilemap.COL_SIZE_BYTES tilemap.VISIBLE_ROWS * tilemap.TILE_SIZE_BYTES
+.define tilemap.ROW_SIZE_BYTES tilemap.COLS * 2
 
 ; Bit locations of flags within tilemap.ram.flags
 .define tilemap.SCROLL_UP_PENDING_BIT       0
@@ -86,7 +89,7 @@
     tilemap.ram.flags:          db  ; see constants for flag definitions
     tilemap.ram.yScrollBuffer:  db  ; VDP y-axis scroll register buffer
 
-    ; VRAM column and row to write next
+    ; VRAM column and row to write next (top left visible tile)
     tilemap.ram.vramCol:        db
     tilemap.ram.vramRow:        db
 .ends
@@ -113,7 +116,7 @@
 ; @in   slotNumber  0 is top left tile
 ;====
 .macro "tilemap.setSlot" args slotNumber
-    utils.vdp.prepWrite (tilemap.vramAddress + (slotNumber * tilemap.SLOT_SIZE))
+    utils.vdp.prepWrite (tilemap.vramAddress + (slotNumber * tilemap.TILE_SIZE_BYTES))
 .endm
 
 ;====
@@ -123,7 +126,7 @@
 ; @in   row     row number (y)
 ;====
 .macro "tilemap.setColRow" args colX rowY
-    tilemap.setSlot ((rowY * tilemap.SCREEN_TILE_WIDTH) + colX)
+    tilemap.setSlot ((rowY * tilemap.COLS) + colX)
 .endm
 
 ;====
