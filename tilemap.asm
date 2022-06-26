@@ -59,7 +59,7 @@
 .define tilemap.VDP_DATA_PORT $be
 .define tilemap.ROWS 28
 .define tilemap.COLS 32
-.define tilemap.VISIBLE_ROWS 25
+.define tilemap.VISIBLE_ROWS 24
 .define tilemap.VISIBLE_COLS 32 ; note: includes the hidden left-most column
 .define tilemap.TILE_SIZE_BYTES 2
 .define tilemap.COL_SIZE_BYTES tilemap.VISIBLE_ROWS * tilemap.TILE_SIZE_BYTES
@@ -278,20 +278,6 @@
 .endm
 
 ;====
-; Set the y-axis row scroll direction
-;
-; @in   hl                  pointer to tilemap.ram.flags
-; @in   setDirectionMask    tilemap.SCROLL_UP_SET_MASK or
-;                           tilemap.SCROLL_DOWN_SET_MASK
-;====
-.macro "tilemap._setRowScroll" args setDirectionMask
-    ld a, (hl)                      ; load flags into A
-    and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
-    or setDirectionMask             ; set new scroll flag
-    ld (hl), a                      ; store result
-.endm
-
-;====
 ; See tilemap.adjustXPixels
 ;
 ; @in   a   the number of x pixels to adjust. Positive values scroll right in
@@ -344,7 +330,9 @@
 .ends
 
 ;====
-; See tilemap.adjustYPixels
+; See tilemap.adjustYPixels macro
+;
+; - Updates tilemap.ram.flags with relevant up/down scroll flags
 ;
 ; @in   a   the number of y pixels to adjust. Positive values scroll down in
 ;           the game world (shifting the tiles up). Negative values scroll
@@ -355,71 +343,98 @@
         or a                    ; analyse yAdjust
         jp z, _noRowScroll      ; jump if nothing to adjust
 
-        ; Adjust yScrollBuffer
-        ld b, a                 ; preserve yAdjust in B
-        ld hl, tilemap.ram.yScrollBuffer
+        ld hl, tilemap.ram.yScrollBuffer    ; point to yScrollBuffer
         ld c, (hl)              ; load current yScrollBuffer into C
+        jp p, _movingDown       ; jump to _movingDown if yAdjust is positive
+
+    _movingUp:
         add a, c                ; add yAdjust to yScrollBuffer
+        cp 224                  ; check if value has gone out of 0-223 range
+        jp c, +
+            ; Value is >= 224 (out of range)
+            sub 32                      ; bring into range (-1/255 becomes 223)
+            ld (hl), a                  ; store new yScrollBuffer
 
-        ; Check if value has gone out of 0-223 range
-        cp 224                  ; compare with 224
-        jp nc, _wrapValue       ; jump if value is > 223 (out of range)
-
-        ; Check if row scroll needed (if upper 5-bits change; every 8 pixels)
-        _checkRowScroll:
-            ld (hl), a              ; store new yScrollBuffer
+            ; Check if scroll needed
             xor c                   ; compare yScrollBuffer against old value in C
             and %11111000           ; zero lower bits (we only care about upper 5)
-            jp nz, _rowScroll       ; scroll if not zero (upper 5 bits are different)
+            jp z, _noRowScroll      ; scroll if not zero (upper 5 bits are different)
 
-            _noRowScroll:
-                ld hl, tilemap.ram.flags
-                ld a, tilemap.Y_SCROLL_RESET_MASK
-                and (hl)            ; reset Y scroll flags with mask
-                ld (hl), a          ; update flags
-                ret
-
-    ;===
-    ; When a new row needs scrolling
-    ; @in   b   the yAdjust value
-    ; @in   hl  pointer to yScrollBuffer
-    ;===
-    _rowScroll:
-        dec hl              ; point to flags
-        bit 7, b            ; check sign bit of yAdjust in B
-        jp z, +
-            ; yAdjust was negative - scroll up
-            tilemap._setRowScroll tilemap.SCROLL_UP_SET_MASK
+            ; Update scroll flags
+            ld hl, tilemap.ram.flags        ; point to flags
+            ld a, (hl)                      ; load flags into A
+            and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
+            or tilemap.SCROLL_UP_SET_MASK   ; set new scroll flag
+            ld (hl), a                      ; store result
             ret
         +:
 
-        ; yAdjust was positive - scroll down
-        tilemap._setRowScroll tilemap.SCROLL_DOWN_SET_MASK
+        ; Value is in range
+        ld (hl), a                          ; store new yScrollBuffer
+
+        ; If upper 5 bits change, row scroll needed
+        xor c                   ; compare yScrollBuffer against old value in C
+        and %11111000           ; zero lower bits (we only care about upper 5)
+        jp z, _noRowScroll      ; jump if zero (if upper 5 bits are the same)
+
+        ; Update scroll flags
+        dec hl                          ; point to flags
+        ld a, (hl)                      ; load flags into A
+        and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
+        or tilemap.SCROLL_UP_SET_MASK   ; set new scroll flag
+        ld (hl), a                      ; store result
         ret
 
-    ;===
-    ; When the yScrollBuffer value has gone out of the 0-223 range
-    ; @in   b   the yAdjust value
-    ; @in   hl  pointer to yScrollBuffer
-    ;===
-    _wrapValue:
-        bit 7, b            ; check sign bit of yAdjust
-        jp z, _wrapOverflow ; jp if yAdjust was positive, so value overflowed
+    _movingDown:
+        add a, c                    ; add yAdjust to yScrollBuffer
+        cp 224                      ; check if value has gone out of 0-223 range
+        jp c, +
+            ; Value is >= 224 (out of range)
+            sub 224                 ; sub 224 (i.e. 224 becomes 0)
+            ld (hl), a              ; store new yScrollBuffer
 
-        _wrapUnderflow:
-            ; Sub 32 brings underflow back into range; -1/255 becomes 223
-            sub 32
-            ld (hl), a      ; store new yScrollBuffer
-            dec hl          ; point to flags
-            tilemap._setRowScroll tilemap.SCROLL_UP_SET_MASK
-            ret
+            ; Check if row scroll needed. Offset by 1 to bring into 0-7 range
+            ; If upper 5 bits change, row scroll needed
+            dec a                   ; offset a
+            dec c                   ; offset c
+            xor c                   ; compare yScrollBuffer against old value in C
+            and %11111000           ; zero lower bits (we only care about upper 5)
+            jp z, _noRowScroll      ; scroll if not zero (upper 5 bits are different)
 
-        _wrapOverflow:
-            sub 224             ; sub 224; 224 becomes 0
-            ld (hl), a          ; store updated yScrollBuffer
-            dec hl              ; point to flags
-            tilemap._setRowScroll tilemap.SCROLL_DOWN_SET_MASK
+            ; Update scroll flags
+            ld hl, tilemap.ram.flags        ; point to flags
+            ld a, (hl)                      ; load flags into A
+            and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
+            or tilemap.SCROLL_DOWN_SET_MASK ; set new scroll flag
+            ld (hl), a                      ; store result
             ret
+        +:
+
+        ; Value is in range
+        ld (hl), a              ; store new yScrollBuffer
+
+        ; Check if row scroll needed. Offset by 1 to bring into 0-7 range
+        ; If upper 5 bits change, row scroll needed
+        dec a                   ; offset a
+        dec c                   ; offset c
+        xor c                   ; compare yScrollBuffer against old value in C
+        and %11111000           ; zero lower bits (we only care about upper 5)
+        jp z, _noRowScroll      ; scroll if not zero (upper 5 bits are different)
+
+        ; Update scroll flags
+        dec hl                  ; point to flags
+        ld a, (hl)                      ; load flags into A
+        and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
+        or tilemap.SCROLL_DOWN_SET_MASK ; set new scroll flag
+        ld (hl), a                      ; store result
+        ret
+
+    _noRowScroll:
+        ld hl, tilemap.ram.flags
+        ld a, tilemap.Y_SCROLL_RESET_MASK
+        and (hl)            ; reset Y scroll flags with mask
+        ld (hl), a          ; update flags
+        ret
 .ends
 
 ;====
