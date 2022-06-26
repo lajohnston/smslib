@@ -657,3 +657,15 @@
     ld a, (tilemap.ram.yScrollBuffer)
     utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER
 .endm
+
+;====
+; Sets the VRAM write address to the row that needs scrolling. If no row needs
+; scrolling will just set the address to the last row scrolled
+;
+; @out  VRAM write address  write address for the row (column 0)
+; @out  c                   VDP data port
+;====
+.macro "tilemap.setRowScrollSlot"
+    ld hl, (tilemap.ram.vramRowWrite)
+    utils.vdp.prepWriteHL
+.endm

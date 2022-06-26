@@ -126,6 +126,18 @@
         ; Apply the buffered scroll registers
         tilemap.updateScrollRegisters
 
+        tilemap.ifRowScroll, _up, _down, +
+            _up:
+                tilemap.setRowScrollSlot
+                ld hl, scrollUpRow
+                tilemap.loadRow
+                jp +
+            _down:
+                tilemap.setRowScrollSlot
+                ld hl, scrollDownRow
+                tilemap.loadRow
+        +:
+
         ; Mark the end of the VBlank handler
         interrupts.endVBlank
 .ends
