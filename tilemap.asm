@@ -89,10 +89,6 @@
     tilemap.ram.flags:          db  ; see constants for flag definitions
     tilemap.ram.yScrollBuffer:  db  ; VDP y-axis scroll register buffer
 
-    ; VRAM column and row to write next (top left visible tile)
-    tilemap.ram.vramCol:        db
-    tilemap.ram.vramRow:        db
-
     ; VRAM write command/address for row scrolling
     tilemap.ram.vramRowWrite:   dw
 .ends
@@ -106,8 +102,6 @@
     ld (tilemap.ram.xScrollBuffer), a
     ld (tilemap.ram.flags), a
     ld (tilemap.ram.yScrollBuffer), a
-    ld (tilemap.ram.vramCol), a
-    ld (tilemap.ram.vramRow), a
 
     ld (tilemap.ram.vramRowWrite), a
     ld (tilemap.ram.vramRowWrite + 1), a
@@ -289,27 +283,12 @@
 ; @in   hl                  pointer to tilemap.ram.flags
 ; @in   setDirectionMask    tilemap.SCROLL_UP_SET_MASK or
 ;                           tilemap.SCROLL_DOWN_SET_MASK
-; @in   vramRow             (optional) the value to set the vram row
 ;====
-.macro "tilemap._setRowScroll" args setDirectionMask vramRow
+.macro "tilemap._setRowScroll" args setDirectionMask
     ld a, (hl)                      ; load flags into A
     and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
     or setDirectionMask             ; set new scroll flag
     ld (hl), a                      ; store result
-
-    ld hl, tilemap.ram.vramRow      ; point to vram row
-
-    .ifdef vramRow
-        ld (hl), vramRow
-    .else
-        .if setDirectionMask == tilemap.SCROLL_UP_SET_MASK
-            ; Scrolling up - decrement VRAM row
-            dec (hl)
-        .else
-            ; Scrolling down - increment VRAM row
-            inc (hl)
-        .endif
-    .endif
 .endm
 
 ;====
@@ -355,20 +334,12 @@
                 ; xAdjust was positive - scroll right
                 or tilemap.SCROLL_RIGHT_SET_MASK
                 ld (hl), a
-
-                ; Increment VRAM column
-                ld hl, tilemap.ram.vramCol
-                inc (hl)
                 ret
             +:
 
             ; xAdjust was negative - scroll left
             or tilemap.SCROLL_LEFT_SET_MASK
             ld (hl), a
-
-            ; Decrement VRAM column
-            ld hl, tilemap.ram.vramCol
-            dec (hl)
             ret
 .ends
 
@@ -440,14 +411,14 @@
             sub 32
             ld (hl), a      ; store new yScrollBuffer
             dec hl          ; point to flags
-            tilemap._setRowScroll tilemap.SCROLL_UP_SET_MASK 27
+            tilemap._setRowScroll tilemap.SCROLL_UP_SET_MASK
             ret
 
         _wrapOverflow:
             sub 224             ; sub 224; 224 becomes 0
             ld (hl), a          ; store updated yScrollBuffer
             dec hl              ; point to flags
-            tilemap._setRowScroll tilemap.SCROLL_DOWN_SET_MASK 0
+            tilemap._setRowScroll tilemap.SCROLL_DOWN_SET_MASK
             ret
 .ends
 
@@ -500,9 +471,14 @@
         bit tilemap.SCROLL_UP_PENDING_BIT, c
         jp z, +
             ; Scrolling up - set row to vramRow, and col to 0
-            ld a, (tilemap.ram.vramRow) ; load vram row
-            rrca                    ; rotate right (y0---y4y3y2y1)
-            rrca                    ; rotate right again (y1y0---y4y3y2)
+            ld a, (tilemap.ram.yScrollBuffer)   ; load scroll value
+
+            ; Divide by 8 (3x rrca) and rotate right twice (2x rrca)
+            ; 5x rrca is equivalent to 3x rlca
+            rlca
+            rlca
+            rlca                    ; value is now y1y0---y4y3y2
+
             ld b, a                 ; preserve in B
             and %00000111           ; mask y4,y3,y2
             or %01000000 | >tilemap.vramAddress    ; add base address + write command
@@ -519,12 +495,16 @@
         jp z, +
             ; Scrolling down
             ; Set col to 0; Set row to (vramRow + 24) mod total rows;
-            ld a, (tilemap.ram.vramRow) ; load vram row
-            add 24                      ; add 24 rows
-            cp tilemap.ROWS             ; compare with number of rows
+            ld a, (tilemap.ram.yScrollBuffer)
+            rrca                    ; divide by 2
+            rrca                    ; ...divide by 4
+            rrca                    ; ...divide by 8 - lower 5 bits is now row number
+            and %00011111           ; floor result
+            add tilemap.VISIBLE_ROWS; add screen height to point to bottom row
+            cp tilemap.ROWS         ; compare against number of rows
             jp c, ++
-                ; Number is greater than number of rows
-                sub tilemap.ROWS        ; wrap number back to 0
+                ; Row number has overflowed max value - wrap value
+                sub tilemap.ROWS
             ++:
 
             rrca                    ; rotate row/y right
