@@ -40,7 +40,7 @@
 
     ; Output high byte to VDP
     ; OR with $40 (%01000000) to set 6th bit and issue write command
-    ld a, >address | $40
+    ld a, >address | %01000000
     out (utils.vdp.VDP_COMMAND_PORT), a
 
     ; Port to write to
@@ -51,6 +51,27 @@
     .if setPort == 1
         ld c, utils.vdp.VDP_DATA_PORT
     .endif
+.endm
+
+;====
+; Prepare a VRAM write to the address stored in HL
+;
+; @in   hl                  VRAM address
+; @out  VRAM write address  VRAM address with write command
+; @out  c                   VDP data port
+;====
+.macro "utils.vdp.prepWriteHL"
+    ; Output low byte to VDP
+    ld a, l
+    out (utils.vdp.VDP_COMMAND_PORT), a ; output low address byte
+
+    ; Output high byte to VDP with 6th bit set (write command)
+    ld a, h
+    or %01000000                        ; set 6th bit (%01------ = write)
+    out (utils.vdp.VDP_COMMAND_PORT), a ; output high address byte + command
+
+    ; Port to write to
+    ld c, utils.vdp.VDP_DATA_PORT
 .endm
 
 ;====
