@@ -570,26 +570,21 @@
 ; @in   right   (optional) jump to this label if the right column needs loading
 ; @in   else    jump to this label if no columns need loading
 ;====
-.macro "tilemap.ifColScroll"
+.macro "tilemap.ifColScroll" args left, right, else
     .if NARGS == 1
         ; Only one argument passed ('else' label)
-        .define \.\@else \1
-
         ld a, (tilemap.ram.flags)               ; load flags
         and tilemap.X_SCROLL_RESET_MASK ~ $ff   ; remove other flags (negate reset mask)
         jp z, \1                                ; jp to else label if no column to scroll
         ; ...otherwise continue
     .elif NARGS == 3
         ; 3 arguments passed (left, right, else)
-        .define \.\@right \2
-        .define \.\@else \3
-
         ld a, (tilemap.ram.flags)               ; load flags
         and tilemap.X_SCROLL_RESET_MASK ~ $ff   ; remove other flags (negate reset mask)
-        jp z, \.\@else                          ; no column to scroll
+        jp z, else                              ; no column to scroll
 
         bit tilemap.SCROLL_RIGHT_PENDING_BIT, a ; check right scroll flag
-        jp nz, \.\@right                        ; jp if scrolling right
+        jp nz, right                            ; jp if scrolling right
         ; ...otherwise continue to left label
     .else
         .print "\ntilemap.ifColScroll requires 1 or 3 arguments (left/right/else, or just else alone)\n\n"
@@ -623,8 +618,6 @@
 .macro "tilemap.ifRowScroll" args up, down, else
     .if NARGS == 1
         ; Only one argument passed ('else' label)
-        .define \.\@else \1
-
         ld a, (tilemap.ram.flags)               ; load flags
         and tilemap.Y_SCROLL_RESET_MASK ~ $ff   ; remove other flags (negate reset mask)
         jp z, \1                                ; jp to else label if no row to scroll
