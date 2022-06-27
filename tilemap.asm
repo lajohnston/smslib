@@ -61,6 +61,8 @@
 .define tilemap.COLS 32
 .define tilemap.VISIBLE_ROWS 24
 .define tilemap.VISIBLE_COLS 32 ; note: includes the hidden left-most column
+.define tilemap.Y_PIXELS tilemap.ROWS * 8
+
 .define tilemap.TILE_SIZE_BYTES 2
 .define tilemap.COL_SIZE_BYTES tilemap.VISIBLE_ROWS * tilemap.TILE_SIZE_BYTES
 .define tilemap.ROW_SIZE_BYTES tilemap.COLS * 2
@@ -349,10 +351,10 @@
 
     _movingUp:
         add a, c                ; add yAdjust to yScrollBuffer
-        cp 224                  ; check if value has gone out of 0-223 range
+        cp tilemap.Y_PIXELS     ; check if value has gone out of range
         jp c, +
-            ; Value is >= 224 (out of range)
-            sub 32                      ; bring into range (-1/255 becomes 223)
+            ; Value is out of range
+            sub 255 - tilemap.Y_PIXELS  ; bring into range (i.e. -1/255 becomes 223)
             ld (hl), a                  ; store new yScrollBuffer
 
             ; Check if scroll needed
@@ -387,10 +389,10 @@
 
     _movingDown:
         add a, c                    ; add yAdjust to yScrollBuffer
-        cp 224                      ; check if value has gone out of 0-223 range
+        cp tilemap.Y_PIXELS         ; check if value has gone out of range
         jp c, +
-            ; Value is >= 224 (out of range)
-            sub 224                 ; sub 224 (i.e. 224 becomes 0)
+            ; Value is out of range
+            sub tilemap.Y_PIXELS    ; bring back into range (i.e. 224 becomes 0)
             ld (hl), a              ; store new yScrollBuffer
 
             ; Check if row scroll needed. Offset by 1 to bring into 0-7 range
