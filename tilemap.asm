@@ -93,6 +93,9 @@
 
     ; VRAM write command/address for row scrolling
     tilemap.ram.vramRowWrite:   dw
+
+    ; Address to call when writing the scrolling column
+    tilemap.ram.colWriteCall:   dw
 .ends
 
 ;====
@@ -107,6 +110,9 @@
 
     ld (tilemap.ram.vramRowWrite), a
     ld (tilemap.ram.vramRowWrite + 1), a
+
+    ld (tilemap.ram.colWriteCall), a
+    ld (tilemap.ram.colWriteCall + 1), a
 
     ; Zero scroll registers
     tilemap.updateScrollRegisters
@@ -504,7 +510,7 @@
             and %11000000           ; mask y1y0
             ld l, a                 ; store in L
             ld (tilemap.ram.vramRowWrite), hl   ; set vramRowWrite
-            ret
+            jp _updateColScroll
         +:
 
         ; Check down scroll
@@ -517,8 +523,8 @@
             rrca                    ; ...divide by 4
             rrca                    ; ...divide by 8 - lower 5 bits is now row number
             and %00011111           ; floor result
-            add tilemap.VISIBLE_ROWS; add screen height to point to bottom row
-            cp tilemap.ROWS         ; compare against number of rows
+            add tilemap.VISIBLE_ROWS; get bottom visible row
+            cp tilemap.ROWS                 ; compare against number of rows
             jp c, ++
                 ; Row number has overflowed max value - wrap value
                 sub tilemap.ROWS
@@ -534,8 +540,37 @@
             and %11000000           ; mask y1y0
             ld l, a                 ; store in L
             ld (tilemap.ram.vramRowWrite), hl   ; set vramRowWrite
+            ; ... continue to _updateColScroll
         +:
 
+    ;===
+    ; @in   c   scroll flags
+    ;===
+    _updateColScroll:
+        ; Check left or right scroll
+        ld a, tilemap.X_SCROLL_RESET_MASK ~ $FF ; negate reset mask
+        and c           ; compare with flags
+        ret z           ; if zero, no column scroll needed
+
+        ; Get top row (yScroll / 8), multiplied by 2 bytes per lookup item
+        ld a, (tilemap.ram.yScrollBuffer)
+        rrca            ; divide by 2
+        rrca            ; divide by 2 again. Bits 1-5 now equal row * 2
+        and %00111110   ; clean value
+
+        ; Point HL to item in lookup table
+        ld hl, tilemap._loadColumnLookup
+        add l           ; add L to row offset in A
+        ld l, a         ; store result in L
+
+        ; Set HL to (HL)
+        ld a, (hl)      ; load low byte into A
+        inc l           ; point to high byte
+        ld h, (hl)      ; load high byte into H
+        ld l, a         ; load low byte into L
+
+        ; Save colWriteCall
+        ld (tilemap.ram.colWriteCall), hl
         ret
 .ends
 
@@ -546,6 +581,54 @@
 .macro "tilemap.prepScroll"
     call tilemap._prepScroll
 .endm
+
+;====
+; Unrolled loop of column tile writes. Call one of the addresses stored in the
+; tilemap._loadColumnLookup lookup table to start from a given row. The loop
+; will wrap back to 0 after the 28th tile is written and continue until all
+; bytes are written
+;
+; @in   hl  pointer to sequential tile data
+; @in   b   bytes to write (number of rows * 2)
+; @in   e   column number * 2
+;====
+.define tilemap._loadColumn_loopSizeBytes 14
+
+.section "tilemap._loadColumn" free
+    tilemap._loadColumn:
+        .repeat tilemap.ROWS index row
+            ; Calculate write address for column 0
+            .redefine tilemap._loadColumn_writeAddress ($4000 | tilemap.vramAddress) + (row * 64)
+
+            ; Set VRAM write address (low byte)
+            ld a, <tilemap._loadColumn_writeAddress
+            or e    ; set column/X
+            out (utils.vdp.VDP_COMMAND_PORT), a ; send to VDP
+
+            ; Set VRAM write address (high byte)
+            ld a, >tilemap._loadColumn_writeAddress
+            out (utils.vdp.VDP_COMMAND_PORT), a ; send to VDP
+
+            ; Output tile
+            outi    ; pattern ref
+            outi    ; tile attributes
+            ret z   ; return if no more tiles to output (b = 0)
+        .endr
+
+        jp tilemap._loadColumn ; continue from row 0
+.ends
+
+;====
+; Lookup table for the loop iterations in tilemap._loadColumn
+; Usage: load HL with tilemap._loadColumnLookup then add row * 2 to L; HL will
+; then point to the address to call in the loop
+;=====
+.section "tilemap._loadColumnLookup" free bitwindow 8
+    tilemap._loadColumnLookup:
+        .repeat tilemap.ROWS index row
+            .dw tilemap._loadColumn + (tilemap._loadColumn_loopSizeBytes * row)
+        .endr
+.ends
 
 ;====
 ; Jumps to the relevant label if a column scroll is needed after a call to
@@ -659,3 +742,31 @@
     ld hl, (tilemap.ram.vramRowWrite)
     utils.vdp.prepWriteHL
 .endm
+
+;====
+; Set the VRAM write address to the column
+;====
+.macro "tilemap.loadScrollCol"
+    ; Get X column offset
+    ld a, (tilemap.ram.xScrollBuffer)   ; load X scroll
+    neg                                 ; negate
+    rrca                                ; divide by 2
+    rrca                                ; divide by 2 (4)
+    and %00111110                       ; clean value
+    ld e, a                             ; load result into E
+
+    ld c, tilemap.VDP_DATA_PORT         ; data port
+    ld b, tilemap.COL_SIZE_BYTES        ; bytes to write
+    ld iy, (tilemap.ram.colWriteCall)   ; load call address in tilemap._loadColumn
+    call tilemap._callIY                ; call address
+.endm
+
+;====
+; Calls the address stored in IY
+;
+; @in   iy  the address to call
+;====
+.section "tilemap._callIY"
+    tilemap._callIY:
+        jp (iy)
+.ends

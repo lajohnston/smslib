@@ -3,7 +3,8 @@
 ;
 ; Part 1 of the tilemap tutorial demonstrates how to scroll the tilemap and
 ; draw new columns and rows when required. Use the input directions to scroll
-; the tilemap
+; the tilemap. This example will simply load rows and columns with arrows
+; pointing to the scroll direction
 ;====
 .sdsctag 1.10, "smslib tilemap scrolling", "smslib tilemap scrolling example", "lajohnston"
 
@@ -49,13 +50,13 @@
             .db 0   ; attributes
         .endr
 
-    scrollLeftColumn:
+    scrollLeftCol:
         .repeat tilemap.VISIBLE_ROWS
             .db LEFT_ARROW_PATTERN
             .db 0   ; attributes
         .endr
 
-    scrollRightColumn:
+    scrollRightCol:
         .repeat tilemap.VISIBLE_ROWS
             .db RIGHT_ARROW_PATTERN
             .db 0   ; attributes
@@ -136,6 +137,16 @@
                 tilemap.setRowScrollSlot
                 ld hl, scrollDownRow
                 tilemap.loadRow
+        +:
+
+        tilemap.ifColScroll _left, _right, +
+            _left:
+                ld hl, scrollLeftCol
+                tilemap.loadScrollCol
+                jp +    ; skip _right
+            _right:
+                ld hl, scrollRightCol
+                tilemap.loadScrollCol
         +:
 
         ; Mark the end of the VBlank handler
