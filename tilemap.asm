@@ -59,7 +59,7 @@
 .define tilemap.VDP_DATA_PORT $be
 .define tilemap.ROWS 28
 .define tilemap.COLS 32
-.define tilemap.VISIBLE_ROWS 24
+.define tilemap.VISIBLE_ROWS 25 ; maximum rows visible at a time (sometimes 24)
 .define tilemap.VISIBLE_COLS 32 ; note: includes the hidden left-most column
 .define tilemap.Y_PIXELS tilemap.ROWS * 8
 
@@ -401,10 +401,7 @@
             sub tilemap.Y_PIXELS    ; bring back into range (i.e. 224 becomes 0)
             ld (hl), a              ; store new yScrollBuffer
 
-            ; Check if row scroll needed. Offset by 1 to bring into 0-7 range
             ; If upper 5 bits change, row scroll needed
-            dec a                   ; offset a
-            dec c                   ; offset c
             xor c                   ; compare yScrollBuffer against old value in C
             and %11111000           ; zero lower bits (we only care about upper 5)
             jp z, _noRowScroll      ; scroll if not zero (upper 5 bits are different)
@@ -421,10 +418,7 @@
         ; Value is in range
         ld (hl), a              ; store new yScrollBuffer
 
-        ; Check if row scroll needed. Offset by 1 to bring into 0-7 range
         ; If upper 5 bits change, row scroll needed
-        dec a                   ; offset a
-        dec c                   ; offset c
         xor c                   ; compare yScrollBuffer against old value in C
         and %11111000           ; zero lower bits (we only care about upper 5)
         jp z, _noRowScroll      ; scroll if not zero (upper 5 bits are different)
@@ -523,7 +517,9 @@
             rrca                    ; ...divide by 4
             rrca                    ; ...divide by 8 - lower 5 bits is now row number
             and %00011111           ; floor result
-            add tilemap.VISIBLE_ROWS; get bottom visible row
+
+            ; Calculate bottom visible row
+            add tilemap.VISIBLE_ROWS - 1    ; exclude buffer row
             cp tilemap.ROWS                 ; compare against number of rows
             jp c, ++
                 ; Row number has overflowed max value - wrap value
