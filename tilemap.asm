@@ -98,6 +98,11 @@
     tilemap.ram.colWriteCall:   dw
 .ends
 
+; Buffer of raw column tiles
+.ramsection "tilemap.ram.colBuffer" slot utils.ram.SLOT
+    tilemap.ram.colBuffer:      dsb tilemap.COL_SIZE_BYTES
+.ends
+
 ;====
 ; Reset the RAM buffers and scroll values to 0
 ;====
