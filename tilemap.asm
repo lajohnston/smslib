@@ -103,6 +103,15 @@
     tilemap.ram.colBuffer:      dsb tilemap.COL_SIZE_BYTES
 .ends
 
+;===
+; Buffer of raw row tiles
+; Contains rowBufferA and rowBufferB, each with a variable length
+; Align to 256 so low byte starts at 0 and can be set to the offset
+;===
+.ramsection "tilemap.ram.rowBuffer" slot utils.ram.SLOT align 256
+    tilemap.ram.rowBuffer:      dsb tilemap.ROW_SIZE_BYTES
+.ends
+
 ;====
 ; Reset the RAM buffers and scroll values to 0
 ;====
@@ -581,6 +590,64 @@
 ;====
 .macro "tilemap.prepScroll"
     call tilemap._prepScroll
+.endm
+
+;====
+; Point DE to rowBufferA in RAM. RowBufferA stores tiles from the left-most
+; visible portion of the screen to the right-edge of the tilemap (col 32).
+;
+; Also returns rowBufferA's length in bytes, i.e. the number of bytes you
+; should write to it (the number of tiles * 2). This is always > 0
+;
+; When writing a row of tiles, start by writing to rowBufferA until it's full
+; then write the remainder in rowBufferB (see tilemapsetRowBufferB).
+;
+; @out  de  pointer to rowBufferA in RAM
+; @out  a   rowBufferA length in bytes; the number of bytes to write to it
+;====
+.macro "tilemap.setRowBufferA"
+    ; Get offset to rowBufferA (CEILING(B2/4))
+    ld a, (tilemap.ram.xScrollBuffer)
+    neg             ; xScrollBuffer is negated - negate back
+    dec a           ; offset by 1 pixel so we'll get ceiling rather than floor
+    rrca            ; divide by 2
+    rrca            ; divide by 2 again (4 total); now equals col * 2 bytes
+    add 2           ; cancel offset we added earlier
+    and %00111110   ; clean value and get ceiling value
+
+    ; Set DE to rowBufferA
+    ld d, >tilemap.ram.rowBuffer    ; set D to high byte of rowBuffer
+    ld e, a                         ; set E to rowBufferA offset
+
+    ; Calculate number of bytes to write
+    ld a, tilemap.ROW_SIZE_BYTES
+    sub e                           ; subtract offset in E
+.endm
+
+;====
+; Point DE to rowBufferB in RAM. RowBufferB stores tiles from column 0 of the
+; tilemap to the left-edge of the visible screen.
+;
+; Also returns rowBufferB's length in bytes, i.e. the number of bytes you
+; should write to it (the number of tiles * 2); Unlike rowBufferA, rowBufferB
+; can have a length of zero - always check the Z flag before writing to it
+;
+; When writing a row of tiles, start by writing to rowBufferA until it's full
+; then write the remainder in rowBufferB
+;
+; @out  de  pointer to rowBufferB in RAM
+; @out  a   rowBufferB length in bytes; the number of bytes to write to it
+; @out  f   Z set if there is no data to write to rowBufferB
+;====
+.macro "tilemap.setRowBufferB"
+    ld de, tilemap.ram.rowBuffer    ; rowBufferB always point to beginning
+    ld a, (tilemap.ram.xScrollBuffer)
+    neg             ; xScrollBuffer is negated - negate back
+    dec a           ; offset by 1 pixel so we'll get ceiling rather than floor
+    rrca            ; divide by 2
+    rrca            ; divide by 2 again (4 total); now equals col * 2 bytes
+    add 2           ; cancel offset we added earlier
+    and %00111110   ; clean value and get ceiling value
 .endm
 
 ;====
