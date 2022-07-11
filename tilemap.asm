@@ -365,7 +365,7 @@
         cp tilemap.Y_PIXELS     ; check if value has gone out of range
         jp c, +
             ; Value is out of range
-            sub 255 - tilemap.Y_PIXELS  ; bring into range (i.e. -1/255 becomes 223)
+            sub 256 - tilemap.Y_PIXELS  ; bring into range (i.e. -1/255 becomes 223)
             ld (hl), a                  ; store new yScrollBuffer
 
             ; Check if scroll needed
