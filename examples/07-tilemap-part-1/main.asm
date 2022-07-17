@@ -114,7 +114,7 @@
         input.loadADirY         ; load A with y direction (-1 = up, 1 = down; 0 = none)
         tilemap.adjustYPixels   ; adjust tilemap y by that many pixels
 
-        tilemap.prepScroll      ; calculate these adjustments
+        tilemap.calculateScroll ; calculate these adjustments
 
         jp update               ; start loop again
 .ends

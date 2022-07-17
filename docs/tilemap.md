@@ -119,24 +119,26 @@ tilemap.adjustXPixels   ; positive values scroll right; negative scroll left
 ld a, -1                ; amount to scroll y (1 pixel up)
 tilemap.adjustYPixels   ; positive values scroll down; negative scroll up
 
+tilemap.update          ; calculate these changes
+
 ; Detect if a column needs scrolling
 tilemap.ifColScroll left, right, +
     left:
-        ; handle left scroll
+        ; ...handle left scroll
         jp +    ; (skip right label)
 
     right:
-        ; handle right scroll
+        ; ...handle right scroll
 +:
 
 ; Detect if a row needs scrolling
 tilemap.ifColScroll up, down, +
     up:
-        ; handle up scroll
+        ; ...handle up scroll
         jp +    ; (skip down label)
 
     down:
-        ; handle down scroll
+        ; ...handle down scroll
 +:
 
 ; During VBlank

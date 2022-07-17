@@ -339,8 +339,8 @@
 ; Calculates the adjustments made with tilemap.adjustXPixels/adjustYPixels
 ; and applies them to the RAM variables
 ;====
-.macro "tilemap.prepScroll"
-    call tilemap._prepScroll
+.macro "tilemap.calculateScroll"
+    call tilemap._calculateScroll
 .endm
 
 ;====
@@ -670,8 +670,8 @@
 ; Sets tilemap.ram.vramRowWrite to the VRAM write address if up/down scroll
 ; flags are set, otherwise it's left unchanged
 ;====
-.section "tilemap._prepScroll" free
-    tilemap._prepScroll:
+.section "tilemap._calculateScroll" free
+    tilemap._calculateScroll:
         ld a, (tilemap.ram.flags)   ; load scroll flags in A
         ld c, a                     ; preserve flags in C
 
