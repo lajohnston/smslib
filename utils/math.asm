@@ -290,3 +290,83 @@
 
     utils.math.addHLA   ; normal addition to handle lower byte
 .endm
+
+;====
+; Multiply HL by a given constant. Only certain numbers are currently supported.
+; It's more efficient to keep multipliers to: 2, 4, 8, 16, 32, 64. Other
+; multipliers are less efficient and will clobber BC.
+;
+; @in   hl          the value to multiply
+; @in   multiplier  the constant to multiply by
+; @out  hl          the result
+;
+; @source http://www.cpctech.cpc-live.com/docs/mult.html
+;====
+.macro "utils.math.multiplyHL" args multiplier
+    .if multiplier == 1
+        ; Do nothing
+    .elif multiplier == 2
+        add hl, hl  ; x2
+    .elif multiplier == 3
+        ld b, h     ; preserve HLx1 in BC
+        ld c, l     ; "
+        add hl, hl  ; x2
+        add hl, bc  ; add x1 to get x3
+    .elif multiplier == 4
+        add hl, hl  ; x2
+        add hl, hl  ; x4
+    .elif multiplier == 5
+        ld b, h     ; preserve HL in BC
+        ld c, l     ; "
+        add hl, hl  ; x2
+        add hl, hl  ; x4
+        add hl, bc  ; add HLx1 to get x5
+    .elif multiplier == 6
+        add hl, hl  ; x2
+        ld b, h     ; preserve HLx2 in BC
+        ld c, l     ; "
+        add hl, hl  ; x4
+        add hl, bc  ; add x2 to get x6
+    .elif multiplier == 7
+        ld b, h     ; preserve HLx1 in BC
+        ld c, l     ; "
+        add hl, hl  ; x2
+        add hl, hl  ; x4
+        add hl, bc  ; add x1 to get x5
+        add hl, bc  ; add x1 to get x6
+        add hl, bc  ; add x1 to get x7
+    .elif multiplier == 8
+        add hl, hl  ; x2
+        add hl, hl  ; x4
+        add hl, hl  ; x8
+    .elif multiplier == 16
+        add hl, hl  ; x2
+        add hl, hl  ; x4
+        add hl, hl  ; x8
+        add hl, hl  ; x16
+    .elif multiplier == 24
+        add hl, hl  ; x2
+        add hl, hl  ; x4
+        add hl, hl  ; x8
+        ld b, h     ; preserve HLx8 in BC
+        ld c, l     ; "
+        add hl, hl  ; x16
+        add hl, bc  ; add x8 to get x24
+    .elif multiplier == 32
+        add hl, hl  ; x2
+        add hl, hl  ; x4
+        add hl, hl  ; x8
+        add hl, hl  ; x16
+        add hl, hl  ; x32
+    .elif multiplier == 64
+        add hl, hl  ; x2
+        add hl, hl  ; x4
+        add hl, hl  ; x8
+        add hl, hl  ; x16
+        add hl, hl  ; x32
+        add hl, hl  ; x64
+    .else
+        .print "utils.math.multiplyHL does not currently support multiplying by ", dec multiplier
+        .fail
+    .endif
+.endm
