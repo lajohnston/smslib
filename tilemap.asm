@@ -344,6 +344,36 @@
 .endm
 
 ;====
+; Load DE with a pointer to the column buffer
+;
+; @out  de  pointer to the column buffer
+;====
+.macro "tilemap.loadDEColBuffer"
+    ld de, tilemap.ram.colBuffer
+.endm
+
+;====
+; Loads B with the number of bytes to write for the scrolling column
+;
+; @out  b   the number of bytes to write
+;====
+.macro "tilemap.loadBColBytes"
+    ld b, tilemap.COL_SIZE_BYTES    ; number of bytes to write
+.endm
+
+;====
+; Loads BC with the number of bytes to write for the scrolling column. Note,
+; this will always be a value <= 50 so only needs 8-bits, but this macro is
+; provided for convenience for routines that use ldi and require a 16-bit
+; counter in BC
+;
+; @out  bc  the number of bytes to write
+;====
+.macro "tilemap.loadBCColBytes"
+    ld bc, tilemap.COL_SIZE_BYTES   ; number of bytes to write
+.endm
+
+;====
 ; Point DE to rowBufferA in RAM, ready to write tile data to. RowBufferA stores tiles
 ; from the left-most visible portion of the screen to the right-edge of the
 ; tilemap (col 32).
