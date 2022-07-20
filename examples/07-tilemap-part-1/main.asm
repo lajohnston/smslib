@@ -139,12 +139,12 @@
 
         tilemap.ifColScroll _left, _right, +
             _left:
-                ld hl, scrollLeftCol
-                tilemap.loadScrollCol
+                ; Load the scrollLeftCol tiles to the scrolling column
+                tilemap.writeScrollCol scrollLeftCol
                 jp +    ; skip _right
             _right:
-                ld hl, scrollRightCol
-                tilemap.loadScrollCol
+                ; Load the scrollRightCol tiles to the scrolling column
+                tilemap.writeScrollCol scrollRightCol
         +:
 
         ; Mark the end of the VBlank handler

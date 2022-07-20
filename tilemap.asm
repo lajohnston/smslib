@@ -518,11 +518,20 @@
 .endm
 
 ;====
-; Send sequential tile data to the scrolling column in VRAM
+; Write tile data to the scrolling column in VRAM. The data should be a
+; sequential list of tiles starting with top of the column visible on
+; screen
 ;
-; @in   hl  pointer to the sequential tile data (top of the column)
+; @in   dataAddr    (optional) pointer to the sequential tile data (top of the
+;                   column). Default to the internal column buffer
 ;====
-.macro "tilemap.loadScrollCol"
+.macro "tilemap.writeScrollCol" args dataAddr
+    .ifdef dataAddr
+        ld hl, dataAddr
+    .else
+        ld hl, tilemap.ram.colBuffer
+    .endif
+
     ; Get X column offset
     ld a, (tilemap.ram.xScrollBuffer)   ; load X scroll
     neg                                 ; negate
@@ -576,7 +585,7 @@
         tilemap.ifColScroll +
             ; Write column tiles from buffer to VRAM
             ld hl, tilemap.ram.colBuffer
-            tilemap.loadScrollCol
+            tilemap.writeScrollCol
         +:
 
         ; Detect whether the row buffer should be flushed
