@@ -125,7 +125,7 @@
 .section "render" free
     interrupts.onVBlank:
         ; Apply the buffered scroll registers
-        tilemap.updateScrollRegisters
+        tilemap.writeScrollRegisters
 
         tilemap.ifRowScroll, _up, _down, +
             _up:

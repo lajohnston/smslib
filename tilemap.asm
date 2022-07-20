@@ -300,7 +300,7 @@
     ld (tilemap.ram.colWriteCall + 1), a
 
     ; Zero scroll registers
-    tilemap.updateScrollRegisters
+    tilemap.writeScrollRegisters
 .endm
 
 ;====
@@ -309,7 +309,7 @@
 ; whether the left or right column needs reloading. You can interpret these flags
 ; using tilemap.ifColScroll.
 ;
-; The scroll value won't apply until you call tilemap.updateScrollRegisters
+; The scroll value won't apply until you call tilemap.writeScrollRegisters
 ;
 ; @in   a   the number of x pixels to adjust. Positive values scroll right in
 ;           the game world (shifting the tiles left). Negative values scroll
@@ -325,7 +325,7 @@
 ; whether the top or bottom rows need reloading. You can interpret these flags
 ; using tilemap.ifRowScroll.
 ;
-; The scroll value won't apply until you call tilemap.updateScrollRegisters
+; The scroll value won't apply until you call tilemap.writeScrollRegisters
 ;
 ; @in   a   the number of y pixels to adjust. Positive values scroll down in
 ;           the game world (shifting the tiles up). Negative values scroll
@@ -497,7 +497,7 @@
 ; Sends the buffered scroll register values to the VDP. This should be called
 ; when the display is off or during a V or H interrupt
 ;====
-.macro "tilemap.updateScrollRegisters"
+.macro "tilemap.writeScrollRegisters"
     ld a, (tilemap.ram.xScrollBuffer)
     utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
 
@@ -551,7 +551,7 @@
 .section "tilemap.writeScrollBuffers" free
     tilemap.writeScrollBuffers:
         ; Set scroll registers
-        tilemap.updateScrollRegisters
+        tilemap.writeScrollRegisters
 
         ; Detect whether the column buffer should be flushed
         tilemap.ifColScroll +
