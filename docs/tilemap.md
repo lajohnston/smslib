@@ -106,41 +106,137 @@ tilemap.loadRows            ; load row data
 
 ## Scrolling
 
-The tilemap supports 8-direction scrolling. This is optimised for use with a maximum of 8 pixels per frame for each axis (8 pixels for X-axis plus 8 pixels for Y-Axis) but the limit is not enforced. See `examples/07-scrolling` example for a working demo.
+The tilemap supports 8-direction scrolling. This is an easy to use but low-level API that handles the scroll registers, scroll detection and VRAM write addresses. You will need a scroll handler on top of this which will maintain the position in the world and also handle your tile format, whether that is raw tile data or metatiles that group multiple tiles together to save memory.
+
+A suggested workflow is to maintain a pointer to the top-left of your tilemap which you then increment/decrement columns and rows depending on the scroll direction. The steps each frame would be to:
+
+1. Adjust the tilemap by x and y number of pixels
+2. If row or column scrolling occurs, adjust row/col of the worldmap
+3. Load the next row and/or column into the RAM buffers
+4. During VBlank, apply these changes to the tilemap in VRAM
+
+### Adjust position
+
+Adjust the x and y axis by a maximum of 8 pixels each per frame (-8 to +8 inclusive). This limit is not enforced so ensure you stay within it.
 
 ```
-; Initialise
+; Initialise (beginning of level)
 tilemap.reset           ; initialise RAM and scroll registers to 0
 
-; Adjust once per frame
-ld a, 1                 ; amount to scroll x (1 pixel right)
-tilemap.adjustXPixels   ; positive values scroll right; negative scroll left
+; Adjust x-axis. Negative values scroll left, positive scroll right
+ld a, 1                 ; amount of pixels to scroll the x-axis (1 pixel right)
+tilemap.adjustXPixels
 
-ld a, -1                ; amount to scroll y (1 pixel up)
-tilemap.adjustYPixels   ; positive values scroll down; negative scroll up
+; Adjust y-axis. Negative values scroll up, positive scroll down
+ld a, -1                ; amount to pixels to scroll the y-axis (1 pixel up)
+tilemap.adjustYPixels
 
-tilemap.update          ; calculate these changes
+tilemap.calculateScroll ; calculate these changes
+```
 
-; Detect if a column needs scrolling
+### tilemap.ifColScroll
+
+You can detect if a new column needs processing using `tilemap.ifColScroll`.
+
+```
+tilemap.ifColScroll +
+    ; A new column has scrolled onto screen
++:
+```
+
+You can pass three arguments to this to act like a switch statement for each direction.
+
+```
 tilemap.ifColScroll left, right, +
     left:
-        ; ...handle left scroll
+        ; Scrolling left
         jp +    ; (skip right label)
-
     right:
-        ; ...handle right scroll
-+:
+        ; Scrolling right
++:  ; will jump here if no column needs scrolling
+```
 
-; Detect if a row needs scrolling
-tilemap.ifColScroll up, down, +
+### tilemap.ifRowScroll
+
+You can detect if a new row needs processing using `tilemap.ifRowScroll`.
+
+```
+tilemap.ifRowScroll +
+    ; A new row has scrolled onto screen
++:
+```
+
+You can pass three arguments to this to act like a switch statement for each direction.
+
+```
+tilemap.ifRowScroll up, down, +
     up:
-        ; ...handle up scroll
+        ; Scrolling up
         jp +    ; (skip down label)
-
     down:
-        ; ...handle down scroll
+        ; Scrolling down
++:  ; will jump here if no row needs scrolling
+```
+### Add data to the column buffer
+
+If a column scroll is detected you can transfer the new column data to the column buffer in RAM.
+
+```
+tilemap.loadDEColBuffer ; point DE to the column buffer
+
+tilemap.loadBColBytes   ; load B with the number of bytes to write to the buffer
+tilemap.loadBCColBytes  ; or, load BC with the value (for use with ldi)
+```
+
+You will need a routine to write sequential tile data for a column from top to bottom. The routine should write a tile, jump to the next row, then write another tile, until the byte counter is 0.
+
+### Add new data to the row buffer
+
+The row buffer is split by `tilemap.asm` into `rowBufferA` and `rowBufferB`, to handle scroll wrapping. Start by writing data to `rowBufferA` then write the remainder (if any) to `rowBufferB`. Start with the tile on the left edge of the screen and work to the right.
+
+```
+; Example routine
+ld hl, pointerToARow
+
+; Set DE to rowBufferA and set A to number of bytes to write
+tilemap.setRowBufferA
+
+ld b, 0
+ld c, a ; transfer byte count to BC
+ldir    ; copy data until BC == 0
+```
+
+Once `rowBufferA` is full, write the remaining tiles (if any) to `rowBufferB`. Unlike `rowBufferA`, `rowBufferB` can sometimes have a size of 0, so ensure you check this.
+
+```
+; Set DE to rowBufferB and set A to number of bytes to write
+tilemap.setRowBufferB
+
+jp z, +     ; jp if there are no bytes to write
+    ld b, 0
+    ld c, a ; transfer A to BC
+    ldir    ; copy data until BC == 0
++:
+```
+
+### Updating VRAM
+
+During VBlank you can safely write the buffered data to VRAM. The easiest way to do this is to call `tilemap.writeScrollBuffers`. This will write the scroll registers, the column buffer and/or the row buffer when necessary.
+
+```
+tilemap.writeScrollBuffers
+```
+
+Alternatively you can perform these separately:
+
+```
+tilemap.writeScrollRegisters
+
+tilemap.ifRowScroll +
+    tilemap.writeScrollRow
 +:
 
-; During VBlank
-tilemap.setScrollRegisters
+tilemap.ifColScroll +
+    tilemap.writeScrollCol
++
 ```
