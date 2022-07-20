@@ -538,6 +538,39 @@
 .endm
 
 ;====
+; Update the scroll registers and send the necessary col/row data to VRAM. This
+; should be called when the display is off or during VBlank
+;====
+.macro "tilemap.writeScrollBuffers"
+    call tilemap.writeScrollBuffers
+.endm
+
+;====
+; See tilemap.writeScrollBuffers macro alias
+;====
+.section "tilemap.writeScrollBuffers" free
+    tilemap.writeScrollBuffers:
+        ; Set scroll registers
+        tilemap.updateScrollRegisters
+
+        ; Detect whether the column buffer should be flushed
+        tilemap.ifColScroll +
+            ; Write column tiles from buffer to VRAM
+            ld hl, tilemap.ram.colBuffer
+            tilemap.loadScrollCol
+        +:
+
+        ; Detect whether the row buffer should be flushed
+        tilemap.ifRowScroll +
+            tilemap.setRowScrollSlot
+            ld hl, tilemap.ram.rowBuffer
+            tilemap.loadRow
+        +:
+
+        ret
+.ends
+
+;====
 ; Private/internal functions
 ;====
 
