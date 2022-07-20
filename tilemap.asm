@@ -518,7 +518,9 @@
 .endm
 
 ;====
-; Set the VRAM write address to the column the requires updating
+; Send sequential tile data to the scrolling column in VRAM
+;
+; @in   hl  pointer to the sequential tile data (top of the column)
 ;====
 .macro "tilemap.loadScrollCol"
     ; Get X column offset
@@ -678,7 +680,7 @@
         jp z, _noRowScroll      ; scroll if not zero (upper 5 bits are different)
 
         ; Update scroll flags
-        dec hl                  ; point to flags
+        dec hl                          ; point to flags
         ld a, (hl)                      ; load flags into A
         and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
         or tilemap.SCROLL_DOWN_SET_MASK ; set new scroll flag
@@ -713,14 +715,14 @@
             ld a, (tilemap.ram.yScrollBuffer)   ; load scroll value
 
             ; Divide by 8 (3x rrca) and rotate right twice (2x rrca)
-            ; 5x rrca is equivalent to 3x rlca
+            ; 3x rlca (left rotate) is equivalent to 5x rrca (right rotate)
             rlca
             rlca
             rlca                    ; value is now y1y0---y4y3y2
 
             ld b, a                 ; preserve in B
             and %00000111           ; mask y4,y3,y2
-            or %01000000 | >tilemap.vramAddress    ; add base address + write command
+            or %01000000 | >tilemap.vramAddress    ; set base address + write command
             ld h, a                 ; store in H
             ld a, b                 ; restore rotated Y (y1y0---y4y3y2)
             and %11000000           ; mask y1y0
@@ -845,7 +847,7 @@
 ;
 ; @in   iy  the address to call
 ;====
-.section "tilemap._callIY"
+.section "tilemap._callIY" free
     tilemap._callIY:
         jp (iy)
 .ends
