@@ -129,14 +129,12 @@
 
         tilemap.ifRowScroll, _up, _down, +
             _up:
-                tilemap.setRowScrollSlot
-                ld hl, scrollUpRow
-                tilemap.loadRow
-                jp +
+                ; Write the scrollUp data to the scrolling row
+                tilemap.writeScrollRow scrollUpRow
+                jp +    ; skip _down
             _down:
-                tilemap.setRowScrollSlot
-                ld hl, scrollDownRow
-                tilemap.loadRow
+                ; Write the scrollDown data to the scrolling row
+                tilemap.writeScrollRow scrollDownRow
         +:
 
         tilemap.ifColScroll _left, _right, +

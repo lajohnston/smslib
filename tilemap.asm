@@ -538,6 +538,25 @@
 .endm
 
 ;====
+; Write data to the scrolling row. Should be called during VBlank or when
+; the display is off.
+;
+; @in   dataAddr    (optional) the pointer to the tile data to write. Defaults
+;                   to the internal row buffer
+;====
+.macro "tilemap.writeScrollRow" args dataAddr
+    tilemap.setRowScrollSlot
+
+    .ifdef dataAddr
+        ld hl, dataAddr
+    .else
+        ld hl, tilemap.ram.rowBuffer
+    .endif
+
+    tilemap.loadRow
+.endm
+
+;====
 ; Update the scroll registers and send the necessary col/row data to VRAM. This
 ; should be called when the display is off or during VBlank
 ;====
