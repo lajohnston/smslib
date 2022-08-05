@@ -63,6 +63,11 @@
 .define tilemap.VISIBLE_COLS 32 ; note: includes the hidden left-most column
 .define tilemap.Y_PIXELS tilemap.ROWS * 8
 
+; Number of pixels the X scroll is shifted by on initialisation. -8 means
+; column 0 is visible on screen and populated by the left-most column, while
+; column 31 is hidden and populated by the next column on the right
+.define tilemap.X_OFFSET -8
+
 .define tilemap.TILE_SIZE_BYTES 2
 .define tilemap.COL_SIZE_BYTES tilemap.VISIBLE_ROWS * tilemap.TILE_SIZE_BYTES
 .define tilemap.ROW_SIZE_BYTES tilemap.COLS * 2
@@ -87,9 +92,14 @@
 ; RAM
 ;====
 .ramsection "tilemap.ram" slot utils.ram.SLOT
-    tilemap.ram.xScrollBuffer:  db  ; VDP x-axis scroll register buffer
+    ; VDP x-axis scroll register buffer
+    tilemap.ram.xScrollBuffer:  db  ; negate before writing to the VDP
+
+    ; Scroll flags
     tilemap.ram.flags:          db  ; see constants for flag definitions
-    tilemap.ram.yScrollBuffer:  db  ; VDP y-axis scroll register buffer
+
+    ; VDP y-axis scroll register buffer
+    tilemap.ram.yScrollBuffer:  db
 
     ; VRAM write command/address for row scrolling
     tilemap.ram.vramRowWrite:   dw
@@ -287,9 +297,11 @@
 ; Reset/initialise the RAM buffers and scroll values to 0
 ;====
 .macro "tilemap.reset"
-    ; Zero values
-    xor a   ; set A to 0
+    ; Initialise values
+    ld a, tilemap.X_OFFSET
     ld (tilemap.ram.xScrollBuffer), a
+
+    xor a   ; set A to 0
     ld (tilemap.ram.flags), a
     ld (tilemap.ram.yScrollBuffer), a
 
@@ -388,14 +400,12 @@
 ; @out  a   rowBufferA length in bytes; the number of bytes to write to it
 ;====
 .macro "tilemap.setRowBufferA"
-    ; Get offset to rowBufferA (CEILING(B2/4))
+    ; Get offset to rowBufferA
     ld a, (tilemap.ram.xScrollBuffer)
-    neg             ; xScrollBuffer is negated - negate back
-    dec a           ; offset by 1 pixel so we'll get ceiling rather than floor
-    rrca            ; divide by 2
-    rrca            ; divide by 2 again (4 total); now equals col * 2 bytes
-    add 2           ; cancel offset we added earlier
-    and %00111110   ; clean value and get ceiling value
+    sub tilemap.X_OFFSET    ; cancel X offset
+    rrca                    ; divide by 2
+    rrca                    ; divide by 2 (4 total)
+    and %00111110           ; clean value; now equals col * 2 bytes
 
     ; Set DE to rowBufferA
     ld d, >tilemap.ram.rowBuffer    ; set D to high byte of rowBuffer
@@ -422,14 +432,15 @@
 ; @out  f   Z set if there is no data to write to rowBufferB
 ;====
 .macro "tilemap.setRowBufferB"
-    ld de, tilemap.ram.rowBuffer    ; rowBufferB always point to beginning
+    ; rowBufferB always point to beginning
+    ld de, tilemap.ram.rowBuffer
+
+    ; Calculate number of bytes to write
     ld a, (tilemap.ram.xScrollBuffer)
-    neg             ; xScrollBuffer is negated - negate back
-    dec a           ; offset by 1 pixel so we'll get ceiling rather than floor
-    rrca            ; divide by 2
-    rrca            ; divide by 2 again (4 total); now equals col * 2 bytes
-    add 2           ; cancel offset we added earlier
-    and %00111110   ; clean value and get ceiling value
+    sub tilemap.X_OFFSET    ; cancel X offset
+    rrca                    ; divide by 2
+    rrca                    ; divide by 2 (4)
+    and %00111110           ; clean value; now equals col * 2 bytes
 .endm
 
 ;====
@@ -499,6 +510,7 @@
 ;====
 .macro "tilemap.writeScrollRegisters"
     ld a, (tilemap.ram.xScrollBuffer)
+    neg
     utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
 
     ld a, (tilemap.ram.yScrollBuffer)
@@ -532,9 +544,9 @@
         ld hl, tilemap.ram.colBuffer
     .endif
 
-    ; Get X column offset
+    ; Get the column offset
     ld a, (tilemap.ram.xScrollBuffer)   ; load X scroll
-    neg                                 ; negate
+    inc a                               ; offset (so -1 is column 0)
     rrca                                ; divide by 2
     rrca                                ; divide by 2 (4)
     and %00111110                       ; clean value
@@ -584,7 +596,6 @@
         ; Detect whether the column buffer should be flushed
         tilemap.ifColScroll +
             ; Write column tiles from buffer to VRAM
-            ld hl, tilemap.ram.colBuffer
             tilemap.writeScrollCol
         +:
 
@@ -611,47 +622,55 @@
 ;====
 .section "tilemap._adjustXPixels" free
     tilemap._adjustXPixels:
-        neg                     ; negate A so positive values scroll right
-        jp z, _noColumnScroll   ; if adjust is zero, no scroll needed
+        or a                                ; analyse A
+        jp z, _noColumnScroll               ; if adjust is zero, no scroll needed
+        ld hl, tilemap.ram.xScrollBuffer    ; point to xScrollBuffer
+        ld b, (hl)                          ; load current xScrollBuffer into B
+        jp p, _movingRight                  ; jump if xAdjust is positive
 
-        ; Add xAdjust to current xScrollBuffer
-        ld hl, tilemap.ram.xScrollBuffer
-        ld b, a                 ; preserve xAdjust in B
-        ld c, (hl)              ; load xScrollBuffer in C
-        add a, c                ; add xAdjust to xScrollBuffer
-        ld (hl), a              ; store result
+        _movingLeft:
+            ; Adjust xScrollBuffer
+            add a, b                        ; add xAdjust to xScrollBuffer
+            ld (hl), a                      ; store new xScrollBuffer
 
-        ; Check if col scroll needed (if upper 5-bits change; every 8 pixels)
-        xor c                   ; compare xScrollBuffer against old value in C
-        and %11111000           ; zero lower bits (we only care about upper 5)
-        jp nz, _columnScroll    ; scroll if not zero (upper 5 bits are different)
+            ; Detect if left column needs updating (if upper 5 bits change)
+            xor b                           ; compare bits with old value in B
+            and %11111000                   ; zero all but upper 5 bits
+            jp z, _noColumnScroll           ; jp if zero (upper 5 bits were the same)
 
-        ; No scroll needed
-        _noColumnScroll:
-            ld hl, tilemap.ram.flags
-            ld a, tilemap.X_SCROLL_RESET_MASK
-            and (hl)            ; reset X scroll flags with mask
-            ld (hl), a          ; update flags
-            ret
-
-        ; Set left or right column scroll flag
-        _columnScroll:
+            ; Left column needs scrolling
             inc hl                          ; point to flags
             ld a, (hl)                      ; load flags into A
             and tilemap.X_SCROLL_RESET_MASK ; reset previous x scroll flags
-
-            bit 7, b            ; check sign bit of (negated) xAdjust in B
-            jp z, +
-                ; xAdjust was positive - scroll right
-                or tilemap.SCROLL_RIGHT_SET_MASK
-                ld (hl), a
-                ret
-            +:
-
-            ; xAdjust was negative - scroll left
-            or tilemap.SCROLL_LEFT_SET_MASK
-            ld (hl), a
+            or tilemap.SCROLL_LEFT_SET_MASK ; set left scroll flag
+            ld (hl), a                      ; store flags
             ret
+
+        _movingRight:
+            ; Adjust xScrollBuffer
+            add a, b                        ; add xAdjust to xScrollBuffer
+            ld (hl), a                      ; store new xScrollBuffer
+
+            ; Detect if right column needs updating (if upper 5 bits change)
+            xor b                           ; compare bits with old value in B
+            and %11111000                   ; zero all but upper 5 bits
+            jp z, _noColumnScroll           ; jp if zero (upper 5 bits were the same)
+
+            ; Right column needs scrolling
+            inc hl                          ; point to flags
+            ld a, (hl)                      ; load flags into A
+            and tilemap.X_SCROLL_RESET_MASK ; reset previous x scroll flags
+            or tilemap.SCROLL_RIGHT_SET_MASK; set right scroll flag
+            ld (hl), a                      ; store flags
+            ret
+
+    ; No scroll needed
+    _noColumnScroll:
+        ld hl, tilemap.ram.flags
+        ld a, tilemap.X_SCROLL_RESET_MASK
+        and (hl)            ; reset X scroll flags with mask
+        ld (hl), a          ; update flags
+        ret
 .ends
 
 ;====
