@@ -348,6 +348,150 @@
 .endm
 
 ;====
+; When tilemap.ifRowScroll indicates an up scroll, but you detect this new row
+; will be out of bounds of the tilemap, call this to cap the y pixel scrolling
+; to the top of the current in-bounds row. Further calls to tilemap.ifRowScroll
+; will indicate that no row scroll is required and thus prevent rendering an
+; invalid row.
+;
+; Note: This should be called before calling tilemap.calculateScroll
+;====
+.section "tilemap.stopUpRowScroll" free
+    tilemap.stopUpRowScroll:
+        ; Reset UP scroll flag
+        ld a, (tilemap.ram.flags)           ; load flags
+        and tilemap.Y_SCROLL_RESET_MASK     ; reset Y scroll flags
+        ld (tilemap.ram.flags), a           ; store updated flags
+
+        ; Round yScrollBuffer to top of previous row
+        ld a, (tilemap.ram.yScrollBuffer)   ; load current value
+        add 8                               ; add 8px to go back down one row
+
+        ; Ensure value hasn't gone out of 0-223 range
+        cp tilemap.Y_PIXELS
+        jp c, +
+            ; Sub screen height to bring back into range (i.e. 224 becomes 0)
+            sub tilemap.Y_PIXELS
+        +:
+
+        and %11111000                       ; round to top pixel of that row
+        ld (tilemap.ram.yScrollBuffer), a   ; update yScrollBuffer
+
+        ret
+.ends
+
+;====
+; Alias to call tilemap.stopUpRowScroll
+;====
+.macro "tilemap.stopUpRowScroll"
+    call tilemap.stopUpRowScroll
+.endm
+
+;====
+; When tilemap.ifRowScroll indicates a down scroll, but you detect this new row
+; will be out of bounds of the tilemap, call this to cap the y pixel scrolling
+; to the top of the current in-bounds row. Further calls to tilemap.ifRowScroll
+; will indicate that no row scroll is required and thus prevent rendering an
+; invalid row.
+;
+; Note: This should be called before calling tilemap.calculateScroll
+;====
+.section "tilemap.stopDownRowScroll" free
+    tilemap.stopDownRowScroll:
+        ; Reset Y scroll flags
+        ld a, (tilemap.ram.flags)           ; load flags
+        and tilemap.Y_SCROLL_RESET_MASK     ; reset Y scroll flags
+        ld (tilemap.ram.flags), a           ; store updated flags
+
+        ; Adjust yScrollBuffer to point to bottom pixel of previous row
+        ld a, (tilemap.ram.yScrollBuffer)   ; load current value
+        sub 8                               ; sub 8px to go back up one row
+
+        ; Ensure value hasn't gone out of 0-223 range
+        jp nc, +
+            ; Value dropped below 0 - bring back into range
+            add tilemap.Y_PIXELS            ; -1 becomes 223
+        +:
+
+        ; Round yScrollBuffer to bottom pixel of the row
+        or %00000111                        ; set bits 0-2
+        ld (tilemap.ram.yScrollBuffer), a   ; store result
+
+        ret
+.ends
+
+;====
+; Alias to call tilemap.stopDownRowScroll
+;====
+.macro "tilemap.stopDownRowScroll"
+    call tilemap.stopDownRowScroll
+.endm
+
+;====
+; When tilemap.ifColScroll indicates a left scroll, but you detect this new row
+; will be out of bounds of the tilemap, call this to cap the x pixel scrolling
+; to the left edge of the current in-bounds column. Further calls to
+; tilemap.ifColScroll will indicate that no column scroll is required and thus
+; prevent rendering an invalid column.
+;
+; Note: This should be called before calling tilemap.calculateScroll
+;====
+.section "tilemap.stopLeftColScroll" free
+    tilemap.stopLeftColScroll:
+        ; Reset column scroll flags
+        ld a, (tilemap.ram.flags)           ; load flags
+        and tilemap.X_SCROLL_RESET_MASK     ; reset x scroll flags
+        ld (tilemap.ram.flags), a           ; store updated flags
+
+        ; Round xScrollBuffer to left of previous column
+        ld a, (tilemap.ram.xScrollBuffer)   ; load current scroll value
+        add 8                               ; go right one column
+        and %11111000                       ; set to left-most pixel of the col
+        ld (tilemap.ram.xScrollBuffer), a   ; update xScrollBuffer
+
+        ret
+.ends
+
+;====
+; Alias to call tilemap.stopLeftColScroll
+;====
+.macro "tilemap.stopLeftColScroll"
+    call tilemap.stopLeftColScroll
+.endm
+
+;====
+; When tilemap.ifColScroll indicates a right scroll, but you detect this new row
+; will be out of bounds of the tilemap, call this to cap the x pixel scrolling
+; to the right edge of the current in-bounds column. Further calls to
+; tilemap.ifColScroll will indicate that no column scroll is required and thus
+; prevent rendering an invalid column.
+;
+; Note: This should be called before calling tilemap.calculateScroll
+;====
+.section "tilemap.stopRightColScroll" free
+    tilemap.stopRightColScroll:
+        ; Reset column scroll flags
+        ld a, (tilemap.ram.flags)           ; load flags
+        and tilemap.X_SCROLL_RESET_MASK     ; reset x scroll flags
+        ld (tilemap.ram.flags), a           ; store updated flags
+
+        ; Round xScrollBuffer to right of previous column
+        ld a, (tilemap.ram.xScrollBuffer)   ; load current scroll value
+        sub 8                               ; go left one column
+        or %00000111                        ; set to right-most pixel of the col
+        ld (tilemap.ram.xScrollBuffer), a   ; update xScrollBuffer
+
+        ret
+.ends
+
+;====
+; Alias to call tilemap.stopRightColScroll
+;====
+.macro "tilemap.stopRightColScroll"
+    call tilemap.stopRightColScroll
+.endm
+
+;====
 ; Calculates the adjustments made with tilemap.adjustXPixels/adjustYPixels
 ; and applies them to the RAM variables
 ;====

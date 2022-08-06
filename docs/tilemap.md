@@ -106,14 +106,17 @@ tilemap.loadRows            ; load row data
 
 ## Scrolling
 
-The tilemap supports 8-direction scrolling. This is an easy to use but low-level API that handles the scroll registers, scroll detection and VRAM write addresses. You will need a scroll handler on top of this which will maintain the position in the world and also handle your tile format, whether that is raw tile data or metatiles that group multiple tiles together to save memory.
+The tilemap supports 8-direction scrolling. This is a simple but low-level API that handles the fine pixel scroll registers, row/column scroll detection and VRAM write addresses. You will need a scroll handler on top of this which will maintain the position in the world and adjust it based on the scroll direction. It will also need to handle your tile format, whether raw tile data or 'metatiles' that group multiple tiles together to save memory.
 
-A suggested workflow is to maintain a pointer to the top-left of your tilemap which you then increment/decrement columns and rows depending on the scroll direction. The steps each frame would be to:
+A suggested workflow is to maintain a pointer to the top-left visible tile of your tilemap and adjust it based on the scroll direction. You can then draw the next column or row based on this position. The steps each frame would be the following (described in further detail below):
 
 1. Adjust the tilemap by x and y number of pixels
-2. If row or column scrolling occurs, adjust row/col of the worldmap
-3. Load the next row and/or column into the RAM buffers
-4. During VBlank, apply these changes to the tilemap in VRAM
+2. If row or column scrolling detected, adjust row/col of the top-left pointer
+    - (Optional) Prevent the pointer going out of bounds
+4. Load the new row and/or column into the RAM buffers
+    - Right edge will be top-left pointer + 31 columns
+    - Bottom edge will be top-left pointer + 24 rows
+5. During VBlank, transfer these changes from the RAM buffer to the VDP
 
 ### Adjust position
 
@@ -121,7 +124,7 @@ Adjust the x and y axis by a maximum of 8 pixels each per frame (-8 to +8 inclus
 
 ```
 ; Initialise (beginning of level)
-tilemap.reset           ; initialise RAM and scroll registers to 0
+tilemap.reset           ; initialise RAM and scroll registers
 
 ; Adjust x-axis. Negative values scroll left, positive scroll right
 ld a, 1                 ; amount of pixels to scroll the x-axis (1 pixel right)
@@ -239,4 +242,34 @@ tilemap.ifRowScroll +
 tilemap.ifColScroll +
     tilemap.writeScrollCol
 +
+```
+
+### Bounds checking
+
+If you detect a row or column scroll will take the tilemap out of bounds, you can call the following scroll stop routines to stop the column and/or row scroll from happening. This will set the pixel scroll to the farthest edge of the in-bounds tiles, but later calls to `tilemap.ifRowScroll` and/or `tilemap.ifColScroll` will no longer detect a scroll and thus not trigger out-of-bounds rows or columns to be drawn.
+
+Note: these should be called before calling `tilemap.calculateScroll` so it takes the cancelling into account.
+
+```
+tilemap.ifRowScroll _up, _down, +
+    _up:
+        ; ...logic that checks bounds
+        tilemap.stopUpRowScroll
+        jp +
+    _down:
+        ; ...logic that checks bounds
+        tilemap.stopDownRowScroll
++:
+```
+
+```
+tilemap.ifColScroll, _left, _right, +
+    _left:
+        ; ...logic that checks bounds
+        tilemap.stopLeftColScroll
+        jp +
+    _right:
+        ; ...logic that checks bounds
+        tilemap.stopRightColScroll
++:
 ```
