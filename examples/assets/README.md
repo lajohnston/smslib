@@ -22,12 +22,15 @@ Place compressor .dlls into the same directory as bmp2Tile. For this example I j
 
 The font file was taken from Maxim's Hello World SMS programming tutorial: https://www.smspower.org/maxim/HowToProgram/Lesson1AllOnOnePage
 
-## tilemap
+## Tilemap
 
-Rough workflow:
+Rough workflow that needs improvement and automation:
 
 1. Created new Aseprite document with indexed colour mode and imported the Master System palette
 2. Drew tilemap using the tilesheet features in v1.3
-3. Selected unused palette entries and deleted them
-4. Exported png using File > Export
-5. Imported into bmp2tile and exported the bin files (palette, patterns, tilemap)
+3. Set Sprite > Color Mode to RGB
+4. Selected unused palette entries and deleted them
+5. Created a new color at the end of the palette, then moved it to the beginning
+6. Set Sprite > Color Mode to Indexed
+7. Exported bmp using File > Export
+8. Imported into bmp2tile and exported the bin files (palette, patterns, tilemap)

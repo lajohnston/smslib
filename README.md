@@ -35,7 +35,8 @@ See example programs in the `examples` directory. Build the examples using the `
 - [patterns.asm](./docs/patterns.md) - handles patterns (tile images)
 - [pause.asm](./docs/pause.md) - handles the pause button
 - [sprites.asm](./docs/sprites.md) - manages a sprite table in a RAM and pushes to VRAM when required
-- [tilemap.asm](./docs/tilemap.md) - handles the background tile
+- [scroll/tiles.asm](./docs/scroll/tiles.md) - manages a scrollable tilemap
+- [tilemap.asm](./docs/tilemap.md) - handles the background tilemap and scrolling
 - [vdp.asm](./docs/vdp.md) - defines and sets graphics chip register settings
 
 ## Design Principles
