@@ -216,29 +216,29 @@ You will need a routine to write sequential tile data for a column from top to b
 
 ### Add new data to the row buffer
 
-The row buffer is split by `tilemap.asm` into `rowBufferA` and `rowBufferB`, to handle scroll wrapping. Start by writing data to `rowBufferA` then write the remainder (if any) to `rowBufferB`. Start with the tile on the left edge of the screen and work to the right.
+The row buffer is split into `rowBufferA` and `rowBufferB` by `tilemap.asm` in order to handle the scroll wrapping. Start by writing tiles to `rowBufferA` then write the remainder (if any) to `rowBufferB`. Start with the tile on the left-most visible tile and work to the right.
 
 ```
 ; Example routine
 ld hl, pointerToARow
 
-; Set DE to rowBufferA and set A to number of bytes to write
+; Sets DE to rowBufferA and sets A to number of bytes to write
 tilemap.setRowBufferA
 
 ld b, 0
-ld c, a ; transfer byte count to BC
+ld c, a ; set BC to byte count
 ldir    ; copy data until BC == 0
 ```
 
 Once `rowBufferA` is full, write the remaining tiles (if any) to `rowBufferB`. Unlike `rowBufferA`, `rowBufferB` can sometimes have a size of 0, so ensure you check this.
 
 ```
-; Set DE to rowBufferB and set A to number of bytes to write
+; Sets DE to rowBufferB and sets A to number of bytes to write
 tilemap.setRowBufferB
 
 jp z, +     ; jp if there are no bytes to write
     ld b, 0
-    ld c, a ; transfer A to BC
+    ld c, a ; set BC to byte count
     ldir    ; copy data until BC == 0
 +:
 ```
@@ -251,7 +251,7 @@ During VBlank you can safely write the buffered data to VRAM. The easiest way to
 tilemap.writeScrollBuffers
 ```
 
-Alternatively you can perform these separately:
+Alternatively you can perform the individual tasks separately:
 
 ```
 tilemap.writeScrollRegisters
@@ -267,7 +267,7 @@ tilemap.ifColScroll +
 
 ### Bounds checking
 
-If you detect a row or column scroll will take the tilemap out of bounds, you can call the following scroll stop routines to stop the column and/or row scroll from happening. This will set the pixel scroll to the farthest edge of the in-bounds tiles, but later calls to `tilemap.ifRowScroll` and/or `tilemap.ifColScroll` will no longer detect a scroll and thus not trigger out-of-bounds rows or columns to be drawn.
+If you detect a row or column scroll will take the tilemap out of bounds, you can call the following scroll-stop routines to stop the column and/or row scroll from happening. This will set the pixel scroll to the farthest edge of the in-bounds tiles, but later calls to `tilemap.ifRowScroll` and/or `tilemap.ifColScroll` will no longer detect a scroll and thus not trigger out-of-bounds rows or columns to be drawn.
 
 Note: these should be called before calling `tilemap.calculateScroll` so it takes the cancelling into account.
 
