@@ -159,6 +159,16 @@ tilemap.ifColScroll left, right, +
 +:  ; will jump here if no column needs scrolling
 ```
 
+A variation of this is `tilemap.ifColScrollElseRet`. This will execute a return instruction if no column scroll is required, otherwise it will jump/continue to the given left/right labels.
+
+```
+tilemap.ifColScrollElseRet left, right
+    left:
+        ; Scrolling left
+    right:
+        ; Scrolling right
+```
+
 ### tilemap.ifRowScroll
 
 You can detect if a new row needs processing using `tilemap.ifRowScroll`.
@@ -180,6 +190,17 @@ tilemap.ifRowScroll up, down, +
         ; Scrolling down
 +:  ; will jump here if no row needs scrolling
 ```
+
+A variation of this is `tilemap.ifRowScrollElseRet`. This will execute a return instruction if no row scroll is required, otherwise it will jump/continue to the given up/down labels.
+
+```
+tilemap.ifRowScrollElseRet up, down
+    up:
+        ; Scrolling up
+    down:
+        ; Scrolling down
+```
+
 ### Add data to the column buffer
 
 If a column scroll is detected you can transfer the new column data to the column buffer in RAM.

@@ -82,6 +82,10 @@
 .define tilemap.X_SCROLL_RESET_MASK %11110011
 .define tilemap.Y_SCROLL_RESET_MASK %11111100
 
+; AND masks to mask relevant flags for a given axis
+.define tilemap.X_SCROLL_MASK tilemap.X_SCROLL_RESET_MASK ~ $ff
+.define tilemap.Y_SCROLL_MASK tilemap.Y_SCROLL_RESET_MASK ~ $ff
+
 ; OR masks to set the scroll flags
 .define tilemap.SCROLL_UP_SET_MASK      %00000001
 .define tilemap.SCROLL_DOWN_SET_MASK    %00000010
@@ -599,18 +603,19 @@
 .macro "tilemap.ifColScroll" args left, right, else
     .if NARGS == 1
         ; Only one argument passed ('else' label)
-        ld a, (tilemap.ram.flags)               ; load flags
-        and tilemap.X_SCROLL_RESET_MASK ~ $ff   ; remove other flags (negate reset mask)
-        jp z, \1                                ; jp to else label if no column to scroll
+        ld a, (tilemap.ram.flags)   ; load flags
+        and tilemap.X_SCROLL_MASK   ; filter out other flags
+        jp z, \1                    ; jp to else if no column to scroll
         ; ...otherwise continue
     .elif NARGS == 3
         ; 3 arguments passed (left, right, else)
-        ld a, (tilemap.ram.flags)               ; load flags
-        and tilemap.X_SCROLL_RESET_MASK ~ $ff   ; remove other flags (negate reset mask)
-        jp z, else                              ; no column to scroll
+        ld a, (tilemap.ram.flags)   ; load flags
+        and tilemap.X_SCROLL_MASK   ; filter out other flags
+        jp z, else                  ; jp to else if no column to scroll
 
-        bit tilemap.SCROLL_RIGHT_PENDING_BIT, a ; check right scroll flag
-        jp nz, right                            ; jp if scrolling right
+        ; Check right scroll flag
+        bit tilemap.SCROLL_RIGHT_PENDING_BIT, a
+        jp nz, right                ; jp if scrolling right
         ; ...otherwise continue to left label
     .else
         .print "\ntilemap.ifColScroll requires 1 or 3 arguments (left/right/else, or just else alone)\n\n"
@@ -619,8 +624,31 @@
 .endm
 
 ;====
+; Returns if no column scroll is needed, otherwise jumps to the relevant
+; 'left' or 'right' label depending on the column scroll direction
+;
+; @in   left    if scrolling left, will continue to this label
+; @in   right   if scrolling right, will jump to this label
+;====
+.macro "tilemap.ifColScrollElseRet" args left, right
+    .if NARGS != 2
+        .print "\ntilemap.ifColScrollElseRet requires 2 arguments (left and right)\n\n"
+        .fail
+    .endif
+
+    ld a, (tilemap.ram.flags)   ; load flags
+    and tilemap.X_SCROLL_MASK   ; filter out other flags
+    ret z                       ; return if no column to scroll
+
+    ; Check right scroll flag
+    bit tilemap.SCROLL_RIGHT_PENDING_BIT, a
+    jp nz, right                ; jp if scrolling right
+    ; ...otherwise continue to 'up' label
+.endm
+
+;====
 ; Jumps to the relevant label if a row scroll is needed after a call to
-; tilemap.adjustXPixels. Must be called with either 3 arguments (up, down, else)
+; tilemap.adjustYPixels. Must be called with either 3 arguments (up, down, else)
 ; or just else alone
 ;
 ; @in   up      (optional) continue to this label if top row needs loading
@@ -630,22 +658,44 @@
 .macro "tilemap.ifRowScroll" args up, down, else
     .if NARGS == 1
         ; Only one argument passed ('else' label)
-        ld a, (tilemap.ram.flags)               ; load flags
-        and tilemap.Y_SCROLL_RESET_MASK ~ $ff   ; remove other flags (negate reset mask)
-        jp z, \1                                ; jp to else label if no row to scroll
+        ld a, (tilemap.ram.flags)   ; load flags
+        and tilemap.Y_SCROLL_MASK   ; filter out other flags
+        jp z, \1                    ; jp to else if no row scroll
         ; ...otherwise continue
     .elif NARGS == 3
-        ld a, (tilemap.ram.flags)
-        and tilemap.Y_SCROLL_RESET_MASK ~ $ff   ; remove other flags (negate reset mask)
-        jp z, else                              ; no row to scroll
+        ld a, (tilemap.ram.flags)   ; load flags
+        and tilemap.Y_SCROLL_MASK   ; filter out other flags
+        jp z, else                  ; no row to scroll
 
         bit tilemap.SCROLL_DOWN_PENDING_BIT, a
-        jp nz, down                             ; scroll down
+        jp nz, down                 ; jp if scrolling down
         ; ...otherwise continue to 'up' label
     .else
         .print "\ntilemap.ifRowScroll requires 1 or 3 arguments (up/down/else, or just else alone)\n\n"
         .fail
     .endif
+.endm
+
+;====
+; Returns if no row scroll is needed, otherwise jumps to the relevant
+; 'up' or 'down' label depending on the row scroll direction
+;
+; @in   up      if scrolling up, will continue to this label
+; @in   down    if scrolling down, will jump to this label
+;====
+.macro "tilemap.ifRowScrollElseRet" args up, down
+    .if NARGS != 2
+        .print "\ntilemap.ifRowScrollElseRet requires 2 arguments (up and down)\n\n"
+        .fail
+    .endif
+
+    ld a, (tilemap.ram.flags)               ; load flags
+    and tilemap.Y_SCROLL_RESET_MASK ~ $ff   ; remove other flags
+    ret z                                   ; return if no row to scroll
+
+    bit tilemap.SCROLL_DOWN_PENDING_BIT, a  ; check down scroll flag
+    jp nz, down                             ; scroll down
+    ; ...otherwise continue to 'up' label
 .endm
 
 ;====
