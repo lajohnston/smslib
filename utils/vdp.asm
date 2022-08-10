@@ -35,7 +35,12 @@
 ;====
 .macro "utils.vdp.prepWrite" args address setPort
     ; Output low byte to VDP
-    ld a, <address
+    .ifeq <address 0
+        xor a
+    .else
+        ld a, <address
+    .endif
+
     out (utils.vdp.VDP_COMMAND_PORT), a
 
     ; Output high byte to VDP

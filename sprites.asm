@@ -250,15 +250,15 @@
 ;====
 .section "sprites.copyToVram"
     sprites.copyToVram:
+        ; Set VDP write address to y positions
+        utils.vdp.prepWrite sprites.vramAddress
+
         ; Load number of slots occupied
         ld hl, sprites.ram.buffer + sprites.Buffer.nextSlot ; nextSlot address
         ld a, (hl)  ; read nextSlot value
         sub $40     ; remove table offset to get sprite count
         push iy     ; preserve iy
         ld iyh, a   ; preserve counter in iyh
-
-        ; Set VDP write address to y positions
-        utils.vdp.prepWrite sprites.vramAddress
 
         ; Copy y positions to VRAM
         jp z, _noSprites                ; jp if no sprites
