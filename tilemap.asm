@@ -745,9 +745,9 @@
 
     ; Get the column offset
     ld a, (tilemap.ram.xScrollBuffer)   ; load X scroll
-    inc a                               ; offset (so -1 is column 0)
     rrca                                ; divide by 2
     rrca                                ; divide by 2 (4)
+    inc a                               ; adjust tilemap.X_OFFSET (-1 is col 0)
     and %00111110                       ; clean value
     ld e, a                             ; load result into E
 
