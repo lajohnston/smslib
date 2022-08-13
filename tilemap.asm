@@ -5,6 +5,7 @@
 ; use and which modifier attributes to apply to it, such as flipping, layer and
 ; color palette
 ;====
+.define tilemap.ENABLED 1
 
 ;====
 ; Settings
@@ -59,8 +60,12 @@
 .define tilemap.VDP_DATA_PORT $be
 .define tilemap.ROWS 28
 .define tilemap.COLS 32
-.define tilemap.VISIBLE_ROWS 25 ; maximum rows visible at a time (sometimes 24)
-.define tilemap.VISIBLE_COLS 32 ; note: includes the hidden left-most column
+
+; Min and max number of rows visible on screen. If the Y scroll offset is a
+; multiple of 8 it's the minimum, otherwise there is an extra row (the bottom
+; of the top row is still visible, as well as the top of the bottom row)
+.define tilemap.MIN_VISIBLE_ROWS 24
+.define tilemap.MAX_VISIBLE_ROWS tilemap.MIN_VISIBLE_ROWS + 1
 .define tilemap.Y_PIXELS tilemap.ROWS * 8
 
 ; Number of pixels the X scroll is shifted by on initialisation. -8 means
@@ -69,7 +74,7 @@
 .define tilemap.X_OFFSET -8
 
 .define tilemap.TILE_SIZE_BYTES 2
-.define tilemap.COL_SIZE_BYTES tilemap.VISIBLE_ROWS * tilemap.TILE_SIZE_BYTES
+.define tilemap.COL_SIZE_BYTES tilemap.MAX_VISIBLE_ROWS * tilemap.TILE_SIZE_BYTES
 .define tilemap.ROW_SIZE_BYTES tilemap.COLS * 2
 
 ; Bit locations of flags within tilemap.ram.flags
@@ -1017,8 +1022,8 @@
             and %00011111           ; floor result
 
             ; Calculate bottom visible row
-            add tilemap.VISIBLE_ROWS - 1    ; exclude buffer row
-            cp tilemap.ROWS                 ; compare against number of rows
+            add tilemap.MIN_VISIBLE_ROWS
+            cp tilemap.ROWS         ; compare against number of rows
             jp c, ++
                 ; Row number has overflowed max value - wrap value
                 sub tilemap.ROWS

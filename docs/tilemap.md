@@ -95,12 +95,12 @@ myTilemap:
         .endr
     .endr
 
-tilemap.setColRow 0, 0      ; load from column 0, row 0 onwards
-ld hl, myTilemap            ; point to top left corner to load
-ld d, tilemap.VISIBLE_ROWS  ; number of rows to load; all visible rows (25)
-ld e, tilemap.MAP_COLS * 2  ; number of full map columns * 2 (each tile is 2 bytes)
+tilemap.setColRow 0, 0          ; load from column 0, row 0 onwards
+ld hl, myTilemap                ; point to top left corner to load
+ld d, tilemap.MAX_VISIBLE_ROWS  ; number of rows to load; all visible rows (25)
+ld e, tilemap.MAP_COLS * 2      ; number of full map columns * 2 (each tile is 2 bytes)
 
-tilemap.loadRows            ; load row data
+tilemap.loadRows                ; load row data
 
 ```
 

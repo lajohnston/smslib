@@ -33,31 +33,31 @@
         .incbin "../assets/tilemapArrows/patterns.bin" fsize patternDataSize
 
     initialScreen:
-        .repeat tilemap.VISIBLE_ROWS * tilemap.VISIBLE_COLS
+        .repeat tilemap.MAX_VISIBLE_ROWS * tilemap.COLS
             .db DEFAULT_PATTERN
             .db 0   ; attributes
         .endr
 
     scrollUpRow:
-        .repeat tilemap.VISIBLE_COLS
+        .repeat tilemap.COLS
             .db UP_ARROW_PATTERN
             .db 0   ; attributes
         .endr
 
     scrollDownRow:
-        .repeat tilemap.VISIBLE_COLS
+        .repeat tilemap.COLS
             .db DOWN_ARROW_PATTERN
             .db 0   ; attributes
         .endr
 
     scrollLeftCol:
-        .repeat tilemap.VISIBLE_ROWS
+        .repeat tilemap.MAX_VISIBLE_ROWS
             .db LEFT_ARROW_PATTERN
             .db 0   ; attributes
         .endr
 
     scrollRightCol:
-        .repeat tilemap.VISIBLE_ROWS
+        .repeat tilemap.MAX_VISIBLE_ROWS
             .db RIGHT_ARROW_PATTERN
             .db 0   ; attributes
         .endr
@@ -79,9 +79,9 @@
         tilemap.reset                   ; initialise scroll values to 0
         tilemap.setColRow 0, 0          ; set write address to col 0, row 0
         ld hl, initialScreen            ; point to default tilemap data
-        ld d, tilemap.VISIBLE_ROWS      ; number of rows to output
+        ld d, tilemap.MAX_VISIBLE_ROWS  ; number of rows to output
         ld e, tilemap.COL_SIZE_BYTES    ; bytes to add to the map pointer each row
-        tilemap.loadRows             ; load rows
+        tilemap.loadRows                 load rows
 
         ; Enable the display
         vdp.startBatch
