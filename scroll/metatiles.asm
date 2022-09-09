@@ -29,19 +29,51 @@
 ; Settings
 ;===
 
-; The number of tile columns (width) in each metatile (default=2)
+; The number of tile columns (width) in each metatile
+; Value should be 2, 4, 8 or 16. Defaults to 2
 .ifndef scroll.metatiles.COLS_PER_METATILE
     .define scroll.metatiles.COLS_PER_METATILE 2
 .endif
 
-; The number of tile rows (height) in each metatile (default=2)
+; The number of tile rows (height) in each metatile
+; Value should be 2, 4, 8 or 16. Defaults to 2
 .ifndef scroll.metatiles.ROWS_PER_METATILE
     .define scroll.metatiles.ROWS_PER_METATILE 2
 .endif
 
-; The maximum bytes a map can be (i.e. metatile rows * metatile columns)
+; The maximum bytes a map can utilise in RAM. Divide by a map's width in
+; metatiles to determine its maximum height
+; (i.e. 4096 bytes / 256 width = 16 metatile max height). Defaults to 4096.
 .ifndef scroll.metatiles.MAX_MAP_BYTES
     .define scroll.metatiles.MAX_MAP_BYTES 4096
+.endif
+
+;====
+; Validate settings
+;====
+
+; Ensure scroll.metatiles.COLS_PER_METATILE is 2, 4, 8 or 16
+.if scroll.metatiles.COLS_PER_METATILE != 2
+    .if scroll.metatiles.COLS_PER_METATILE != 4
+        .if scroll.metatiles.COLS_PER_METATILE != 8
+            .if scroll.metatiles.COLS_PER_METATILE != 16
+                .print "\nscroll.metatiles.COLS_PER_METATILE should be set to 2, 4, 8 or 16\n\n"
+                .fail
+            .endif
+        .endif
+    .endif
+.endif
+
+; Ensure scroll.metatiles.ROWS_PER_METATILE is 2, 4, 8 or 16
+.if scroll.metatiles.ROWS_PER_METATILE != 2
+    .if scroll.metatiles.ROWS_PER_METATILE != 4
+        .if scroll.metatiles.ROWS_PER_METATILE != 8
+            .if scroll.metatiles.ROWS_PER_METATILE != 16
+                .print "\nscroll.metatiles.ROWS_PER_METATILE should be set to 2, 4, 8 or 16\n\n"
+                .fail
+            .endif
+        .endif
+    .endif
 .endif
 
 ;====
