@@ -273,6 +273,40 @@
 .endm
 
 ;====
+; IX = IX - A (unsigned)
+;
+; @in  a    value to subtract from IX
+; @in  ix   value from which to subtract
+; @out ix   result
+;
+; @source https://www.plutiedev.com/z80-add-8bit-to-16bit#sub-unsigned
+;====
+.macro "utils.math.subIXA" isolated
+    neg                     ; negate a
+    jp z, +                 ; skip if A is zero
+        dec ixh             ; pretend 'high byte' is -1, so sub 1 from high byte
+        utils.math.addIXA   ; add as normal
+    +:
+.endm
+
+;====
+; IX = IX - value (unsigned)
+;
+; @in  value    value to subtract from IX
+; @in  ix       value from which to subtract
+; @out ix       result
+;
+; @source https://www.plutiedev.com/z80-add-8bit-to-16bit#sub-unsigned
+;====
+.macro "utils.math.subIX" isolated args value
+    .if value != 0
+        ld a, -value        ; load A with the negated value
+        dec ixh             ; pretend 'high byte' is -1, so sub 1 from high byte
+        utils.math.addIXA   ; add as normal
+    .endif
+.endm
+
+;====
 ; Add a signed value to HL
 ;
 ; @in   a   signed value to add to HL
