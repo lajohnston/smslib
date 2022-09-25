@@ -423,6 +423,179 @@
 .endm
 
 ;====
+; Alias to call scroll.metatiles.update
+;====
+.macro "scroll.metatiles.update"
+    call scroll.metatiles.update
+.endm
+
+;====
+; Update the scroll buffers
+;====
+.section "scroll.metatiles.update" free
+    scroll.metatiles.update:
+        ;===
+        ; Update the topLeftTile if a row scroll is required
+        ;===
+        tilemap.ifRowScroll, _moveUp, _moveDown, +
+            ;===
+            ; When moving 1 tile (subrow) up
+            ;===
+            _moveUp:
+                ;===
+                ; If rowsRemaining == ROWS_PER_METATILE we need to point to
+                ; previous metatile row (rowsRemaining works in a downward
+                ; direction)
+                ;===
+                ld a, (scroll.metatiles.ram.topLeftTile.rowsRemaining)
+                cp scroll.metatiles.ROWS_PER_METATILE
+                jr z, ++
+                    ;===
+                    ; There are subrows left in current metatile.
+                    ; rowsRemaining works in a downward direction so when moving
+                    ; up a subrow there is now 1 more row to render for current
+                    ; metatile
+                    ;===
+                    inc a   ; inc rowsRemaining
+                    ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
+                    jp +    ; escape tilemap.ifRowScroll
+                ++:
+
+                ;===
+                ; Update topLeftTile to point to previous metatile row
+                ;===
+
+                ; Set rowsRemaining to 1 to refer to the bottom subrow of
+                ; the previous metatile row (i.e. 1 row left to render when
+                ; drawing from top to bottom)
+                ld a, 1
+                ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
+
+                ; Subtract 1 row from metatileAddress
+                ld a, (scroll.metatiles.ram.bytesPerRow)
+                neg         ; negate bytes
+                ld d, $ff   ; negative high byte
+                ld e, a     ; set E to negated low byte
+                ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+                add hl, de  ; subtract DE from HL
+
+                ; Store updated metatileAddress
+                ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+
+                jp +    ; escape tilemap.ifRowScroll
+
+            ;===
+            ; When moving 1 tile (subrow) down
+            ;===
+            _moveDown:
+                ; Check if there are any subrows remaining in current metatile
+                ld a, (scroll.metatiles.ram.topLeftTile.rowsRemaining)
+                cp 1    ; compare with 1 (rowsRemaining is 1-based)
+                jr z, ++
+                    ; There are still subrows left in current metatile
+                    dec a   ; dec rowsRemaining
+
+                    ; Store result
+                    ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
+                    jp +
+                ++:
+
+                ; Current metatile was on its last subrow - we'll need to
+                ; point to next metatile row
+
+                ; We'll now be pointing to the first subrow of the next
+                ; metatile, so set rowsRemaining to max
+                ld a, scroll.metatiles.ROWS_PER_METATILE
+                ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
+
+                ; Add 1 row to metatileAddress
+                ld a, (scroll.metatiles.ram.bytesPerRow)
+                ld d, 0
+                ld e, a ; set DE to bytesPerRow
+                ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+                add hl, de  ; add one row to HL
+
+                ; Store updated metatileAddress
+                ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+        +:
+
+        ;===
+        ; Update the topLeftTile if a col scroll is required
+        ;===
+        tilemap.ifColScroll, _moveLeft, _moveRight, +
+            ;===
+            ; When moving left 1 tile (subcol)
+            ;===
+            _moveLeft:
+                ;===
+                ; If colsRemaining == COLS_PER_METATILE we need to point to
+                ; previous metatile row (colsRemaining works in a downward
+                ; direction)
+                ;===
+                ld a, (scroll.metatiles.ram.topLeftTile.colsRemaining)
+                cp scroll.metatiles.COLS_PER_METATILE
+                jr z, ++
+                    ;===
+                    ; There are subcols left in current metatile.
+                    ; colsRemaining works in a rightward direction. When moving
+                    ; left there is now 1 more row to render for it when rendering
+                    ; from left to right, so inc colsRemaining and store result
+                    ;===
+                    inc a   ; inc colsRemaining
+                    ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
+                    jp +
+                ++:
+
+                ;===
+                ; Update topLeftTile to point to previous metatile col
+                ;===
+
+                ; Set colsRemaining to 1 to refer to the right subcol of
+                ; the previous metatile row (i.e. 1 col left to render when
+                ; drawing from left to right)
+                ld a, 1
+                ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
+
+                ; Subtract 1 col from metatileAddress (just decrement)
+                ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+                dec hl
+                ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+
+                jp +
+
+            ;===
+            ; When moving right 1 tile (subcol)
+            ;===
+            _moveRight:
+                ; Check if there are any subcols remaining in current metatile
+                ld a, (scroll.metatiles.ram.topLeftTile.colsRemaining)
+                cp 1     ; compare with 1 (colsRemaining is 1-based)
+                jr z, ++
+                    ; There are still subcols left in current metatile
+                    dec a   ; dec colsRemaining
+                    ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
+                    jp +
+                ++:
+
+                ; We need to point to the next metatile column
+
+                ; Set cols remaining to max
+                ld a, scroll.metatiles.COLS_PER_METATILE
+                ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
+
+                ; Update metatileAddress to next column (just increment)
+                ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+                inc hl
+                ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+        +:
+
+        ; Update tilemap scroll changes
+        tilemap.calculateScroll
+
+        ret
+.ends
+
+;====
 ; Writes the row/column RAM buffers to VRAM and adjusts the scroll registers.
 ; This should be called during VBlank
 ;====
