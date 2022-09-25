@@ -190,6 +190,9 @@
     ; left shift a row number to point to its first column in the metatilemap
     scroll.metatiles.ram.widthMode: db
 
+    ; The number of bytes per map row (also the number of metatiles per row)
+    scroll.metatiles.ram.bytesPerRow: db
+
     ; Grid of 1-byte metatile refs
     scroll.metatiles.ram.map: dsb scroll.metatiles.MAX_MAP_BYTES
 .ends
@@ -227,8 +230,19 @@
 ;====
 .section "scroll.metatiles.init" free
     scroll.metatiles.init:
-        ; Store settings
+        ; Store width mode
         ld (scroll.metatiles.ram.widthMode), a  ; set width mode
+
+        ; Calculate and store metatiles per row
+        ld b, a ; set B to width mode
+        ld a, 1 ; set A to 1
+        -:
+            ; Left-shift A until it equals metatiles per row
+            rlca ; A = A * 2
+        djnz -
+
+        ; Store metatiles per row
+        ld (scroll.metatiles.ram.bytesPerRow), a
 
         ; Set topMetatileRow to E and leftMetatileCol to D
         inc d   ; make leftMetatileCol 1-based
@@ -286,15 +300,11 @@
         ;===
         ; Calculate number of metatiles to add to pointer after each row
         ;===
-        ld a, (scroll.metatiles.ram.widthMode)  ; load width mode into A
-        ld b, a                                 ; set B to width mode
-        ld a, 1                                 ; set A to 1
-        -:
-            ; Left-shift A until it equals metatiles per row
-            rlca ; A = A * 2
-        djnz -
 
-        ; Subtract metatiles we'll have already output
+        ; Load bytes/metatiles per map row
+        ld a, (scroll.metatiles.ram.bytesPerRow)
+
+        ; Subtract metatiles we'll have already output.
         ; Minus 1 as pointer isn't incremented for last one
         sub scroll.metatiles.VISIBLE_METATILE_COLS - 1
         ld i, a                                     ; store result in I
