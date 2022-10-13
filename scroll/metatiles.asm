@@ -182,6 +182,9 @@
     ; Pointer to the metatile definitions
     scroll.metatiles.ram.defsAddress: dw
 
+    ; Base address + an offset to the current row or col being output
+    scroll.metatiles.ram.defsWithOffset: dw
+
     ; How many metatile columns there are in the map (0-based; 0=1, 255=256)
     scroll.metatiles.ram.metatileColumns: db
 
@@ -427,6 +430,21 @@
 ;====
 .macro "scroll.metatiles.update"
     call scroll.metatiles.update
+.endm
+
+;====
+; Lookup a metatileRef and point to its metatile definition
+;
+; @in   l   the metatile reference
+; @out  hl  address of the metatile definition relative to the base address.
+;           The base address and any row/col offset will need to be added
+;           separately
+;====
+.macro "scroll.metatiles._lookupL"
+    ld h, 0
+    .repeat scroll.metatiles.LOOKUP_LSHIFT
+        add hl, hl
+    .endr
 .endm
 
 ;====
