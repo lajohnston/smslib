@@ -80,7 +80,7 @@
 ; Constants
 ;====
 
-; Number of subtiles in every metatile
+; Number of subtiles in every metatile definition
 .define scroll.metatiles.TILE_COUNT scroll.metatiles.COLS_PER_METATILE * scroll.metatiles.ROWS_PER_METATILE
 
 ; Map size modes (value = left shifts required on a row number to point to that row)
@@ -88,6 +88,12 @@
 .define scroll.metatiles.WIDTH_64   6   ; 64 metatiles
 .define scroll.metatiles.WIDTH_128  7   ; 128 metatiles
 .define scroll.metatiles.WIDTH_256  8   ; 256 metatiles
+
+; Number of bytes per metatile definition
+.define scroll.metatiles.DEF_SIZE_BYTES scroll.metatiles.TILE_COUNT * tilemap.TILE_SIZE_BYTES
+
+; The ALIGN needed for an array of metatile definitions
+.define scroll.metatiles.DEFS_ALIGN scroll.metatiles.DEF_SIZE_BYTES
 
 ;====
 ; METATILE_COLS_MODULO: AND mask to modulo a number by COLS_PER_METATILE
@@ -610,7 +616,180 @@
         ; Update tilemap scroll changes
         tilemap.calculateScroll
 
-        ret
+        ;===
+        ; Update column scroll buffer if necessary
+        ;===
+        tilemap.ifColScrollElseRet, _updateLeftCol, _updateRightCol
+            _updateLeftCol:
+                ; Point IX to left visible metatile column
+                ld ix, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+
+                ; Load colsRemaining into C and rowsRemaining into B
+                ld bc, (scroll.metatiles.ram.topLeftTile.colsRemaining)
+
+                ; Populate the column buffer (routine then returns to caller)
+                jp scroll.metatiles._populateColBuffer
+
+            _updateRightCol:
+                ; Point IX to left visible metatile column
+                ld ix, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+
+                ; Add screen width (-1 col as topLeft has already been inc'd)
+                ld a, (tilemap.COLS - 1) / scroll.metatiles.COLS_PER_METATILE
+                utils.math.addIXA   ; add columns to map pointer
+
+                ; Load colsRemaining into C and rowsRemaining into B
+                ld bc, (scroll.metatiles.ram.topLeftTile.colsRemaining)
+
+                ;===
+                ; Calculate colsRemaining for topRight metatile based on the
+                ; colsRemaining for the topLeft metatile (increment it and wrap
+                ; back to 1 if it goes over COLS_PER_METATILE)
+                ;===
+                inc c   ; increment colsRemaining
+
+                ; Check colsRemaining hasn't overflowed
+                ld a, scroll.metatiles.COLS_PER_METATILE
+                cp c
+                jr nc, +
+                    ; colsRemaining is greater than COLS_PER_METATILE
+                    ld c, 1 ; wrap colsRemaining back to 1
+                +:
+
+                ; Populate the column buffer (routine then returns to caller)
+                jp scroll.metatiles._populateColBuffer
+.ends
+
+;====
+; Populates the column buffer with the column being scrolled onto the screen
+;
+; @in   b   rowsRemaining in the top-most metatile of the column
+; @in   c   colsRemaining in the top-most metatile of the column
+; @in   ix  pointer to the top-most metatileRef to output
+;====
+.section "scroll.metatiles._populateColBuffer" free
+    scroll.metatiles._populateColBuffer:
+        ; Get current subcol offset in bytes
+        ld a, scroll.metatiles.COLS_PER_METATILE
+        sub c               ; set A to current col (cols - colsRemaining)
+        rlca                ; multiply by 2 (2 bytes per tile)
+
+        ; Calculate defsWithOffset (defsAddress + subcol offset)
+        ld de, (scroll.metatiles.ram.defsAddress)
+        utils.math.addDEA   ; add to the defsAddress to get defsWithOffset
+        ld (scroll.metatiles.ram.defsWithOffset), de
+
+        ; Load bytesPerRow and store in IYH
+        ld a, (scroll.metatiles.ram.bytesPerRow)
+        ld iyh, a
+
+        ;===
+        ; The top metatile may be partly off the top of the screen, so we'll
+        ; need skip to the first visible subrow and draw from there. We also
+        ; need to keep track of how many subrows to output before moving to the
+        ; next metatile.
+        ;
+        ; @in   b   rowsRemaining in the top metatile
+        ; @in   c   colsRemaining in the top metatile
+        ; @in   de  address of the definitions + offset to the subcol
+        ; @in   ix  pointer to the top metatileRef in the column
+        ;===
+        _outputTopMetatile:
+            ;===
+            ; Add subrow offset
+            ;===
+            ; Get current subrow
+            ld a, scroll.metatiles.ROWS_PER_METATILE
+            sub b       ; subtract rowsRemaining to get current subrow
+
+            ; Get subrow offset in bytes
+            .repeat scroll.metatiles.METATILE_ROW_LSHIFTS
+                rlca    ; left-shift
+            .endr
+
+            utils.math.addDEA           ; add row offset to defsWithOffset
+
+            ;===
+            ; Lookup metatileRef
+            ;===
+            ld a, (ix + 0)              ; load metatileRef
+            ld l, a                     ; set L to metatileRef
+            scroll.metatiles._lookupL   ; lookup relative metatileDef address
+            add hl, de                  ; add defsWithOffset
+
+            ; Prepare to write to column buffer
+            ld iyl, b                   ; move rowsRemaining to iyl
+            tilemap.loadDEColBuffer     ; set DE to the column buffer
+            tilemap.loadBCColBytes      ; set BC to bytes to write
+
+            ;===
+            ; Output each potential subrow in the metatile
+            ; Jump to _nextMetatileRow when iyl reaches 0
+            ;===
+            .repeat scroll.metatiles.ROWS_PER_METATILE index row
+                ; Output one tile
+                ldi     ; output pattern number
+                ldi     ; output tile attributes
+
+                ; Increment subrow (unless this is the last possible one)
+                .if row < scroll.metatiles.ROWS_PER_METATILE - 1
+                    dec iyl                 ; dec rowsRemaining
+                    jp z, _nextMetatileRow  ; jump if no rows left in this metatile
+
+                    ; Skip remaining columns in metatile (total minus the one
+                    ; we've just output, multiplied by bytes)
+                    ld a, tilemap.TILE_SIZE_BYTES * (scroll.metatiles.COLS_PER_METATILE - 1)
+                    add l   ; add L to column bytes
+                    ld l, a ; set HL to result
+                .endif
+            .endr
+
+        ; Point to the next metatile row in the column
+        _nextMetatileRow:
+            ld a, iyh           ; set A to bytesPerRow (stored in IYH)
+            utils.math.addIXA   ; add bytesPerRow to map pointer
+                                ; continue to _outputMetatileColumn
+
+        ;===
+        ; Copy a metatile column to the buffer, starting from the top subrow.
+        ; Continues outputting metatiles until bytes remaining is 0.
+        ;
+        ; @in   c   bytes left to output in this column
+        ; @in   de  pointer to column buffer
+        ; @in   ix  pointer to metatileRef in the map
+        ;===
+        _outputMetatileColumn:
+            ld a, (ix + 0)              ; load metatileRef
+            ld l, a                     ; set L to metatileRef
+            scroll.metatiles._lookupL   ; lookup relative metatileDef address
+
+            ; Add defsWithOffset to metatileDef pointer
+            ld iyl, c   ; preserve bytes remaining in IYL
+            ld bc, (scroll.metatiles.ram.defsWithOffset)
+            add hl, bc  ; add offset to definition pointer
+
+            ; Restore BC to bytes remaining
+            ld b, 0     ; high byte is always 0
+            ld c, iyl   ; BC is now bytes remaining
+
+            ; Each potential row in the metatile
+            .repeat scroll.metatiles.ROWS_PER_METATILE index row
+                ; Output one tile
+                ldi     ; output pattern number
+                ldi     ; output tile attributes
+                ret po  ; return if no more bytes to output (BC == 0)
+
+                ; Increment subrow (unless this is the last possible one)
+                .if row < scroll.metatiles.ROWS_PER_METATILE - 1
+                    ; Skip remaining columns in metatile (total minus the one
+                    ; we've just output, multiplied by bytes)
+                    ld a, tilemap.TILE_SIZE_BYTES * (scroll.metatiles.COLS_PER_METATILE - 1)
+                    add l   ; set A to current tile + bytes to skip
+                    ld l, a ; set HL to result
+                .endif
+            .endr
+
+            jp _nextMetatileRow
 .ends
 
 ;====
@@ -619,5 +798,5 @@
 ;====
 .macro "scroll.metatiles.render"
     ; Write the tilemap scroll buffers
-    ; tilemap.writeScrollBuffers
+    tilemap.writeScrollBuffers
 .endm
