@@ -240,11 +240,12 @@
 .section "scroll.metatiles.init" free
     scroll.metatiles.init:
         ; Store width mode
-        ld (scroll.metatiles.ram.widthMode), a  ; set width mode
+        ld (scroll.metatiles.ram.widthMode), a
+        ld iyl, a   ; preserve width mode in IYL
 
         ; Calculate and store metatiles per row
-        ld b, a ; set B to width mode
-        ld a, 1 ; set A to 1
+        ld b, a     ; set B to width mode
+        ld a, 1     ; set A to 1
         -:
             ; Left-shift A until it equals metatiles per row
             rlca ; A = A * 2
@@ -272,10 +273,10 @@
         ; (metatileRowOffset * mapWidthCols) + metatileColOffset + baseAddress
         ;===
 
-        ; Calculate row address
-        ld b, a ; set B to width mode (the number of left shifts needed)
+        ; Calculate row offset
+        ld b, iyl   ; set B to width mode (the number of left shifts needed)
         ld h, 0
-        ld l, e ; set HL to rows to offset
+        ld l, e     ; set HL to rows to offset
         -:
             ; Multiply row offset by columns in the map
             add hl, hl  ; HL = HL * 2 (left shift)
@@ -328,7 +329,7 @@
         ld a, (scroll.metatiles.ram.topLeftTile.rowsRemaining)
         ld iyl, a
 
-        jp _outputMetatile
+        jp _outputMetatileAlongRow
 
         _nextSubRow:
             dec iyh ; decrement tilemap rows remaining
@@ -349,7 +350,7 @@
                 ld hl, scroll.metatiles.COLS_PER_METATILE * tilemap.TILE_SIZE_BYTES
                 add hl, de  ; add a row
                 ex hl, de   ; store result in DE
-                jp _outputMetatile
+                jp _outputMetatileAlongRow
             +:
 
             ; No sub rows left - point IX to next metatile row
@@ -364,7 +365,15 @@
 
             ; ...output next metatile
 
-        _outputMetatile:
+        ;===
+        ; Output a metatile along a row and return if there are no more bytes
+        ; to output in the row
+        ;
+        ; @in   bc  bytes remaining to output in the row
+        ; @in   de  defsAddress + subrow offset
+        ; @in   ix  pointer to metatileRef in map
+        ;===
+        _outputMetatileAlongRow:
             ; Get metatileRef
             ld a, (ix + 0)  ; load metatileRef into A
             ld h, 0
@@ -388,7 +397,7 @@
 
             ; Keep outputting metatiles along the row
             inc ix
-            jp _outputMetatile
+            jp _outputMetatileAlongRow
 .ends
 
 ;====
