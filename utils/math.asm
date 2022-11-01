@@ -72,6 +72,23 @@
 .endm
 
 ;====
+; IY = IY + A (unsigned)
+;
+; @in  a    value to add to IY
+; @in  iy   value to add A to
+; @out iy   result
+;
+; @source https://www.plutiedev.com/z80-add-8bit-to-16bit#add-unsigned
+;====
+.macro "utils.math.addIYA"
+    add a, iyl  ; A = A+IYL
+    ld iyl, a   ; IYL = A+IYL
+    adc a, iyh  ; A = A+IYL+IYH+carry
+    sub iyl     ; A = IYL+carry
+    ld iyh, a   ; IYH = IYH+carry
+.endm
+
+;====
 ; Left shift HL
 ;
 ; @source https://chilliant.com/z80shift.html
