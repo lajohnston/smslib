@@ -274,8 +274,8 @@
         +:
 
         ; Point to x positions in VRAM and buffer
-        utils.vdp.prepWrite (sprites.vramAddress + 128) 0           ; vram
-        ld l, <(sprites.ram.buffer) + sprites.Buffer.xPosAndPattern ; buffer
+        utils.vdp.prepWrite (sprites.vramAddress + 128) 0   ; vram
+        ld l, <(sprites.ram.buffer.xPosAndPattern)          ; buffer
 
         ; Copy x positions and patterns from buffer to VRAM
         ld b, ixl                       ; restore sprite count
