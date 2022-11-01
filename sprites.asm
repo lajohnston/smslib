@@ -255,12 +255,12 @@
 
         ; Load number of slots occupied
         ld hl, sprites.ram.buffer + sprites.Buffer.nextSlot ; nextSlot address
-        ld a, (hl)  ; read nextSlot value
-        sub $40     ; remove table offset to get sprite count
-        ld ixl, a   ; preserve counter in IXL
+        ld a, (hl)      ; read nextSlot value
+        sub $40         ; remove table offset to get sprite count
+        jp z, _noSprites; jump if no sprites
+        ld ixl, a       ; preserve counter in IXL
 
         ; Copy y positions to VRAM
-        jp z, _noSprites                ; jp if no sprites
         ld b, ixl                       ; load size into B
         inc l                           ; point to y positions in buffer
         call utils.outiBlock.sendUpTo128Bytes ; send data
