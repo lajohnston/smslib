@@ -257,19 +257,19 @@
         ld hl, sprites.ram.buffer + sprites.Buffer.nextSlot ; nextSlot address
         ld a, (hl)  ; read nextSlot value
         sub $40     ; remove table offset to get sprite count
-        ld iyh, a   ; preserve counter in iyh
+        ld ixl, a   ; preserve counter in IXL
 
         ; Copy y positions to VRAM
         jp z, _noSprites                ; jp if no sprites
-        ld b, iyh                       ; load size into b
+        ld b, ixl                       ; load size into B
         inc l                           ; point to y positions in buffer
         call utils.outiBlock.sendUpTo128Bytes ; send data
 
         ; Output sprite terminator at end of y positions
-        ld a, iyh                       ; load counter into a
+        ld a, ixl                       ; load counter into A
         cp sprites.MAX_SPRITES          ; compare with max sprites
         jp nc, +                        ; skip if counter == max sprites
-            ld a, sprites.Y_TERMINATOR  ; load y terminator into a
+            ld a, sprites.Y_TERMINATOR  ; load y terminator into A
             out (c), a                  ; output y terminator
         +:
 
@@ -278,14 +278,14 @@
         ld l, <(sprites.ram.buffer) + sprites.Buffer.xPosAndPattern ; buffer
 
         ; Copy x positions and patterns from buffer to VRAM
-        ld b, iyh                       ; restore sprite count
+        ld b, ixl                       ; restore sprite count
         rlc b                           ; double to get xPos + pattern
         jp utils.outiBlock.sendUpTo128Bytes   ; send bytes, then ret
 
     ; No sprites in buffer - cap table with sprite terminator then return
     ; VRAM address must be set
     _noSprites:
-        ld a, sprites.Y_TERMINATOR      ; load y terminator into a
+        ld a, sprites.Y_TERMINATOR      ; load y terminator into A
         out (c), a                      ; output y terminator
         ret
 .ends
