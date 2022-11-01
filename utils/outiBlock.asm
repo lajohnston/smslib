@@ -105,24 +105,24 @@
 ; OUTI between 1-128 bytes
 ;
 ; @in   b   the number of bytes to write. Must be greater than 0 and <= 128
+; @in   c   the port to output the data to
 ; @in   hl  the address of the source data
 ;====
 .section "utils.outiBlock.sendUpTo128Bytes" free
     utils.outiBlock.sendUpTo128Bytes:
         ; Address of last OUTI instruction
-        ld d, >(utils.outiBlock.lastOuti)         ; high-byte address of last outi
-        ld a, <(utils.outiBlock.lastOuti)         ; load low-byte address of last outi
+        ld iyh, >(utils.outiBlock.lastOuti) ; high-byte address of last outi
+        ld a, <(utils.outiBlock.lastOuti)   ; load low-byte address of last outi
 
-        ; Subtract additional bytes required
-        dec b                               ; make 0-based (0 = 1, 127 = 128)
-        sub b                               ; subtract bytes
-        sub b                               ; subtract again (1 outi = 2 bytes)
-        ld e, a                             ; set low-byte of address
+        ; Subtract outi instructions required
+        dec b       ; exclude the byte the last outi will output
+        sub b       ; subtract remaining bytes
+        sub b       ; subtract again (1 outi = 2 bytes)
+        ld iyl, a   ; set low-byte of address in IY
 
-        ; Push address to stack then 'return' to it
-        ; ret in outi block will return to original caller
-        push de                             ; push address to stack
-        ret                                 ; 'return' to address in stack
+        ; JP to the outi address in IY; ret in outi block will return to
+        ; the original caller
+        jp (iy)
 .ends
 
 ;====
