@@ -214,34 +214,18 @@ tilemap.loadBCColBytes  ; or, load BC with the value (for use with ldi)
 
 You will need a routine to write sequential tile data for a column from top to bottom. The routine should write a tile, jump to the next row, then write another tile, until the byte counter is 0.
 
-### Add new data to the row buffer
+### Add data to the row buffer
 
-The row buffer is split into `rowBufferA` and `rowBufferB` by `tilemap.asm` in order to handle the scroll wrapping. Start by writing tiles to `rowBufferA` then write the remainder (if any) to `rowBufferB`. Start with the tile on the left-most visible tile and work to the right.
-
-```
-; Example routine
-ld hl, pointerToARow
-
-; Sets DE to rowBufferA and sets A to number of bytes to write
-tilemap.setRowBufferA
-
-ld b, 0
-ld c, a ; set BC to byte count
-ldir    ; copy data until BC == 0
-```
-
-Once `rowBufferA` is full, write the remaining tiles (if any) to `rowBufferB`. Unlike `rowBufferA`, `rowBufferB` can sometimes have a size of 0, so ensure you check this.
+If a row scroll is detected you can transfer the new row data to the row buffer in RAM.
 
 ```
-; Sets DE to rowBufferB and sets A to number of bytes to write
-tilemap.setRowBufferB
+tilemap.loadDERowBuffer ; point DE to the row buffer
 
-jp z, +     ; jp if there are no bytes to write
-    ld b, 0
-    ld c, a ; set BC to byte count
-    ldir    ; copy data until BC == 0
-+:
+tilemap.loadBRowBytes   ; load B with the number of bytes to write to the buffer
+tilemap.loadBCRowBytes  ; or, load BC with the value (for use with ldi)
 ```
+
+You will need a routine that sends the row data to the buffer from left to right. If copying uncompressed data you would just need to point HL to the left-most visible column and use `ldir` to copy the bytes until BC is 0.
 
 ### Updating VRAM
 

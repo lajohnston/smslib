@@ -335,23 +335,9 @@
 
         ; Load the tiles into the row buffer
         _loadRowBuffer:
-            ; Point DE to rowBufferA; Set A to bytes to write
-            tilemap.setRowBufferA
-
-            ; Copy tiles into rowBufferA
-            ld b, 0 ; set BC to bytes to write
-            ld c, a
+            tilemap.loadDERowBuffer ; point DE to row buffer
+            tilemap.loadBCRowBytes  ; set BC to bytes to write
             ldir    ; copy data from HL (tilemap) to DE (buffer)
-
-            ; Point DE to rowBufferB; Set A to bytes to write
-            tilemap.setRowBufferB
-            ret z   ; return if no bytes to write
-
-            ; Copy tiles into rowBufferB
-            ld b, 0 ; set BC to bytes to write
-            ld c, a ; "
-            ldir    ; copy data from HL (tilemap) to DE (buffer)
-
             ret
 .ends
 

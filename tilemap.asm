@@ -124,7 +124,6 @@
 
 ;===
 ; Buffer of raw row tiles
-; Contains rowBufferA and rowBufferB, each with a variable length
 ; Align to 256 so low byte starts at 0 and can be set to the offset
 ;===
 .ramsection "tilemap.ram.rowBuffer" slot utils.ram.SLOT align 256
@@ -518,7 +517,7 @@
 .endm
 
 ;====
-; Loads B with the number of bytes to write for the scrolling column
+; Load B with the number of bytes to write for the scrolling column
 ;
 ; @out  b   the number of bytes to write
 ;====
@@ -527,7 +526,7 @@
 .endm
 
 ;====
-; Loads BC with the number of bytes to write for the scrolling column. Note,
+; Load BC with the number of bytes to write for the scrolling column. Note,
 ; this will always be a value <= 50 so only needs 8-bits, but this macro is
 ; provided for convenience for routines that use ldi and require a 16-bit
 ; counter in BC
@@ -539,61 +538,33 @@
 .endm
 
 ;====
-; Point DE to rowBufferA in RAM, ready to write tile data to. RowBufferA stores tiles
-; from the left-most visible portion of the screen to the right-edge of the
-; tilemap (col 32).
+; Load DE with a pointer to the row buffer
 ;
-; Also returns rowBufferA's length in bytes, i.e. the number of bytes you
-; should write to it (the number of tiles * 2). This is always > 0
-;
-; When writing a row of tiles, start by writing to rowBufferA until it's full
-; then write the remainder in rowBufferB (see tilemapsetRowBufferB).
-;
-; @out  de  pointer to rowBufferA in RAM
-; @out  a   rowBufferA length in bytes; the number of bytes to write to it
+; @out  de  pointer to the row buffer
 ;====
-.macro "tilemap.setRowBufferA"
-    ; Get offset to rowBufferA
-    ld a, (tilemap.ram.xScrollBuffer)
-    sub tilemap.X_OFFSET    ; cancel X offset
-    rrca                    ; divide by 2
-    rrca                    ; divide by 2 (4 total)
-    and %00111110           ; clean value; now equals col * 2 bytes
-
-    ; Set DE to rowBufferA
-    ld d, >tilemap.ram.rowBuffer    ; set D to high byte of rowBuffer
-    ld e, a                         ; set E to rowBufferA offset
-
-    ; Calculate number of bytes to write
-    ld a, tilemap.ROW_SIZE_BYTES
-    sub e                           ; subtract offset in E
+.macro "tilemap.loadDERowBuffer"
+    ld de, tilemap.ram.rowBuffer
 .endm
 
 ;====
-; Point DE to rowBufferB in RAM. RowBufferB stores tiles from column 0 of the
-; tilemap to the left-edge of the visible screen.
+; Load B with the number of bytes to write for the scrolling row
 ;
-; Also returns rowBufferB's length in bytes, i.e. the number of bytes you
-; should write to it (the number of tiles * 2); Unlike rowBufferA, rowBufferB
-; can have a length of zero - always check the Z flag before writing to it
-;
-; When writing a row of tiles, start by writing to rowBufferA until it's full
-; then write the remainder in rowBufferB
-;
-; @out  de  pointer to rowBufferB in RAM
-; @out  a   rowBufferB length in bytes; the number of bytes to write to it
-; @out  f   Z set if there is no data to write to rowBufferB
+; @out  b   the number of bytes to write
 ;====
-.macro "tilemap.setRowBufferB"
-    ; rowBufferB always point to beginning
-    ld de, tilemap.ram.rowBuffer
+.macro "tilemap.loadBRowBytes"
+    ld b, tilemap.ROW_SIZE_BYTES
+.endm
 
-    ; Calculate number of bytes to write
-    ld a, (tilemap.ram.xScrollBuffer)
-    sub tilemap.X_OFFSET    ; cancel X offset
-    rrca                    ; divide by 2
-    rrca                    ; divide by 2 (4)
-    and %00111110           ; clean value; now equals col * 2 bytes
+;====
+; Load BC with the number of bytes to write for the scrolling row. Note,
+; this will always be a value <= 50 so only needs 8-bits, but this macro is
+; provided for convenience for routines that use ldi and require a 16-bit
+; counter in BC
+;
+; @out  bc  the number of bytes to write
+;====
+.macro "tilemap.loadBCRowBytes"
+    ld bc, tilemap.ROW_SIZE_BYTES
 .endm
 
 ;====
@@ -800,9 +771,55 @@
 
         ; Detect whether the row buffer should be flushed
         tilemap.ifRowScroll +
+            ; Set VRAM address to the scrolling row
+            ; Set C to the VDP output port
             tilemap.setRowScrollSlot
-            ld hl, tilemap.ram.rowBuffer
-            tilemap.loadRow
+
+            ;===
+            ; First write
+            ; Set B to bytes to write minus floor(xScroll / 4)
+            ; Set HL to end of the buffer minus bytes to write
+            ;===
+            _firstWrite:
+                ld h, >tilemap.ram.rowBuffer    ; set H to high byte of rowBuffer
+                ld a, (tilemap.ram.xScrollBuffer)
+                sub tilemap.X_OFFSET    ; cancel X offset
+                rrca                    ; divide by 2
+                rrca                    ; divide by 2 (4 total)
+                and %00111110           ; clean value; now equals col * 2 bytes
+                ld e, a                 ; preserve result in E
+                jp z, _secondWrite      ; skip if the are no bytes in first write
+                ld b, a                 ; set B to bytes to write
+
+                ; Set A to the last byte of the buffer
+                ld a, <(tilemap.ram.rowBuffer + tilemap.ROW_SIZE_BYTES)
+
+                ; Subtract bytes we need to write
+                sub b
+
+                ; Point HL to end of buffer minus bytes
+                ld l, a
+
+                ; Copy bytes from buffer to VDP
+                call utils.outiBlock.sendUpTo128Bytes
+
+            ;===
+            ; Second write
+            ; Set B to ROW_SIZE_BYTES minus bytes outputted in first write
+            ; Set HL to start of rowBuffer
+            ;===
+            _secondWrite:
+                ; Set HL to start of rowBuffer; No need to update H as the data
+                ; is aligned
+                ld l, <(tilemap.ram.rowBuffer)  ; set L to low byte of rowBuffer
+
+                ; Bytes to write
+                ld a, tilemap.ROW_SIZE_BYTES
+                sub e       ; subtract bytes written in first write
+
+                ; Write bytes then return to caller
+                ld b, a     ; set B to bytes to write
+                jp utils.outiBlock.sendUpTo128Bytes
         +:
 
         ret
