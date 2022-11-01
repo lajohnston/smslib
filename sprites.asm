@@ -257,7 +257,6 @@
         ld hl, sprites.ram.buffer + sprites.Buffer.nextSlot ; nextSlot address
         ld a, (hl)  ; read nextSlot value
         sub $40     ; remove table offset to get sprite count
-        push iy     ; preserve iy
         ld iyh, a   ; preserve counter in iyh
 
         ; Copy y positions to VRAM
@@ -280,7 +279,6 @@
 
         ; Copy x positions and patterns from buffer to VRAM
         ld b, iyh                       ; restore sprite count
-        pop iy                          ; restore iy
         rlc b                           ; double to get xPos + pattern
         jp utils.outiBlock.sendUpTo128Bytes   ; send bytes, then ret
 
@@ -289,7 +287,6 @@
     _noSprites:
         ld a, sprites.Y_TERMINATOR      ; load y terminator into a
         out (c), a                      ; output y terminator
-        pop iy                          ; restore iy
         ret
 .ends
 
