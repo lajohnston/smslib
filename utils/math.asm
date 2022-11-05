@@ -354,8 +354,15 @@
 ; @source http://www.cpctech.cpc-live.com/docs/mult.html
 ;====
 .macro "utils.math.multiplyHL" args multiplier
-    .if multiplier == 1
-        ; Do nothing
+    .if ceil(multiplier) != multiplier
+        .print "utils.math.multiplyHL: Ensure multiplier is a whole number\n"
+        .fail
+    .endif
+
+    .if multiplier == 0
+        ld hl, 0
+    .elif multiplier == 1
+        ; do nothing
     .elif multiplier == 2
         add hl, hl  ; x2
     .elif multiplier == 3
@@ -435,7 +442,7 @@
         add hl, hl  ; x32
         add hl, hl  ; x64
     .else
-        .print "utils.math.multiplyHL does not currently support multiplying by ", dec multiplier
+        .print "utils.math.multiplyHL does not currently support multiplying by ", dec multiplier, "\n"
         .fail
     .endif
 .endm
