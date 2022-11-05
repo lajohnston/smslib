@@ -345,7 +345,7 @@
 ;====
 ; Multiply HL by a given constant. Only certain numbers are currently supported.
 ; It's more efficient to keep multipliers to: 2, 4, 8, 16, 32, 64. Other
-; multipliers are less efficient and will clobber BC.
+; multipliers are less efficient and will clobber BC and maybe DE
 ;
 ; @in   hl          the value to multiply
 ; @in   multiplier  the constant to multiply by
@@ -390,6 +390,13 @@
         add hl, hl  ; x2
         add hl, hl  ; x4
         add hl, hl  ; x8
+    .elif multiplier == 12
+        add hl, hl  ; x2
+        add hl, hl  ; x4
+        ld b, h     ; preserve HLx4 in BC
+        ld c, l     ; "
+        add hl, hl  ; x8
+        add hl, bc  ; add x4 to get x12
     .elif multiplier == 16
         add hl, hl  ; x2
         add hl, hl  ; x4
@@ -403,6 +410,17 @@
         ld c, l     ; "
         add hl, hl  ; x16
         add hl, bc  ; add x8 to get x24
+    .elif multiplier == 25
+        ld b, h     ; preserve HLx1 in BC
+        ld c, l     ; "
+        add hl, hl  ; x2
+        add hl, hl  ; x4
+        add hl, hl  ; x8
+        ld d, h     ; preserve HLx8 in DE
+        ld e, l     ; "
+        add hl, hl  ; x16
+        add hl, de  ; add x8 to get x24
+        add hl, bc  ; add x1 to get x25
     .elif multiplier == 32
         add hl, hl  ; x2
         add hl, hl  ; x4
