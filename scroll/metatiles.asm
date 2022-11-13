@@ -83,6 +83,9 @@
 ; Number of subtiles in every metatile definition
 .define scroll.metatiles.TILE_COUNT scroll.metatiles.COLS_PER_METATILE * scroll.metatiles.ROWS_PER_METATILE
 
+; Number of bytes each metatile definition requires
+.define scroll.metatiles.METATILE_DEF_SIZE_BYTES scroll.metatiles.TILE_COUNT * tilemap.TILE_SIZE_BYTES
+
 ; Map size modes (value = left shifts required on a row number to point to that row)
 .define scroll.metatiles.WIDTH_32   5   ; 32 metatiles
 .define scroll.metatiles.WIDTH_64   6   ; 64 metatiles
@@ -722,11 +725,24 @@
             sub b       ; subtract rowsRemaining to get current subrow
 
             ; Get subrow offset in bytes
-            .repeat scroll.metatiles.METATILE_ROW_LSHIFTS
-                rlca    ; left-shift
-            .endr
+            .if scroll.metatiles.METATILE_DEF_SIZE_BYTES < 256
+                .repeat scroll.metatiles.METATILE_ROW_LSHIFTS
+                    rlca    ; left-shift
+                .endr
 
-            utils.math.addDEA           ; add row offset to defsWithOffset
+                utils.math.addDEA           ; add row offset to defsWithOffset
+            .else
+                ; METATILE_DEF_SIZE_BYTES is >= to 256, requiring 16-bit addition
+                ld l, a
+                ld h, 0
+
+                .repeat scroll.metatiles.METATILE_ROW_LSHIFTS
+                    add hl, hl  ; HL = HL * 2
+                .endr
+
+                add hl, de
+                ex de, hl
+            .endif
 
             ;===
             ; Lookup metatileRef
@@ -758,8 +774,17 @@
                     ; Skip remaining columns in metatile (total minus the one
                     ; we've just output, multiplied by bytes)
                     ld a, tilemap.TILE_SIZE_BYTES * (scroll.metatiles.COLS_PER_METATILE - 1)
-                    add l   ; add L to column bytes
-                    ld l, a ; set HL to result
+
+                    .if scroll.metatiles.METATILE_DEF_SIZE_BYTES > 255
+                        ; METATILE_DEF_SIZE_BYTES is 256 bytes+, so we'll need
+                        ; 16-bit addition
+                        utils.math.addHLA
+                    .else
+                        ; METATILE_DEF_SIZE_BYTES is < 256 and data is aligned,
+                        ; so we only have to add to the lower byte
+                        add l   ; add L to column bytes
+                        ld l, a ; set HL to result
+                    .endif
                 .endif
             .endr
 
@@ -803,8 +828,17 @@
                     ; Skip remaining columns in metatile (total minus the one
                     ; we've just output, multiplied by bytes)
                     ld a, tilemap.TILE_SIZE_BYTES * (scroll.metatiles.COLS_PER_METATILE - 1)
-                    add l   ; set A to current tile + bytes to skip
-                    ld l, a ; set HL to result
+
+                    .if scroll.metatiles.METATILE_DEF_SIZE_BYTES > 255
+                        ; METATILE_DEF_SIZE_BYTES is 256 bytes+, so we'll need
+                        ; 16-bit addition
+                        utils.math.addHLA
+                    .else
+                        ; As data is aligned and METATILE_DEF_SIZE_BYTES < 256
+                        ; we only have to touch the lower byte
+                        add l   ; add L to column bytes
+                        ld l, a ; set HL to result
+                    .endif
                 .endif
             .endr
 
