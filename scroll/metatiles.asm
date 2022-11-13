@@ -643,12 +643,22 @@
                 ; Point IX to left visible metatile column
                 ld ix, (scroll.metatiles.ram.topLeftTile.metatileAddress)
 
-                ; Add screen width (-1 col as topLeft has already been inc'd)
-                ld a, (tilemap.COLS - 1) / scroll.metatiles.COLS_PER_METATILE
-                utils.math.addIXA   ; add columns to map pointer
-
                 ; Load colsRemaining into C and rowsRemaining into B
                 ld bc, (scroll.metatiles.ram.topLeftTile.colsRemaining)
+
+                ; Point to topRight metatile
+                ld a, scroll.metatiles.COLS_PER_METATILE
+                cp c    ; compare colsRemaining with COLS_PER_METATILE
+
+                ; Calculate tiles to add
+                ld a, ceil(tilemap.COLS / scroll.metatiles.COLS_PER_METATILE)
+                jp nz, +
+                    ; colsRemaining == COLS_PER_METATILE; there are no
+                    ; partial tiles on screen and we need to add one less
+                    dec a
+                +:
+
+                utils.math.addIXA   ; add columns to map pointer
 
                 ;===
                 ; Calculate colsRemaining for topRight metatile based on the
@@ -660,7 +670,7 @@
                 ; Check colsRemaining hasn't overflowed
                 ld a, scroll.metatiles.COLS_PER_METATILE
                 cp c
-                jr nc, +
+                jp nc, +
                     ; colsRemaining is greater than COLS_PER_METATILE
                     ld c, 1 ; wrap colsRemaining back to 1
                 +:
