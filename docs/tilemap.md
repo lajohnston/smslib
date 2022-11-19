@@ -108,6 +108,8 @@ tilemap.loadRows                ; load row data
 
 The tilemap supports 8-direction scrolling. This is a simple but low-level API that handles the fine pixel scroll registers, row/column scroll detection and VRAM write addresses. You will need a scroll handler on top of this which will maintain the position in the world and adjust it based on the scroll direction. It will also need to handle your tile format, whether raw tile data or 'metatiles' that group multiple tiles together to save memory.
 
+Optional scroll handlers are included in the [scroll](./scroll) directory but you may also build your own if needed.
+
 A suggested workflow is to maintain a pointer to the top-left visible tile of your tilemap and adjust it based on the scroll direction. You can then draw the next column or row based on this position. The steps each frame would be the following (described in further detail below):
 
 1. Adjust the tilemap by x and y number of pixels
