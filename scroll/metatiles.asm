@@ -196,11 +196,6 @@
     ; How many metatile columns there are in the map (0-based; 0=1, 255=256)
     scroll.metatiles.ram.metatileColumns: db
 
-    ; The width of the current map, the value of which is one of the
-    ; scroll.metatiles.WIDTH_* constants. The value is the number of times to
-    ; left shift a row number to point to its first column in the metatilemap
-    scroll.metatiles.ram.widthMode: db
-
     ; The number of bytes per map row (also the number of metatiles per row)
     scroll.metatiles.ram.bytesPerRow: db
 
@@ -234,23 +229,19 @@
 ; Sets the initial position of the map and draws a full screen of tiles. This
 ; should be called when the display is off.
 ;
-; @in   a   the map's width mode (should be one of the
-;           scroll.metatiles.WIDTH_xxx values)
+; @in   b   the map's width mode (should be one of the scroll.metatiles.WIDTH_xxx
+;           values)
 ; @in   d   the column offset in metatiles
 ; @in   e   the row offset in metatiles
 ;====
 .section "scroll.metatiles.init" free
     scroll.metatiles.init:
-        ; Store width mode
-        ld (scroll.metatiles.ram.widthMode), a
-        ld iyl, a   ; preserve width mode in IYL
-
-        ; Calculate and store metatiles per row
-        ld b, a     ; set B to width mode
+        ; Calculate metatiles per row
+        ld c, b     ; preserve width mode in C
         ld a, 1     ; set A to 1
         -:
             ; Left-shift A until it equals metatiles per row
-            rlca ; A = A * 2
+            rlca    ; A = A * 2
         djnz -
 
         ; Store metatiles per row
@@ -276,7 +267,7 @@
         ;===
 
         ; Calculate row offset
-        ld b, iyl   ; set B to width mode (the number of left shifts needed)
+        ld b, c     ; set B to width mode (the number of left shifts needed)
         ld h, 0
         ld l, e     ; set HL to rows to offset
         -:

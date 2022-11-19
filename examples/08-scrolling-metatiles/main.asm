@@ -102,7 +102,7 @@
         scroll.metatiles.setDefs
 
         ; Initialise map (offset x0, y0)
-        ld a, scroll.metatiles.WIDTH_64     ; full map width in metatiles
+        ld b, scroll.metatiles.WIDTH_64     ; full map width in metatiles
         ld d, 0                             ; metatile col offset
         ld e, 0                             ; metatile row offset
         scroll.metatiles.init               ; draw the inital screen
