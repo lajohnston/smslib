@@ -1,6 +1,14 @@
-# scroll/tiles.md
+# scroll/tiles.asm
 
 Manages a scrollable tilemap consisting of raw uncompressed tiles (see [tilemap.asm](../tilemap.md) for more information about the tile data format). This builds on the API provided by [tilemap.asm](../tilemap.md).
+
+## Importing the handler and setting the metatile size
+
+The module isn't included by default so will need to be included:
+
+```
+.include "scroll/tiles.asm"
+```
 
 ## 1. Initialise the map
 
