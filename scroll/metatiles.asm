@@ -87,10 +87,9 @@
 .define scroll.metatiles.METATILE_DEF_SIZE_BYTES scroll.metatiles.TILE_COUNT * tilemap.TILE_SIZE_BYTES
 
 ; Map size modes (value = left shifts required on a row number to point to that row)
+.define scroll.metatiles.WIDTH_16   4   ; 16 metatiles
 .define scroll.metatiles.WIDTH_32   5   ; 32 metatiles
 .define scroll.metatiles.WIDTH_64   6   ; 64 metatiles
-.define scroll.metatiles.WIDTH_128  7   ; 128 metatiles
-.define scroll.metatiles.WIDTH_256  8   ; 256 metatiles
 
 ; Number of bytes per metatile definition
 .define scroll.metatiles.DEF_SIZE_BYTES scroll.metatiles.TILE_COUNT * tilemap.TILE_SIZE_BYTES
