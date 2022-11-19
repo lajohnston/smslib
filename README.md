@@ -27,17 +27,18 @@ See example programs in the `examples` directory. Build the examples using the `
 
 ## Docs
 
-- [init.asm](./docs/init.md) - initialises the system and smslib modules
-- [input.asm](./docs/input.md) - interprets the joypad inputs
-- [interrupts.asm](./docs/interrupts.md) - handles VBlank and HBlank interrupts
-- [/mapper/\*.asm](./docs/mappers.md) - memory mapper handlers
-- [palette.asm](./docs/palette.md) - handles the color palettes
-- [patterns.asm](./docs/patterns.md) - handles patterns (tile images)
-- [pause.asm](./docs/pause.md) - handles the pause button
-- [sprites.asm](./docs/sprites.md) - manages a sprite table in a RAM and pushes to VRAM when required
-- [scroll/tiles.asm](./docs/scroll/tiles.md) - manages a scrollable tilemap
-- [tilemap.asm](./docs/tilemap.md) - handles the background tilemap and scrolling
-- [vdp.asm](./docs/vdp.md) - defines and sets graphics chip register settings
+- [init.asm](./docs/init.md) - Initialises the system and smslib modules
+- [input.asm](./docs/input.md) - Interprets the joypad inputs
+- [interrupts.asm](./docs/interrupts.md) - VBlank and HBlank interrupts
+- [/mapper/\*.asm](./docs/mappers.md) - Memory mapper handlers
+- [palette.asm](./docs/palette.md) - Color palettes
+- [patterns.asm](./docs/patterns.md) - Patterns (tile images)
+- [pause.asm](./docs/pause.md) - Pause button
+- [sprites.asm](./docs/sprites.md) - Manages a sprite table in a RAM and pushes to VRAM when required
+- [scroll/tiles.asm](./docs/scroll/tiles.md) - Scrollable tilemaps
+- [scroll/metatiles.asm](./docs/scroll/metatiles.md) - Scrollable maps of metatiles
+- [tilemap.asm](./docs/tilemap.md) - Background tilemap and scrolling
+- [vdp.asm](./docs/vdp.md) - Graphics chip register settings
 
 ## Design Principles
 
