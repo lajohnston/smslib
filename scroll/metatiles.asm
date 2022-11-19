@@ -378,9 +378,8 @@
         ;===
         _outputMetatileAlongRow:
             ; Get metatileRef
-            ld a, (ix + 0)  ; load metatileRef into A
             ld h, 0
-            ld l, a         ; set HL to metatileRef
+            ld l, (ix + 0)  ; load metatileRef into A
 
             ; Lookup metatileDef offset
             utils.math.leftShiftHL scroll.metatiles.LOOKUP_LSHIFT
@@ -747,8 +746,7 @@
             ;===
             ; Lookup metatileRef
             ;===
-            ld a, (ix + 0)              ; load metatileRef
-            ld l, a                     ; set L to metatileRef
+            ld l, (ix + 0)              ; load metatileRef
             scroll.metatiles._lookupL   ; lookup relative metatileDef address
             add hl, de                  ; add defsWithOffset
 
@@ -803,8 +801,7 @@
         ; @in   ix  pointer to metatileRef in the map
         ;===
         _outputMetatileColumn:
-            ld a, (ix + 0)              ; load metatileRef
-            ld l, a                     ; set L to metatileRef
+            ld l, (ix + 0)              ; load metatileRef
             scroll.metatiles._lookupL   ; lookup relative metatileDef address
 
             ; Add defsWithOffset to metatileDef pointer
