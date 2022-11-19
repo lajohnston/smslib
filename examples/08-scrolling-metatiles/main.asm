@@ -19,6 +19,7 @@
 .include "smslib.asm"
 
 ; Set the size (each value can be 2, 4, 8, 16)
+; Try changing these values and see for your yourself:
 .define scroll.metatiles.COLS_PER_METATILE 4
 .define scroll.metatiles.ROWS_PER_METATILE 4
 .include "scroll/metatiles.asm"     ; a metatile scroll handler
