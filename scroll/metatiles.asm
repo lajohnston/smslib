@@ -919,7 +919,9 @@
                     rlca    ; left-shift
                 .endr
 
-                utils.math.addDEA           ; add row offset to defsWithOffset
+                ; Add subrow offset to definitions offset
+                add e       ; add to low byte
+                ld e, a     ; no need to update D as data is aligned
             .else
                 ; METATILE_DEF_SIZE_BYTES is >= to 256, requiring 16-bit addition
                 ld l, a
