@@ -5,8 +5,6 @@
 ; metatile scrolling example before including the scroll/metatiles.asm file.
 ;
 ; Each metatile definition is square or rectangle with its own color.
-;
-; Note how
 ;====
 
 ; The number of metatiles definitions/colors

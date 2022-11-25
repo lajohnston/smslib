@@ -60,7 +60,13 @@ The definitions contain the raw tile data stored sequentially (i.e. the top row 
 
 ## Metatilemap data
 
-The tilemap consists of 1-byte references to these definitions, allowing 256 metatiles at a time. The width of the tilemap is variable, but currently must be either 16, 32 or 64. The maximum height is then determined by how much RAM has been allocated for the map. This defaults to 4096-bytes, so with a width of 32 the maximum height of the map would be 128 (4096 / 32 = 128).
+The tilemap consists of 1-byte references to the metatile definitions, allowing 256 metatiles at a time. The width of the tilemap is variable at runtime to allow a variety of level sizes, but the width * height must fit within the map RAM buffer. This buffer size is determined by the `scroll.metatiles.MAX_MAP_BYTES` value which defaults to 4096, meaning a map with a width of 128 would have a height of 32 (4096 / 128).
+
+The current available widths are below (dimensions assuming 4096 map buffer size):
+- `scroll.metatiles.WIDTH_16` (16x256 metatiles)
+- `scroll.metatiles.WIDTH_32` (32x128 metatiles)
+- `scroll.metatiles.WIDTH_64` (64x64 metatiles)
+- `scroll.metatiles.WIDTH_128` (128x32 metatiles)
 
 You can change the RAM allocation by setting the `scroll.metatiles.MAX_MAP_BYTES` value before importing the module:
 

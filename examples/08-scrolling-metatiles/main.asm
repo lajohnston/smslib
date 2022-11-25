@@ -43,25 +43,15 @@
 .ends
 
 ;====
-; A map of metatile references. Each ref is a byte (0-255) and refers to one
-; of the metatile definitions specified above.
-;
-; Here we programmatically generate the map but a real game may have a designed
-; map that's compressed on the ROM.
+; The metatile map, consisting of a grid of 1-byte refereces to the metatile
+; definitions. The max width is variable at runtime allowing a variety of level
+; sizes. Use one of the scroll.metatiles.WIDTH_xxx constants.
 ;====
-.section "metatileReference" free
+.define MAP_WIDTH scroll.metatiles.WIDTH_32
+
+.section "metatileMap"
     metatileMap:
-        .repeat 64 index row
-            .repeat 64 index col
-                .if row == 0 || col == 0 || row == 63 || col == 64
-                    ; Border around the edges
-                    .db 5   ; metatile #5
-                .else
-                    ; Diagonal stripes in middle
-                    .db ((row + col) # 4)
-                .endif
-            .endr
-        .endr
+        .include "../assets/metatiles/metatileMap.asm"
     metatileMapEnd:
 .ends
 
@@ -103,7 +93,7 @@
         scroll.metatiles.setDefs
 
         ; Initialise map (offset x0, y0)
-        ld b, scroll.metatiles.WIDTH_64     ; full map width in metatiles
+        ld b, MAP_WIDTH                     ; set map width
         ld d, 0                             ; metatile col offset
         ld e, 0                             ; metatile row offset
         scroll.metatiles.init               ; draw the inital screen
