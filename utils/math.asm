@@ -446,3 +446,44 @@
         .fail
     .endif
 .endm
+
+;====
+; Multiply two unsigned bytes together
+;
+; @in   h   the multiplier
+; @in   e   the multiplicand
+; @out  hl  the product
+;
+; @source https://tutorials.eeems.ca/Z80ASM/part4.htm
+;====
+.macro "utils.math.multiplyHByE"
+    call utils.math.multiplyHByE
+.endm
+
+;====
+; See utils.math.multiplyHByE macro
+;====
+.section "utils.math.multiplyHByE" free
+    utils.math.multiplyHByE:
+        ; Zero D and L
+        ld d, 0
+        ld l, d
+
+        ; Bits in the multiplier
+        .repeat 8 index bit
+            -:
+                add hl, hl      ; advance a bit
+
+                .if bit < 7
+                    jp nc, +    ; if bit is 0, skip the addition
+                .else
+                    ret nc      ; if final bit is 0, return
+                .endif
+
+                ; If bit is 1, add to the product
+                add hl, de
+            +:
+        .endr
+
+        ret
+.ends
