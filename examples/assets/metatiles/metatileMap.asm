@@ -6,18 +6,6 @@
 ; map that's compressed on the ROM.
 ;====
 
-; Determine the number of metatiles per row, based on the MAP_WIDTH set in
-; the example file
-.if MAP_WIDTH == scroll.metatiles.WIDTH_16
-    .define MAP_WIDTH_METATILES 16
-.elif MAP_WIDTH == scroll.metatiles.WIDTH_32
-    .define MAP_WIDTH_METATILES 32
-.elif MAP_WIDTH == scroll.metatiles.WIDTH_64
-    .define MAP_WIDTH_METATILES 64
-.elif MAP_WIDTH == scroll.metatiles.WIDTH_128
-    .define MAP_WIDTH_METATILES 128
-.endif
-
 ; The max height for the map will be the MAX_MAP_BYTES value divided by the width
 .define MAP_HEIGHT_METATILES scroll.metatiles.MAX_MAP_BYTES / MAP_WIDTH_METATILES
 

@@ -86,12 +86,6 @@
 ; Number of bytes each metatile definition requires
 .define scroll.metatiles.METATILE_DEF_SIZE_BYTES scroll.metatiles.TILE_COUNT * tilemap.TILE_SIZE_BYTES
 
-; Map size modes (value = left shifts required on a row number to point to that row)
-.define scroll.metatiles.WIDTH_16   4   ; 16 metatiles
-.define scroll.metatiles.WIDTH_32   5   ; 32 metatiles
-.define scroll.metatiles.WIDTH_64   6   ; 64 metatiles
-.define scroll.metatiles.WIDTH_128  7   ; 128 metatiles
-
 ; Number of bytes per metatile definition
 .define scroll.metatiles.DEF_SIZE_BYTES scroll.metatiles.TILE_COUNT * tilemap.TILE_SIZE_BYTES
 
@@ -207,8 +201,7 @@
 ;====
 ; Alias to call scroll.metatiles.init
 ;
-; @in   a           the map's width mode (should be one of the
-;                   scroll.metatiles.WIDTH_xxx values)
+; @in   a           the map's width in metatiles
 ; @in   colOffset|d (optional) the left-most metatile column to draw
 ; @in   rowOffset|e (optional) the top-most metatile row to draw
 ;====
@@ -230,30 +223,21 @@
 ; Sets the initial position of the map and draws a full screen of tiles. This
 ; should be called when the display is off.
 ;
-; @in   b   the map's width mode (should be one of the scroll.metatiles.WIDTH_xxx
-;           values)
-; @in   d   the column offset in metatiles
-; @in   e   the row offset in metatiles
+; @in   a   the map's width in metatiles
+; @in   b   the column offset in metatiles
+; @in   c   the row offset in metatiles
 ;====
 .section "scroll.metatiles.init" free
     scroll.metatiles.init:
-        ; Calculate metatiles per row
-        ld c, b     ; preserve width mode in C
-        ld a, 1     ; set A to 1
-        -:
-            ; Left-shift A until it equals metatiles per row
-            rlca    ; A = A * 2
-        djnz -
-
         ; Store metatiles per row
         ld (scroll.metatiles.ram.bytesPerRow), a
 
-        ; Set topMetatileRow to E and leftMetatileCol to D
-        inc d   ; make leftMetatileCol 1-based
-        inc e   ; make topMetatileRow 1-based
-        ld (scroll.metatiles.ram.topMetatileRow), de
-        dec d   ; restore leftMetatileCol
-        dec e   ; restore topMetatileRow
+        ; Set topMetatileRow to C and leftMetatileCol to B
+        inc b   ; make leftMetatileCol 1-based
+        inc c   ; make topMetatileRow 1-based
+        ld (scroll.metatiles.ram.topMetatileRow), bc
+        dec b   ; restore leftMetatileCol
+        dec c   ; restore topMetatileRow
 
         ; Set H to rowsRemaining and L to colsRemaining (both to max, as there
         ; is no subtile offset)
@@ -267,19 +251,15 @@
         ; (metatileRowOffset * mapWidthCols) + metatileColOffset + baseAddress
         ;===
 
-        ; Calculate row offset
-        ld b, c     ; set B to width mode (the number of left shifts needed)
-        ld h, 0
-        ld l, e     ; set HL to rows to offset
-        -:
-            ; Multiply row offset by columns in the map
-            add hl, hl  ; HL = HL * 2 (left shift)
-        djnz -
+        ; Set HL to metatileRowOffset * mapWidthCols
+        ld h, c                 ; set H to rows to offset
+        ld e, a                 ; set E to map width in metatiles
+        utils.math.multiplyHByE ; set HL to H (metatileRowOffset) * E (mapWidthCols)
 
         ; Add metatile column offset to HL
-        ld b, 0
-        ld c, d     ; set BC to column offset
-        add hl, bc  ; add column offset to address
+        ld c, b                 ; set C to column offset
+        ld b, 0                 ; set BC to column offset
+        add hl, bc              ; add column offset to address
 
         ; Add base map address to HL
         ld bc, scroll.metatiles.ram.map
@@ -288,7 +268,7 @@
         ; Store resulting metaTileAddress
         ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
 
-        ; Draw a full screen of tiles (which then returns)
+        ; Draw a full screen of tiles (routine then returns)
         jp scroll.metatiles._drawFullScreen
 .ends
 

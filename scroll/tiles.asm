@@ -371,6 +371,7 @@
             sub tilemap.TILE_SIZE_BYTES ; sub 2 bytes we'll have just outputted
             ld ixl, a                   ; preserve in ixl
 
+            ; For each row in the column
             .repeat tilemap.MAX_VISIBLE_ROWS index row
                 ; Copy tile from the tilemap to the buffer
                 .repeat tilemap.TILE_SIZE_BYTES

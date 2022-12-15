@@ -45,9 +45,9 @@
 ;====
 ; The metatile map, consisting of a grid of 1-byte refereces to the metatile
 ; definitions. The max width is variable at runtime allowing a variety of level
-; sizes. Use one of the scroll.metatiles.WIDTH_xxx constants.
+; sizes.
 ;====
-.define MAP_WIDTH scroll.metatiles.WIDTH_32
+.define MAP_WIDTH_METATILES 64  ; map width in metatiles
 
 .section "metatileMap"
     metatileMap:
@@ -93,9 +93,9 @@
         scroll.metatiles.setDefs
 
         ; Initialise map (offset x0, y0)
-        ld b, MAP_WIDTH                     ; set map width
-        ld d, 0                             ; metatile col offset
-        ld e, 0                             ; metatile row offset
+        ld a, MAP_WIDTH_METATILES           ; set map width (in metatiles)
+        ld b, 0                             ; metatile col offset (0 = left)
+        ld c, 0                             ; metatile row offset (0 = top)
         scroll.metatiles.init               ; draw the inital screen
 
         ; Enable the display
