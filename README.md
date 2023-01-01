@@ -1,6 +1,6 @@
 # SMSLib - Sega Master System Z80 Libs
 
-Low-level Sega Master System libs for the Z80 WLA-DX assembler. Its aim is to provide a consistent API for the hardware with zero/very low cost abstractions and to minimise the boilerplate required to get homebrew projects up and running quickly.
+Low-level Sega Master System libs for the WLA-DX Z80 assembler (v10.3+). Its aim is to provide a consistent API for the hardware with zero/very low cost abstractions and to minimise the boilerplate required to get homebrew projects up and running quickly.
 
 ## Quick Start
 
@@ -44,14 +44,14 @@ See example programs in the `examples` directory. Build the examples using the `
 
 ### Low level
 
-The libs act as a thin layer to the Master System chips to ensure they are applicable across many projects and engines. They provide macros and routines to abstract many of the nuances of Master System development so you can build a more fuller-blown engine on top of them.
+The modules in the root directory act as a thin layer to the Master System chips to ensure they are applicable across many projects and engines. They provide macros and routines to abstract many of the nuances of Master System development so you can build a more fuller-blown engine on top of them. The repo does though include additional modules that provide some higher level functionality such as scroll handling that build upon these lower level libs.
 
 ### Priorities: Speed > Ease > Size
 
 Over time the routines will be optimised for speed and size without one aspect adversely affecting the other. There will however be an emphasis on speed as code size is less of a problem in Master System projects (especially compared to asset sizes) whereas speed can be a bottleneck, especially within VBlank timing constraints.
 
-- The lib is designed for ease of use so long as this doesn't reduce the speed of the generated code.
-- The lib makes heavy use of macros to generate inline code and save on `call` and `ret` costs. The macros are though mindful of code size so will generate `call`s to large shared routines where necessary.
+- The lib is designed for ease of use so long as this doesn't reduce the speed of the generated code (within reason)
+- The lib makes heavy use of macros to generate inline code and save on `call` and `ret` costs. The macros are though mindful of code size so will generate `call`s to large shared routines where necessary
 
 ### Unsafe Register Preservation
 
@@ -61,7 +61,7 @@ The register values before and after a call may therefore change. This shifts th
 
 ### Decoupled
 
-SMSLib modules are independent of one another so you can pick or choose only the ones you want. For convenience you can just include `smslib.asm` and this will pull them all in for you. In either case WLA-DX will only assemble the code you actually use.
+SMSLib modules for the most part are independent of one another so you can pick or choose only the ones you want. For convenience you can just include `smslib.asm` and this will pull the main ones in for you. In either case WLA-DX will only assemble the code you actually use.
 
 ### Namespaced Prefixes
 
