@@ -80,22 +80,19 @@
 ; Bit locations of flags within tilemap.ram.flags
 .define tilemap.SCROLL_UP_PENDING_BIT       0
 .define tilemap.SCROLL_DOWN_PENDING_BIT     1
-.define tilemap.SCROLL_LEFT_PENDING_BIT     2
-.define tilemap.SCROLL_RIGHT_PENDING_BIT    3
 
-; AND masks to reset the scroll flags for a given axis
-.define tilemap.X_SCROLL_RESET_MASK %11110011
-.define tilemap.Y_SCROLL_RESET_MASK %11111100
+; Masks to set/reset the Y scroll flags (00 = no scroll, 01 = up, 10 = down)
+.define tilemap.SCROLL_Y_RESET_MASK     %11111100   ; AND mask
+.define tilemap.SCROLL_UP_SET_MASK      %00000001   ; OR mask
+.define tilemap.SCROLL_DOWN_SET_MASK    %00000010   ; OR mask
+
+; Masks to set/reset the X scroll flags (00 = no scroll, 10 = right, 11 = left)
+.define tilemap.SCROLL_X_RESET_MASK     %00111111   ; AND mask
+.define tilemap.SCROLL_LEFT_SET_MASK    %11000000   ; OR mask
+.define tilemap.SCROLL_RIGHT_SET_MASK   %10000000   ; OR mask
 
 ; AND masks to mask relevant flags for a given axis
-.define tilemap.X_SCROLL_MASK tilemap.X_SCROLL_RESET_MASK ~ $ff
-.define tilemap.Y_SCROLL_MASK tilemap.Y_SCROLL_RESET_MASK ~ $ff
-
-; OR masks to set the scroll flags
-.define tilemap.SCROLL_UP_SET_MASK      %00000001
-.define tilemap.SCROLL_DOWN_SET_MASK    %00000010
-.define tilemap.SCROLL_LEFT_SET_MASK    %00000100
-.define tilemap.SCROLL_RIGHT_SET_MASK   %00001000
+.define tilemap.Y_SCROLL_MASK tilemap.SCROLL_Y_RESET_MASK ~ $ff
 
 ;====
 ; RAM
@@ -368,7 +365,7 @@
     tilemap.stopUpRowScroll:
         ; Reset UP scroll flag
         ld a, (tilemap.ram.flags)           ; load flags
-        and tilemap.Y_SCROLL_RESET_MASK     ; reset Y scroll flags
+        and tilemap.SCROLL_Y_RESET_MASK     ; reset Y scroll flags
         ld (tilemap.ram.flags), a           ; store updated flags
 
         ; Round yScrollBuffer to top of previous row
@@ -408,7 +405,7 @@
     tilemap.stopDownRowScroll:
         ; Reset Y scroll flags
         ld a, (tilemap.ram.flags)           ; load flags
-        and tilemap.Y_SCROLL_RESET_MASK     ; reset Y scroll flags
+        and tilemap.SCROLL_Y_RESET_MASK     ; reset Y scroll flags
         ld (tilemap.ram.flags), a           ; store updated flags
 
         ; Adjust yScrollBuffer to point to bottom pixel of previous row
@@ -448,7 +445,7 @@
     tilemap.stopLeftColScroll:
         ; Reset column scroll flags
         ld a, (tilemap.ram.flags)           ; load flags
-        and tilemap.X_SCROLL_RESET_MASK     ; reset x scroll flags
+        and tilemap.SCROLL_X_RESET_MASK     ; reset x scroll flags
         ld (tilemap.ram.flags), a           ; store updated flags
 
         ; Round xScrollBuffer to left of previous column
@@ -480,7 +477,7 @@
     tilemap.stopRightColScroll:
         ; Reset column scroll flags
         ld a, (tilemap.ram.flags)           ; load flags
-        and tilemap.X_SCROLL_RESET_MASK     ; reset x scroll flags
+        and tilemap.SCROLL_X_RESET_MASK     ; reset x scroll flags
         ld (tilemap.ram.flags), a           ; store updated flags
 
         ; Round xScrollBuffer to right of previous column
@@ -580,18 +577,18 @@
     .if NARGS == 1
         ; Only one argument passed ('else' label)
         ld a, (tilemap.ram.flags)   ; load flags
-        and tilemap.X_SCROLL_MASK   ; filter out other flags
-        jp z, \1                    ; jp to else if no column to scroll
+        rlca                        ; set C to 7th bit
+        jp nc, \1                   ; jp to else if no col to scroll
         ; ...otherwise continue
     .elif NARGS == 3
         ; 3 arguments passed (left, right, else)
         ld a, (tilemap.ram.flags)   ; load flags
-        and tilemap.X_SCROLL_MASK   ; filter out other flags
-        jp z, else                  ; jp to else if no column to scroll
+        rlca                        ; set C to 7th bit
+        jp nc, else                 ; jp to else if no col to scroll (bit 7 was 0)
 
         ; Check right scroll flag
-        bit tilemap.SCROLL_RIGHT_PENDING_BIT, a
-        jp nz, right                ; jp if scrolling right
+        rlca                        ; set C to what was 6th bit
+        jp nc, right                ; jp if scrolling right (bit 6 was 0)
         ; ...otherwise continue to left label
     .else
         .print "\ntilemap.ifColScroll requires 1 or 3 arguments (left/right/else, or just else alone)\n\n"
@@ -613,13 +610,13 @@
     .endif
 
     ld a, (tilemap.ram.flags)   ; load flags
-    and tilemap.X_SCROLL_MASK   ; filter out other flags
-    ret z                       ; return if no column to scroll
+    rlca                        ; set C to 7th bit
+    ret nc                      ; return if no column to scroll (bit 7 was 0)
 
     ; Check right scroll flag
-    bit tilemap.SCROLL_RIGHT_PENDING_BIT, a
-    jp nz, right                ; jp if scrolling right
-    ; ...otherwise continue to 'up' label
+    rlca                        ; set C to what was 6th bit
+    jp nc, right                ; jp if scrolling right (bit 6 was 0)
+    ; ...otherwise continue to 'left' label
 .endm
 
 ;====
@@ -666,7 +663,7 @@
     .endif
 
     ld a, (tilemap.ram.flags)               ; load flags
-    and tilemap.Y_SCROLL_RESET_MASK ~ $ff   ; remove other flags
+    and tilemap.SCROLL_Y_RESET_MASK ~ $ff   ; remove other flags
     ret z                                   ; return if no row to scroll
 
     bit tilemap.SCROLL_DOWN_PENDING_BIT, a  ; check down scroll flag
@@ -857,8 +854,7 @@
             ; Left column needs scrolling
             inc hl                          ; point to flags
             ld a, (hl)                      ; load flags into A
-            and tilemap.X_SCROLL_RESET_MASK ; reset previous x scroll flags
-            or tilemap.SCROLL_LEFT_SET_MASK ; set left scroll flag
+            or tilemap.SCROLL_LEFT_SET_MASK ; set left scroll flags
             ld (hl), a                      ; store flags
             ret
 
@@ -875,7 +871,7 @@
             ; Right column needs scrolling
             inc hl                          ; point to flags
             ld a, (hl)                      ; load flags into A
-            and tilemap.X_SCROLL_RESET_MASK ; reset previous x scroll flags
+            and tilemap.SCROLL_X_RESET_MASK ; reset previous x scroll flags
             or tilemap.SCROLL_RIGHT_SET_MASK; set right scroll flag
             ld (hl), a                      ; store flags
             ret
@@ -883,7 +879,7 @@
     ; No scroll needed
     _noColumnScroll:
         ld hl, tilemap.ram.flags
-        ld a, tilemap.X_SCROLL_RESET_MASK
+        ld a, tilemap.SCROLL_X_RESET_MASK
         and (hl)            ; reset X scroll flags with mask
         ld (hl), a          ; update flags
         ret
@@ -923,7 +919,7 @@
             ; Update scroll flags
             ld hl, tilemap.ram.flags        ; point to flags
             ld a, (hl)                      ; load flags into A
-            and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
+            and tilemap.SCROLL_Y_RESET_MASK ; reset previous y scroll flags
             or tilemap.SCROLL_UP_SET_MASK   ; set new scroll flag
             ld (hl), a                      ; store result
             ret
@@ -940,7 +936,7 @@
         ; Update scroll flags
         dec hl                          ; point to flags
         ld a, (hl)                      ; load flags into A
-        and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
+        and tilemap.SCROLL_Y_RESET_MASK ; reset previous y scroll flags
         or tilemap.SCROLL_UP_SET_MASK   ; set new scroll flag
         ld (hl), a                      ; store result
         ret
@@ -961,7 +957,7 @@
             ; Update scroll flags
             ld hl, tilemap.ram.flags        ; point to flags
             ld a, (hl)                      ; load flags into A
-            and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
+            and tilemap.SCROLL_Y_RESET_MASK ; reset previous y scroll flags
             or tilemap.SCROLL_DOWN_SET_MASK ; set new scroll flag
             ld (hl), a                      ; store result
             ret
@@ -978,14 +974,14 @@
         ; Update scroll flags
         dec hl                          ; point to flags
         ld a, (hl)                      ; load flags into A
-        and tilemap.Y_SCROLL_RESET_MASK ; reset previous y scroll flags
+        and tilemap.SCROLL_Y_RESET_MASK ; reset previous y scroll flags
         or tilemap.SCROLL_DOWN_SET_MASK ; set new scroll flag
         ld (hl), a                      ; store result
         ret
 
     _noRowScroll:
         ld hl, tilemap.ram.flags
-        ld a, tilemap.Y_SCROLL_RESET_MASK
+        ld a, tilemap.SCROLL_Y_RESET_MASK
         and (hl)            ; reset Y scroll flags with mask
         ld (hl), a          ; update flags
         ret
@@ -1064,9 +1060,9 @@
     ;===
     _updateColScroll:
         ; Check left or right scroll
-        ld a, tilemap.X_SCROLL_RESET_MASK ~ $FF ; negate reset mask
-        and c           ; compare with flags
-        ret z           ; if zero, no column scroll needed
+        ld a, c         ; load flags into A
+        rlca            ; set C to bit 7
+        ret nc          ; if bit 7 was 0, no column scroll needed
 
         ; Get top row (yScroll / 8), multiplied by 2 bytes per lookup item
         ld a, (tilemap.ram.yScrollBuffer)
