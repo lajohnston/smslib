@@ -77,22 +77,15 @@
 .define tilemap.COL_SIZE_BYTES tilemap.MAX_VISIBLE_ROWS * tilemap.TILE_SIZE_BYTES
 .define tilemap.ROW_SIZE_BYTES tilemap.COLS * 2
 
-; Bit locations of flags within tilemap.ram.flags
-.define tilemap.SCROLL_UP_PENDING_BIT       0
-.define tilemap.SCROLL_DOWN_PENDING_BIT     1
-
-; Masks to set/reset the Y scroll flags (00 = no scroll, 01 = up, 10 = down)
+; Masks to set/reset the Y scroll flags (00 = no scroll, 01 = up, 11 = down)
 .define tilemap.SCROLL_Y_RESET_MASK     %11111100   ; AND mask
 .define tilemap.SCROLL_UP_SET_MASK      %00000001   ; OR mask
-.define tilemap.SCROLL_DOWN_SET_MASK    %00000010   ; OR mask
+.define tilemap.SCROLL_DOWN_SET_MASK    %00000011   ; OR mask
 
 ; Masks to set/reset the X scroll flags (00 = no scroll, 10 = right, 11 = left)
 .define tilemap.SCROLL_X_RESET_MASK     %00111111   ; AND mask
 .define tilemap.SCROLL_LEFT_SET_MASK    %11000000   ; OR mask
 .define tilemap.SCROLL_RIGHT_SET_MASK   %10000000   ; OR mask
-
-; AND masks to mask relevant flags for a given axis
-.define tilemap.Y_SCROLL_MASK tilemap.SCROLL_Y_RESET_MASK ~ $ff
 
 ;====
 ; RAM
@@ -632,16 +625,17 @@
     .if NARGS == 1
         ; Only one argument passed ('else' label)
         ld a, (tilemap.ram.flags)   ; load flags
-        and tilemap.Y_SCROLL_MASK   ; filter out other flags
-        jp z, \1                    ; jp to else if no row scroll
+        rrca                        ; set C to bit 0
+        jp nc, \1                   ; jp to else if no row scroll (bit 0 was 0)
         ; ...otherwise continue
     .elif NARGS == 3
         ld a, (tilemap.ram.flags)   ; load flags
-        and tilemap.Y_SCROLL_MASK   ; filter out other flags
-        jp z, else                  ; no row to scroll
+        rrca                        ; set C to bit 0
+        jp nc, else                 ; no row to scroll (bit 0 was 0)
 
-        bit tilemap.SCROLL_DOWN_PENDING_BIT, a
-        jp nz, down                 ; jp if scrolling down
+        ; Check down scroll flag
+        rrca                        ; set C to what was bit 1
+        jp c, down                  ; jp if scrolling down (bit 1 was set)
         ; ...otherwise continue to 'up' label
     .else
         .print "\ntilemap.ifRowScroll requires 1 or 3 arguments (up/down/else, or just else alone)\n\n"
@@ -663,11 +657,12 @@
     .endif
 
     ld a, (tilemap.ram.flags)               ; load flags
-    and tilemap.SCROLL_Y_RESET_MASK ~ $ff   ; remove other flags
-    ret z                                   ; return if no row to scroll
+    rrca                                    ; set C to bit 0
+    ret nc                                  ; return if no row to scroll
 
-    bit tilemap.SCROLL_DOWN_PENDING_BIT, a  ; check down scroll flag
-    jp nz, down                             ; scroll down
+    ; Check down scroll flag
+    rrca                                    ; set C to what was bit 1
+    jp c, down                              ; jp if down scroll (bit 1 was set)
     ; ...otherwise continue to 'up' label
 .endm
 
@@ -957,8 +952,7 @@
             ; Update scroll flags
             ld hl, tilemap.ram.flags        ; point to flags
             ld a, (hl)                      ; load flags into A
-            and tilemap.SCROLL_Y_RESET_MASK ; reset previous y scroll flags
-            or tilemap.SCROLL_DOWN_SET_MASK ; set new scroll flag
+            or tilemap.SCROLL_DOWN_SET_MASK ; update scroll flag
             ld (hl), a                      ; store result
             ret
         +:
@@ -974,8 +968,7 @@
         ; Update scroll flags
         dec hl                          ; point to flags
         ld a, (hl)                      ; load flags into A
-        and tilemap.SCROLL_Y_RESET_MASK ; reset previous y scroll flags
-        or tilemap.SCROLL_DOWN_SET_MASK ; set new scroll flag
+        or tilemap.SCROLL_DOWN_SET_MASK ; update scroll flag
         ld (hl), a                      ; store result
         ret
 
@@ -1000,10 +993,16 @@
         ld c, a                     ; preserve flags in C
 
     _updateRowScroll:
-        ; Check UP scroll
-        bit tilemap.SCROLL_UP_PENDING_BIT, c
-        jp z, +
-            ; Scrolling up - set row to vramRow, and col to 0
+        ; Check Y scroll flag
+        rrca                        ; set C to bit 0
+        jp nc, _updateColScroll     ; bit 0 was 0; no rows to scroll
+
+        ; Check down scroll
+        rrca                        ; set C to what was bit 1
+        jp c, _scrollingDown        ; jp if bit 1 was 1 (scrolling down)
+
+        _scrollingUp:
+            ; Set row to vramRow; Set col to 0
             ld a, (tilemap.ram.yScrollBuffer)   ; load scroll value
 
             ; Divide by 8 (3x rrca) and rotate right twice (2x rrca)
@@ -1021,12 +1020,8 @@
             ld l, a                 ; store in L
             ld (tilemap.ram.vramRowWrite), hl   ; set vramRowWrite
             jp _updateColScroll
-        +:
 
-        ; Check down scroll
-        bit tilemap.SCROLL_DOWN_PENDING_BIT, c
-        jp z, +
-            ; Scrolling down
+        _scrollingDown:
             ; Set col to 0; Set row to (vramRow + 24) mod total rows;
             ld a, (tilemap.ram.yScrollBuffer)
             rrca                    ; divide by 2
