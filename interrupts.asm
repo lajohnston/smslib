@@ -13,7 +13,7 @@
 ;====
 ; Dependencies
 ;====
-.include "./utils/ram.asm"
+.include "./utils/ramSlot.asm"
 
 ;====
 ; Settings
@@ -59,7 +59,7 @@
 ; Flag is set when a VBlank interrupt has occurred so that
 ; interrupts.waitForVBlank can differentiate them from pauses and HBlanks
 ;====
-.ramsection "interrupts.ram.vBlankFlag" slot utils.ram.SLOT
+.ramsection "interrupts.ram.vBlankFlag" slot utils.ramSlot
     interrupts.ram.vBlankFlag: db
 .ends
 

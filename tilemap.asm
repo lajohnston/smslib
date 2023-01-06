@@ -29,7 +29,7 @@
     .include "utils/outiBlock.asm"
 .endif
 
-.include "./utils/ram.asm"
+.include "./utils/ramSlot.asm"
 
 .ifndef utils.vdp
     .include "utils/vdp.asm"
@@ -100,7 +100,7 @@
 ;====
 ; RAM
 ;====
-.ramsection "tilemap.ram" slot utils.ram.SLOT
+.ramsection "tilemap.ram" slot utils.ramSlot
     ; VDP x-axis scroll register buffer
     tilemap.ram.xScrollBuffer:  db  ; negate before writing to the VDP
 
@@ -118,7 +118,7 @@
 .ends
 
 ; Buffer of raw column tiles
-.ramsection "tilemap.ram.colBuffer" slot utils.ram.SLOT
+.ramsection "tilemap.ram.colBuffer" slot utils.ramSlot
     tilemap.ram.colBuffer:      dsb tilemap.COL_SIZE_BYTES
 .ends
 
@@ -126,7 +126,7 @@
 ; Buffer of raw row tiles
 ; Align to 256 so low byte starts at 0 and can be set to the offset
 ;===
-.ramsection "tilemap.ram.rowBuffer" slot utils.ram.SLOT align 256
+.ramsection "tilemap.ram.rowBuffer" slot utils.ramSlot align 256
     tilemap.ram.rowBuffer:      dsb tilemap.ROW_SIZE_BYTES
 .ends
 

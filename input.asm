@@ -7,7 +7,7 @@
 .define input.ENABLED 1
 
 ; Dependencies
-.include "./utils/ram.asm"
+.include "./utils/ramSlot.asm"
 
 ; Constants
 .define input.UP        0
@@ -21,7 +21,7 @@
 .define input.PORT_2    $dd
 
 ; Variables
-.ramsection "input.ram" slot utils.ram.SLOT
+.ramsection "input.ram" slot utils.ramSlot
     input.ram.value: db
 .ends
 

@@ -21,9 +21,7 @@
     .include "utils/math.asm"
 .endif
 
-.ifndef utils.ram
-    .include "utils/ram.asm"
-.endif
+.include "utils/ramSlot.asm"
 
 ;===
 ; Settings
@@ -174,7 +172,7 @@
 ;====
 ; RAM
 ;====
-.ramsection "scroll.metatiles.ram" slot utils.ram.SLOT
+.ramsection "scroll.metatiles.ram" slot utils.ramSlot
     ; Pointer to the top left tile of the on screen map
     scroll.metatiles.ram.topLeftTile:   instanceof scroll.metatiles.TilePointer
 

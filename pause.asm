@@ -7,14 +7,14 @@
 ;====
 ; Dependencies
 ;====
-.include "./utils/ram.asm"
+.include "./utils/ramSlot.asm"
 
 ;====
 ; RAM
 ;
 ; Flag is set when the pause button has been pressed
 ;====
-.ramsection "pause.ram.pauseFlag" slot utils.ram.SLOT
+.ramsection "pause.ram.pauseFlag" slot utils.ramSlot
     pause.ram.pauseFlag: db
 .ends
 

@@ -15,14 +15,12 @@
     .include "utils/math.asm"
 .endif
 
-.ifndef utils.ram
-    .include "utils/ram.asm"
-.endif
+.include "utils/ramSlot.asm"
 
 ;====
 ; RAM variables
 ;====
-.ramsection "scroll.tiles.ram" slot utils.ram.SLOT
+.ramsection "scroll.tiles.ram" slot utils.ramSlot
     ; Pointer to the current top left visible tile
     scroll.tiles.ram.topLeft:       dw
 
