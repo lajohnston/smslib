@@ -13,10 +13,10 @@
     .repeat MAP_WIDTH_METATILES index col
         .if row == 0 || col == 0 || row == MAP_HEIGHT_METATILES - 1 || col == MAP_WIDTH_METATILES - 1
             ; Border around the edges
-            .db 5   ; metatile #5
+            scroll.metatiles.ref 5
         .else
             ; Diagonal stripes in middle
-            .db ((row + col) # 4)
+            scroll.metatiles.ref ((row + col) # 4)
         .endif
     .endr
 .endr

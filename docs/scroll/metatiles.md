@@ -58,9 +58,24 @@ The definitions contain the raw tile data stored sequentially (i.e. the top row 
 .ends
 ```
 
+You can define multiple sets of these and specify which to use with `scroll.metatiles.setDefs`:
+
+```
+ld hl, my2x2MetatileDefs
+scroll.metatiles.setDefs
+```
+
 ## Metatilemap data
 
-The tilemap consists of 1-byte references to the metatile definitions, allowing 256 metatiles at a time. The width of the tilemap is variable at runtime to allow a variety of level sizes, but the width * height must fit within the map RAM buffer. This buffer size is determined by the `scroll.metatiles.MAX_MAP_BYTES` value which defaults to 4096, meaning a map with a width of 128 would have a height of 32 (4096 / 128).
+The tilemap consists of 1-byte references that each point to one of the current 256 metatile definitions. Due to optimisations within the lookup code the metatile reference may not always match up with the order defined in the metatile definitions. You can use `scroll.metatiles.ref` to define a byte containing the correct reference number.
+
+```
+scroll.metatiles.ref 0      ; the first metatile definition
+scroll.metatiles.ref 1      ; the second metatile definition
+scroll.metatiles.ref 255    ; the last metatile definition
+```
+
+The width of the tilemap is variable at runtime to allow a variety of level sizes, but the width * height must fit within the map RAM buffer. This buffer size is determined by the `scroll.metatiles.MAX_MAP_BYTES` value which defaults to 4096, meaning a map with a width of 128 would have a height of 32 (4096 / 128).
 
 You can change the RAM allocation by setting the `scroll.metatiles.MAX_MAP_BYTES` value before importing the module:
 
@@ -77,7 +92,7 @@ An example 64x32 metatile map. 64*32 = 2048, so this will fit into 2048-bytes of
 .repeat 32
     ; Each row contains 64 metatile columns (width)
     .repeat 64
-        .db 2   ; fill map with metatile #2
+        scroll.metatiles.ref 5  ; the 6th metatile definition (0-based)
     .endr
 .endr
 ```

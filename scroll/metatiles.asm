@@ -197,6 +197,17 @@
 .ends
 
 ;====
+; Defines a byte containing a metatileRef. This will be used to lookup the
+; metatile definition
+;
+; @in   index   the metatile index (0-255)
+; @out  .db     the metatileRef
+;====
+.macro "scroll.metatiles.ref" args index
+    .db index
+.endm
+
+;====
 ; Alias to call scroll.metatiles.init
 ;
 ; @in   a           the map's width in metatiles
