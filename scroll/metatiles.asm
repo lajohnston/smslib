@@ -282,6 +282,21 @@
 .ends
 
 ;====
+; Lookup a metatileRef and point to its metatile definition
+;
+; @in   l   the metatile reference
+; @out  hl  address of the metatile definition relative to the base address.
+;           The base address and any row/col offset will need to be added
+;           separately
+;====
+.macro "scroll.metatiles._lookupL"
+    ld h, 0
+    .repeat scroll.metatiles.LOOKUP_LSHIFT
+        add hl, hl
+    .endr
+.endm
+
+;====
 ; Draw a full screen of tiles. This should only be called when the display is off
 ;====
 .section "scroll.metatiles._drawFullScreen" free
@@ -357,13 +372,10 @@
         ; @in   ix  pointer to metatileRef in map
         ;===
         _outputMetatileAlongRow:
-            ; Get metatileRef
-            ld h, 0
-            ld l, (ix + 0)  ; load metatileRef into A
-
-            ; Lookup metatileDef offset
-            utils.math.leftShiftHL scroll.metatiles.LOOKUP_LSHIFT
-            add hl, de      ; add offset (base address + subrow offset)
+            ; Lookup metatileDef
+            ld l, (ix + 0)              ; load metatileRef into L
+            scroll.metatiles._lookupL   ; set HL to relative address
+            add hl, de                  ; add offset (base addr + subrow offset)
 
             ; Output tiles
             .repeat scroll.metatiles.COLS_PER_METATILE
@@ -427,21 +439,6 @@
 ;====
 .macro "scroll.metatiles.update"
     call scroll.metatiles.update
-.endm
-
-;====
-; Lookup a metatileRef and point to its metatile definition
-;
-; @in   l   the metatile reference
-; @out  hl  address of the metatile definition relative to the base address.
-;           The base address and any row/col offset will need to be added
-;           separately
-;====
-.macro "scroll.metatiles._lookupL"
-    ld h, 0
-    .repeat scroll.metatiles.LOOKUP_LSHIFT
-        add hl, hl
-    .endr
 .endm
 
 ;====
