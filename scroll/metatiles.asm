@@ -133,22 +133,39 @@
     .define scroll.metatiles.SUBROW_TO_ROW_MASK %00001111
 .endif
 
-; Number of times to left shift a metatileRef to get the metatileDef offset
+;====
+; Constants used to resolving a metatileRef to the metatileDef address
+;
+; LOOKUP_LSHIFT             number of times to left shift a ref to point to the
+;                           definition
+; LOOKUP_HIGH_BYTE_MASK     AND mask to retrieve the high byte of the metatileDef
+;                           from a ref
+;====
 .if scroll.metatiles.TILE_COUNT == 4
     .define scroll.metatiles.LOOKUP_LSHIFT 3
+    .define scroll.metatiles.LOOKUP_HIGH_BYTE_MASK %00000011
 .elif scroll.metatiles.TILE_COUNT == 8
     .define scroll.metatiles.LOOKUP_LSHIFT 4
+    .define scroll.metatiles.LOOKUP_HIGH_BYTE_MASK %00000111
 .elif scroll.metatiles.TILE_COUNT == 16
     .define scroll.metatiles.LOOKUP_LSHIFT 5
+    .define scroll.metatiles.LOOKUP_HIGH_BYTE_MASK %00001111
 .elif scroll.metatiles.TILE_COUNT == 32
     .define scroll.metatiles.LOOKUP_LSHIFT 6
+    .define scroll.metatiles.LOOKUP_HIGH_BYTE_MASK %00011111
 .elif scroll.metatiles.TILE_COUNT == 64
     .define scroll.metatiles.LOOKUP_LSHIFT 7
+    .define scroll.metatiles.LOOKUP_HIGH_BYTE_MASK %00111111
 .elif scroll.metatiles.TILE_COUNT == 128
     .define scroll.metatiles.LOOKUP_LSHIFT 8
+    .define scroll.metatiles.LOOKUP_HIGH_BYTE_MASK %01111111
 .elif scroll.metatiles.TILE_COUNT == 256
     .define scroll.metatiles.LOOKUP_LSHIFT 9
+    .define scroll.metatiles.LOOKUP_HIGH_BYTE_MASK %11111111
 .endif
+
+; AND mask to retrieve the low byte of the metatileDef from a ref
+.define scroll.metatiles.LOOKUP_LOW_BYTE_MASK (scroll.metatiles.LOOKUP_HIGH_BYTE_MASK ~ $ff)    ; inverse of high mask
 
 ; Number of full metatile columns on the screen at a time
 .define scroll.metatiles.VISIBLE_METATILE_COLS tilemap.COLS / scroll.metatiles.COLS_PER_METATILE
@@ -204,7 +221,40 @@
 ; @out  .db     the metatileRef
 ;====
 .macro "scroll.metatiles.ref" args index
-    .db index
+    ; Left shift the index, LOOKUP_LSHIFT times
+    .define \.\@shiftedIndex index<<scroll.metatiles.LOOKUP_LSHIFT
+
+    ; Use AND masks to filter high and low bits
+    .define \.\@highBits >\.\@shiftedIndex & scroll.metatiles.LOOKUP_HIGH_BYTE_MASK
+    .define \.\@lowBits <\.\@shiftedIndex & scroll.metatiles.LOOKUP_LOW_BYTE_MASK
+
+    ; Combine high bits and low bits into 1 byte
+    .db \.\@highBits | \.\@lowBits
+.endm
+
+;====
+; Lookup a metatileRef and point HL to its relative metatile definition address
+;
+; @in   h   the metatile reference
+; @out  hl  address of the metatile definition relative to the base address.
+;           The base address and any row/col offset will need to be added
+;           separately
+;====
+.macro "scroll.metatiles._lookupH"
+    .if scroll.metatiles.LOOKUP_HIGH_BYTE_MASK == $ff
+        ; High byte (H) is already correct
+        ld l, 0 ; low byte (L) is always 0
+    .else
+        ; Calculate low byte
+        ld a, scroll.metatiles.LOOKUP_LOW_BYTE_MASK
+        and h       ; AND with metatileRef to get low byte
+        ld l, a     ; set L to low byte
+
+        ; Calculate high byte
+        ld a, scroll.metatiles.LOOKUP_HIGH_BYTE_MASK
+        and h       ; AND with metatileRef to get high byte
+        ld h, a     ; set H to high byte
+    .endif
 .endm
 
 ;====
@@ -280,21 +330,6 @@
         ; Draw a full screen of tiles (routine then returns)
         jp scroll.metatiles._drawFullScreen
 .ends
-
-;====
-; Lookup a metatileRef and point to its metatile definition
-;
-; @in   l   the metatile reference
-; @out  hl  address of the metatile definition relative to the base address.
-;           The base address and any row/col offset will need to be added
-;           separately
-;====
-.macro "scroll.metatiles._lookupL"
-    ld h, 0
-    .repeat scroll.metatiles.LOOKUP_LSHIFT
-        add hl, hl
-    .endr
-.endm
 
 ;====
 ; Draw a full screen of tiles. This should only be called when the display is off
@@ -373,8 +408,8 @@
         ;===
         _outputMetatileAlongRow:
             ; Lookup metatileDef
-            ld l, (ix + 0)              ; load metatileRef into L
-            scroll.metatiles._lookupL   ; set HL to relative address
+            ld h, (ix + 0)              ; load metatileRef into L
+            scroll.metatiles._lookupH   ; set HL to relative address
             add hl, de                  ; add offset (base addr + subrow offset)
 
             ; Output tiles
@@ -797,8 +832,8 @@
                     ; defsAddress is aligned so no need to calculate D
 
         ; Lookup first metatileRef
-        ld l, (ix + 0)              ; load metatileRef
-        scroll.metatiles._lookupL   ; lookup relative metatileDef address
+        ld h, (ix + 0)              ; load metatileRef
+        scroll.metatiles._lookupH   ; lookup relative metatileDef address
         add hl, de                  ; add defsWithOffset
 
         ; Point to rowBuffer and set the bytes required
@@ -834,8 +869,8 @@
             inc ix
 
             ; Lookup metatileRef
-            ld l, (ix + 0)              ; load metatileRef
-            scroll.metatiles._lookupL   ; lookup relative metatileDef address
+            ld h, (ix + 0)              ; load metatileRef
+            scroll.metatiles._lookupH   ; lookup relative metatileDef address
 
             ; Load defsWithOffset (defs + subcol offset) and add to HL
             ld a, c                     ; preserve bytes remaining in A
@@ -925,8 +960,8 @@
             ;===
             ; Lookup metatileRef
             ;===
-            ld l, (ix + 0)              ; load metatileRef
-            scroll.metatiles._lookupL   ; lookup relative metatileDef address
+            ld h, (ix + 0)              ; load metatileRef
+            scroll.metatiles._lookupH   ; lookup relative metatileDef address
             add hl, de                  ; add defsWithOffset
 
             ; Prepare to write to column buffer
@@ -980,8 +1015,8 @@
         ; @in   ix  pointer to metatileRef in the map
         ;===
         _outputMetatileColumn:
-            ld l, (ix + 0)              ; load metatileRef
-            scroll.metatiles._lookupL   ; lookup relative metatileDef address
+            ld h, (ix + 0)              ; load metatileRef
+            scroll.metatiles._lookupH   ; lookup relative metatileDef address
 
             ; Add defsWithOffset to metatileDef pointer
             ld iyl, c   ; preserve bytes remaining in IYL
