@@ -110,30 +110,6 @@
 .endif
 
 ;====
-; METATILE_ROWS_MODULO:     AND mask to modulo a number by ROWS_PER_METATILE
-; SUBROW_TO_ROW_RSHIFTS:    Number of times to right shift a subrow offset to
-;                           get the metatile row
-; SUBROW_TO_ROW_MASK:       AND mask to apply after using SUBROW_TO_ROW_RSHIFTS
-;====
-.if scroll.metatiles.ROWS_PER_METATILE == 2
-    .define scroll.metatiles.METATILE_ROWS_MODULO %00000001
-    .define scroll.metatiles.SUBROW_TO_ROW_RSHIFTS 1
-    .define scroll.metatiles.SUBROW_TO_ROW_MASK %01111111
-.elif scroll.metatiles.ROWS_PER_METATILE == 4
-    .define scroll.metatiles.METATILE_ROWS_MODULO %00000011
-    .define scroll.metatiles.SUBROW_TO_ROW_RSHIFTS 2
-    .define scroll.metatiles.SUBROW_TO_ROW_MASK %00111111
-.elif scroll.metatiles.ROWS_PER_METATILE == 8
-    .define scroll.metatiles.METATILE_ROWS_MODULO %00000111
-    .define scroll.metatiles.SUBROW_TO_ROW_RSHIFTS 3
-    .define scroll.metatiles.SUBROW_TO_ROW_MASK %00011111
-.elif scroll.metatiles.ROWS_PER_METATILE == 16
-    .define scroll.metatiles.METATILE_ROWS_MODULO %00001111
-    .define scroll.metatiles.SUBROW_TO_ROW_RSHIFTS 4
-    .define scroll.metatiles.SUBROW_TO_ROW_MASK %00001111
-.endif
-
-;====
 ; Constants used to resolving a metatileRef to the metatileDef address
 ;
 ; LOOKUP_LSHIFT             number of times to left shift a ref to point to the
