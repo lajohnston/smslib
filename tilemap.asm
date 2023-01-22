@@ -714,6 +714,10 @@
     and %00111110                       ; clean value
     ld e, a                             ; load result into E
 
+    ; Set D to column bytes ORed with 128, as required by tilemap._loadColumn
+    or 128                              ; OR A by 128 to combine bits
+    ld d, a                             ; set D to value
+
     ld c, tilemap.VDP_DATA_PORT         ; data port
     ld b, tilemap.COL_SIZE_BYTES        ; bytes to write
     ld iy, (tilemap.ram.colWriteCall)   ; load call address in tilemap._loadColumn
@@ -1089,6 +1093,7 @@
 ;
 ; @in   hl  pointer to sequential tile data
 ; @in   b   bytes to write (number of rows * 2)
+; @in   d   column number * 2 ORed with 128
 ; @in   e   column number * 2
 ;====
 .section "tilemap._loadColumn" free
@@ -1103,6 +1108,9 @@
             .if tilemap._loadColumn_writeAddressLow == 0
                 ; Row address low byte is 0; Just set A to column address
                 ld a, e ; set A to column address
+            .elif tilemap._loadColumn_writeAddressLow == 128
+                ; Row address low byte is 128; This value (and col address) is cached in D
+                ld a, d
             .else
                 ; Set A to low address
                 ld a, tilemap._loadColumn_writeAddressLow
@@ -1143,8 +1151,9 @@
             .dw tilemap._loadColumn + tilemap._loadColumnLookup_currentOffset
 
             ; Update offset to next iteration
-            .if rowNumber # 4 == 0
-                ; Because ld a, e is used every 4th iteration, we only need to increase offset by 12 bytes
+            .if rowNumber # 2 == 0
+                ; Every second iteration uses additional optimisations, so we
+                ; only need to increase the offset by 12 bytes
                 .redefine tilemap._loadColumnLookup_currentOffset tilemap._loadColumnLookup_currentOffset + 12
             .else
                 ; Increase offset by 14 bytes
