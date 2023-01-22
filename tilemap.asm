@@ -1091,8 +1091,6 @@
 ; @in   b   bytes to write (number of rows * 2)
 ; @in   e   column number * 2
 ;====
-.define tilemap._loadColumn_loopSizeBytes 14
-
 .section "tilemap._loadColumn" free
     tilemap._loadColumn:
         .repeat tilemap.ROWS index rowNumber
@@ -1101,10 +1099,20 @@
             .redefine tilemap._loadColumn_writeAddressHigh >tilemap._loadColumn_writeAddress
             .redefine tilemap._loadColumn_writeAddressLow <tilemap._loadColumn_writeAddress
 
+            ; Calculate VRAM low byte write address (0, 64, 128, 192)
+            .if tilemap._loadColumn_writeAddressLow == 0
+                ; Row address low byte is 0; Just set A to column address
+                ld a, e ; set A to column address
+            .else
+                ; Set A to low address
+                ld a, tilemap._loadColumn_writeAddressLow
+
+                ; Set column address bits
+                or e
+            .endif
+
             ; Set VRAM low byte write address
-            ld a, tilemap._loadColumn_writeAddressLow   ; set A to low address
-            or e                                        ; set column address bits
-            out (utils.vdp.VDP_COMMAND_PORT), a         ; send to VDP
+            out (utils.vdp.VDP_COMMAND_PORT), a
 
             ; Set VRAM high byte write address
             ld a,  tilemap._loadColumn_writeAddressHigh ; set A to high address
@@ -1126,8 +1134,22 @@
 ;=====
 .section "tilemap._loadColumnLookup" free bitwindow 8
     tilemap._loadColumnLookup:
-        .repeat tilemap.ROWS index row
-            .dw tilemap._loadColumn + (tilemap._loadColumn_loopSizeBytes * row)
+        ; The offset to the current tilemap._loadColumn iteration
+        .redefine tilemap._loadColumnLookup_currentOffset 0
+
+        ; Iterate over each potential row, starting from 0
+        .repeat tilemap.ROWS index rowNumber
+            ; Set address of the row iteration in tilemap._loadColumn
+            .dw tilemap._loadColumn + tilemap._loadColumnLookup_currentOffset
+
+            ; Update offset to next iteration
+            .if rowNumber # 4 == 0
+                ; Because ld a, e is used every 4th iteration, we only need to increase offset by 12 bytes
+                .redefine tilemap._loadColumnLookup_currentOffset tilemap._loadColumnLookup_currentOffset + 12
+            .else
+                ; Increase offset by 14 bytes
+                .redefine tilemap._loadColumnLookup_currentOffset tilemap._loadColumnLookup_currentOffset + 14
+            .endif
         .endr
 .ends
 
