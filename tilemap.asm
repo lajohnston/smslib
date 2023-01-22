@@ -718,8 +718,9 @@
     or 128                              ; OR A by 128 to combine bits
     ld d, a                             ; set D to value
 
-    ld c, tilemap.VDP_DATA_PORT         ; data port
-    ld b, tilemap.COL_SIZE_BYTES        ; bytes to write
+    ; Set B to bytes to write (tilemap.COL_SIZE_BYTES), and C to tilemap.VDP_DATA_PORT
+    ld bc, (tilemap.COL_SIZE_BYTES * 256) + tilemap.VDP_DATA_PORT
+
     ld iy, (tilemap.ram.colWriteCall)   ; load call address in tilemap._loadColumn
     call tilemap._callIY                ; call address
 .endm
