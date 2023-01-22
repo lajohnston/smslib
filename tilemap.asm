@@ -1095,23 +1095,25 @@
 
 .section "tilemap._loadColumn" free
     tilemap._loadColumn:
-        .repeat tilemap.ROWS index row
+        .repeat tilemap.ROWS index rowNumber
             ; Calculate write address for column 0
-            .redefine tilemap._loadColumn_writeAddress ($4000 | tilemap.vramAddress) + (row * 64)
+            .redefine tilemap._loadColumn_writeAddress ($4000 | tilemap.vramAddress) + (rowNumber * tilemap.COLS * tilemap.TILE_SIZE_BYTES)
+            .redefine tilemap._loadColumn_writeAddressHigh >tilemap._loadColumn_writeAddress
+            .redefine tilemap._loadColumn_writeAddressLow <tilemap._loadColumn_writeAddress
 
-            ; Set VRAM write address (low byte)
-            ld a, <tilemap._loadColumn_writeAddress
-            or e    ; set column/X
-            out (utils.vdp.VDP_COMMAND_PORT), a ; send to VDP
+            ; Set VRAM low byte write address
+            ld a, tilemap._loadColumn_writeAddressLow   ; set A to low address
+            or e                                        ; set column address bits
+            out (utils.vdp.VDP_COMMAND_PORT), a         ; send to VDP
 
-            ; Set VRAM write address (high byte)
-            ld a, >tilemap._loadColumn_writeAddress
-            out (utils.vdp.VDP_COMMAND_PORT), a ; send to VDP
+            ; Set VRAM high byte write address
+            ld a,  tilemap._loadColumn_writeAddressHigh ; set A to high address
+            out (utils.vdp.VDP_COMMAND_PORT), a         ; send to VDP
 
             ; Output tile
             outi    ; pattern ref
             outi    ; tile attributes
-            ret z   ; return if no more tiles to output (b = 0)
+            ret z   ; return if no more tiles to output (B = 0)
         .endr
 
         jp tilemap._loadColumn ; continue from row 0
