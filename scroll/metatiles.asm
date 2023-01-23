@@ -474,10 +474,9 @@
                 cp scroll.metatiles.ROWS_PER_METATILE
                 jr z, ++
                     ;===
-                    ; There are subrows left in current metatile.
-                    ; rowsRemaining works in a downward direction so when moving
-                    ; up a subrow there is now 1 more row to render for current
-                    ; metatile
+                    ; There are still subrows in the current metatile. We need
+                    ; to increment rowsRemaining as when drawing from top to
+                    ; bottom there is now one more subrow to draw
                     ;===
                     inc a   ; inc rowsRemaining
                     ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
@@ -488,24 +487,38 @@
                 ; Update topLeftTile to point to previous metatile row
                 ;===
 
-                ; Set rowsRemaining to 1 to refer to the bottom subrow of
-                ; the previous metatile row (i.e. 1 row left to render when
-                ; drawing from top to bottom)
-                ld a, 1
-                ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
+                ; Check metatile map bounds
+                ld a, (scroll.metatiles.ram.topMetatileRow)
+                dec a       ; decrement top row
+                jr z, ++    ; jp if out of bounds
+                    ; In bounds
+                    ld (scroll.metatiles.ram.topMetatileRow), a ; save update topRow
 
-                ; Subtract 1 row from metatileAddress
-                ld a, (scroll.metatiles.ram.bytesPerRow)
-                neg         ; negate bytes
-                ld d, $ff   ; negative high byte
-                ld e, a     ; set E to negated low byte
-                ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
-                add hl, de  ; subtract DE from HL
+                    ;===
+                    ; We'll be moving to the buttom subrow of the metatile above
+                    ; this ones, so set rowsRemaining to 1 (1 row left to
+                    ; render when drawing from top to bottom)
+                    ;===
+                    ld a, 1
+                    ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
 
-                ; Store updated metatileAddress
-                ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+                    ; Subtract 1 row from metatileAddress
+                    ld a, (scroll.metatiles.ram.bytesPerRow)
+                    neg         ; negate bytes
+                    ld d, $ff   ; negative high byte
+                    ld e, a     ; set E to negated low byte
+                    ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+                    add hl, de  ; subtract DE from HL
 
-                jp +    ; escape tilemap.ifRowScroll
+                    ; Store updated metatileAddress
+                    ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+
+                    jp +    ; escape tilemap.ifRowScroll
+                ++:
+
+                ; Out of bounds
+                tilemap.stopUpRowScroll
+                jp +
 
             ;===
             ; When moving 1 tile (subrow) down
@@ -542,6 +555,10 @@
 
                 ; Store updated metatileAddress
                 ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+
+                ; Increment topMetatileRow
+                ld hl, scroll.metatiles.ram.topMetatileRow
+                inc (hl)
         +:
 
         ;===
