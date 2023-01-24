@@ -592,17 +592,30 @@
                 ; Update topLeftTile to point to previous metatile col
                 ;===
 
-                ; Set colsRemaining to 1 to refer to the right subcol of
-                ; the previous metatile row (i.e. 1 col left to render when
-                ; drawing from left to right)
-                ld a, 1
-                ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
+                ; Check bounds
+                ld a, (scroll.metatiles.ram.leftMetatileCol)
+                dec a       ; decrement leftMetatileCol
+                jp z, ++    ; jp if out of bounds
+                    ; In bounds
+                    ; Store updated leftMetatileCol
+                    ld (scroll.metatiles.ram.leftMetatileCol), a
 
-                ; Subtract 1 col from metatileAddress (just decrement)
-                ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
-                dec hl
-                ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+                    ; Set colsRemaining to 1 to refer to the right subcol of
+                    ; the previous metatile row (i.e. 1 col left to render when
+                    ; drawing from left to right)
+                    ld a, 1
+                    ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
 
+                    ; Subtract 1 col from metatileAddress (just decrement)
+                    ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+                    dec hl
+                    ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+
+                    jp +
+                ++
+
+                ; Out of bounds
+                tilemap.stopLeftColScroll
                 jp +
 
             ;===
@@ -630,6 +643,10 @@
                 ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
                 inc hl
                 ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+
+                ; Increment leftMetatileCol
+                ld hl, scroll.metatiles.ram.leftMetatileCol
+                inc (hl)
         +:
 
         ; Update tilemap scroll changes
