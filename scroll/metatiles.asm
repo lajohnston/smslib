@@ -144,7 +144,7 @@
 .define scroll.metatiles.LOOKUP_LOW_BYTE_MASK (scroll.metatiles.LOOKUP_HIGH_BYTE_MASK ~ $ff)    ; inverse of high mask
 
 ; Number of full metatile columns on the screen at a time
-.define scroll.metatiles.VISIBLE_METATILE_COLS tilemap.COLS / scroll.metatiles.COLS_PER_METATILE
+.define scroll.metatiles.FULL_VISIBLE_METATILE_COLS tilemap.COLS / scroll.metatiles.COLS_PER_METATILE
 
 ;====
 ; Structs
@@ -170,8 +170,9 @@
     scroll.metatiles.ram.topLeftTile:   instanceof scroll.metatiles.TilePointer
 
     ; Col and row counters, to help with bounds checking
-    scroll.metatiles.ram.topMetatileRow:    db  ; 1-based (1 = col 0)
-    scroll.metatiles.ram.leftMetatileCol:   db  ; 1-based (1 = row 0)
+    scroll.metatiles.ram.topMetatileRow:        db  ; 1-based (1 = col 0)
+    scroll.metatiles.ram.leftMetatileCol:       db  ; 1-based (1 = row 0)
+    scroll.metatiles.ram.maxLeftMetatileCol:    db  ; 1-based (1 = col 0)
 
     ; Pointer to the metatile definitions
     scroll.metatiles.ram.defsAddress: dw
@@ -303,6 +304,14 @@
         ; Store resulting metaTileAddress
         ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
 
+        ;===
+        ; Subtract screen width in metatiles from map width to get
+        ; maxLeftMetatileCol. Minus 1 from the subtraction as this will be the
+        ; partial metatile on the right of the screen
+        ;===
+        sub scroll.metatiles.FULL_VISIBLE_METATILE_COLS - 1
+        ld (scroll.metatiles.ram.maxLeftMetatileCol), a
+
         ; Draw a full screen of tiles (routine then returns)
         jp scroll.metatiles._drawFullScreen
 .ends
@@ -325,7 +334,7 @@
 
         ; Subtract metatiles we'll have already output.
         ; Minus 1 as pointer isn't incremented for last one
-        sub scroll.metatiles.VISIBLE_METATILE_COLS - 1
+        sub scroll.metatiles.FULL_VISIBLE_METATILE_COLS - 1
         ld i, a                                     ; store result in I
 
         ; Prep tile output
@@ -353,7 +362,7 @@
 
                 ; Point IX back to first metatile column (minus 1 as the pointer
                 ; isn't incremented for the last one)
-                utils.math.subIX scroll.metatiles.VISIBLE_METATILE_COLS - 1
+                utils.math.subIX scroll.metatiles.FULL_VISIBLE_METATILE_COLS - 1
 
                 ; Add a subrow to the definition offset in DE
                 ld hl, scroll.metatiles.COLS_PER_METATILE * tilemap.TILE_SIZE_BYTES
@@ -622,19 +631,55 @@
             ; When moving right 1 tile (subcol)
             ;===
             _moveRight:
-                ; Check if there are any subcols remaining in current metatile
+                ;===
+                ; Check if there are any subcols remaining in current
+                ; topLeft metatile
+                ;===
                 ld a, (scroll.metatiles.ram.topLeftTile.colsRemaining)
-                cp 1     ; compare with 1 (colsRemaining is 1-based)
-                jr z, ++
-                    ; There are still subcols left in current metatile
-                    dec a   ; dec colsRemaining
-                    ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
-                    jp +
+                cp 1        ; check if we're on the last subCol of the metatile
+                jr z, ++    ; jp if we're on the last subCol of the metatile
+                    ; There are still subcols left in current topLeft metatile
+
+                    ;===
+                    ; Bounds check. Check if the current leftMetatileCol is
+                    ; already the max value
+                    ;===
+                    ld b, a                     ; preserve colsRemaining in B
+
+                    ; Set L to leftMetatileCol and H to maxLeftMetatileCol
+                    ld hl, (scroll.metatiles.ram.leftMetatileCol)
+                    ld a, h                     ; set A to maxLeftMetatileCol
+                    cp l                        ; compare to current leftMetatileCol
+                    jr z, @checkSubColBounds    ; jp if leftMetatileCol == maxLeftMetatileCol
+
+                    @inBounds:
+                        ; Update topLeftTile's colsRemaining
+                        ld a, b     ; set A to colsRemaining
+                        dec a       ; decrement colsRemaining
+
+                        ; Store result
+                        ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
+                        jp +
+
+                    ;===
+                    ; leftMetatileCol == maxLeftMetatileCol. If colsRemaining
+                    ; equals scroll.metatiles.COLS_PER_METATILE then we can't
+                    ; scroll further
+                    ;===
+                    @checkSubColBounds:
+                        ld a, b             ; set A to colsRemaining
+                        cp scroll.metatiles.COLS_PER_METATILE
+                        jp nz, @inBounds    ; jp if colsRemaining != COLS_PER_METATILE
+
+                        ; Otherwise we'll be out of bounds, so stop the column scroll
+                        tilemap.stopRightColScroll
+                        jp +
                 ++:
 
                 ;===
-                ; Point to the next metatile column
+                ; Increment the left metatile to the next metatile column
                 ;===
+
                 ; Set cols remaining to max
                 ld a, scroll.metatiles.COLS_PER_METATILE
                 ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
