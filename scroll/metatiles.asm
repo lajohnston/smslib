@@ -236,22 +236,8 @@
 
 ;====
 ; Alias to call scroll.metatiles.init
-;
-; @in   a           the map's width in metatiles
-; @in   colOffset|d (optional) the left-most metatile column to draw
-; @in   rowOffset|e (optional) the top-most metatile row to draw
 ;====
-.macro "scroll.metatiles.init" args colOffset rowOffset
-    .ifdef colOffset
-        .ifdef rowOffset
-            ; Both colOffset and rowOffset set
-            ld de, rowOffset + (colOffset * 256)
-        .else
-            ; Only colOffset set
-            ld d, colOffset
-        .endif
-    .endif
-
+.macro "scroll.metatiles.init"
     call scroll.metatiles.init
 .endm
 
