@@ -662,36 +662,43 @@
                     ; Bounds check. Check if the current leftMetatileCol is
                     ; already the max value
                     ;===
-                    ld b, a                     ; preserve colsRemaining in B
+                    ld b, a      ; preserve colsRemaining in B
 
                     ; Set L to leftMetatileCol and H to maxLeftMetatileCol
                     ld hl, (scroll.metatiles.ram.leftMetatileCol)
-                    ld a, h                     ; set A to maxLeftMetatileCol
-                    cp l                        ; compare to current leftMetatileCol
-                    jr z, @checkSubColBounds    ; jp if leftMetatileCol == maxLeftMetatileCol
-
-                    @inBounds:
+                    ld a, h     ; set A to maxLeftMetatileCol
+                    cp l        ; compare to current leftMetatileCol
+                    ld a, b     ; set A to colsRemaining
+                    jr z, +++   ; jp if leftMetatileCol == maxLeftMetatileCol
+                        ; In bounds
                         ; Update topLeftTile's colsRemaining
-                        ld a, b     ; set A to colsRemaining
-                        dec a       ; decrement colsRemaining
+                        dec a   ; decrement colsRemaining
 
                         ; Store result
                         ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
                         jp +
+                    +++:
 
                     ;===
                     ; leftMetatileCol == maxLeftMetatileCol. If colsRemaining
                     ; equals scroll.metatiles.COLS_PER_METATILE then we can't
                     ; scroll further
                     ;===
-                    @checkSubColBounds:
-                        ld a, b             ; set A to colsRemaining
-                        cp scroll.metatiles.COLS_PER_METATILE
-                        jp nz, @inBounds    ; jp if colsRemaining != COLS_PER_METATILE
+                    cp scroll.metatiles.COLS_PER_METATILE
 
-                        ; Otherwise we'll be out of bounds, so stop the column scroll
-                        tilemap.stopRightColScroll
+                    jr z, +++
+                        ; In bounds
+                        ; Update topLeftTile's colsRemaining
+                        dec a       ; decrement colsRemaining
+
+                        ; Store result
+                        ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
                         jp +
+                    +++:
+
+                    ; Otherwise we'll be out of bounds, so stop the column scroll
+                    tilemap.stopRightColScroll
+                    jp +
                 ++:
 
                 ;===
