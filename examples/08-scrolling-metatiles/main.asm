@@ -44,10 +44,13 @@
 
 ;====
 ; The metatile map, consisting of a grid of 1-byte refereces to the metatile
-; definitions. The max width is variable at runtime allowing a variety of level
-; sizes.
+; definitions. The width and height are variable at runtime allowing a variety
+; of map sizes. The max width in metatiles is 255. The max height is the set
+; scroll.metatiles.MAX_MAP_BYTES value (defaults to 4096) divided by this map
+; width
 ;====
-.define MAP_WIDTH_METATILES 64  ; map width in metatiles
+.define MAP_WIDTH_METATILES     64  ; map width in metatiles
+.define MAP_HEIGHT_METATILES    64  ; map height in metatiles
 
 .section "metatileMap"
     metatileMap:
@@ -94,6 +97,7 @@
 
         ; Initialise map (offset x0, y0)
         ld a, MAP_WIDTH_METATILES           ; set map width (in metatiles)
+        ld d, MAP_HEIGHT_METATILES          ; the map's height
         ld b, 0                             ; metatile col offset (0 = left)
         ld c, 0                             ; metatile row offset (0 = top)
         scroll.metatiles.init               ; draw the inital screen

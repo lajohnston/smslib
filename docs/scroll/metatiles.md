@@ -108,7 +108,8 @@ Draw the initial view of the map when the display is off.
 ld hl, myMetatileDefs
 scroll.metatiles.setDefs
 
-ld a, 64                ; map has a width of 64 metatiles
+ld a, 64                ; the map has a width of 64 metatiles
+ld d, 64                ; the map has a height of 64 metatiles
 ld b, 0                 ; starting column offset, in metatiles
 ld c, 0                 ; starting row offset, in metatiles
 scroll.metatiles.init   ; draw map
@@ -131,8 +132,6 @@ scroll.metatiles.adjustYPixels
 ```
 
 After adjusting these, use `scroll.metatiles.update` to apply the changes to the RAM buffers.
-
-Note: The metatile scroll handler doesn't currently enforce bounds checking, so the scroll could potentially start drawing non-existent tiles off the screen.
 
 ### 3. Transfer changes to VRAM (during VBlank)
 

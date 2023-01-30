@@ -146,6 +146,9 @@
 ; Number of full metatile columns on the screen at a time
 .define scroll.metatiles.FULL_VISIBLE_METATILE_COLS tilemap.COLS / scroll.metatiles.COLS_PER_METATILE
 
+; Number of full metatile rows on the screen at a time
+.define scroll.metatiles.FULL_VISIBLE_METATILE_ROWS tilemap.MIN_VISIBLE_ROWS / scroll.metatiles.ROWS_PER_METATILE
+
 ;====
 ; Structs
 ;====
@@ -170,8 +173,9 @@
     scroll.metatiles.ram.topLeftTile:   instanceof scroll.metatiles.TilePointer
 
     ; Col and row counters, to help with bounds checking
-    scroll.metatiles.ram.topMetatileRow:        db  ; 1-based (1 = col 0)
-    scroll.metatiles.ram.leftMetatileCol:       db  ; 1-based (1 = row 0)
+    scroll.metatiles.ram.maxTopMetatileRow:     db  ; 1-based (1 = row 0)
+    scroll.metatiles.ram.topMetatileRow:        db  ; 1-based (1 = row 0)
+    scroll.metatiles.ram.leftMetatileCol:       db  ; 1-based (1 = col 0)
     scroll.metatiles.ram.maxLeftMetatileCol:    db  ; 1-based (1 = col 0)
 
     ; Pointer to the metatile definitions
@@ -248,11 +252,29 @@
 ; @in   a   the map's width in metatiles
 ; @in   b   the column offset in metatiles
 ; @in   c   the row offset in metatiles
+; @in   d   the map's height in metatiles
 ;====
 .section "scroll.metatiles.init" free
     scroll.metatiles.init:
         ; Store metatiles per row
         ld (scroll.metatiles.ram.bytesPerRow), a
+        ld e, a ; set E to map width in metatiles
+
+        ;===
+        ; Subtract screen width in metatiles from map width to get
+        ; maxLeftMetatileCol. Minus 1 from the subtraction as this will be the
+        ; partial metatile on the right of the screen
+        ;===
+        sub scroll.metatiles.FULL_VISIBLE_METATILE_COLS - 1
+        ld (scroll.metatiles.ram.maxLeftMetatileCol), a
+
+        ;====
+        ; Subtract screen height in metatiles from map height to get
+        ; maxTopMetatileRow
+        ;====
+        ld a, d ; set A to map height in metatiles
+        sub scroll.metatiles.FULL_VISIBLE_METATILE_ROWS
+        ld (scroll.metatiles.ram.maxTopMetatileRow), a
 
         ; Set topMetatileRow to C and leftMetatileCol to B
         inc b   ; make leftMetatileCol 1-based
@@ -275,7 +297,6 @@
 
         ; Set HL to metatileRowOffset * mapWidthCols
         ld h, c                 ; set H to rows to offset
-        ld e, a                 ; set E to map width in metatiles
         utils.math.multiplyHByE ; set HL to H (metatileRowOffset) * E (mapWidthCols)
 
         ; Add metatile column offset to HL
@@ -289,14 +310,6 @@
 
         ; Store resulting metaTileAddress
         ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
-
-        ;===
-        ; Subtract screen width in metatiles from map width to get
-        ; maxLeftMetatileCol. Minus 1 from the subtraction as this will be the
-        ; partial metatile on the right of the screen
-        ;===
-        sub scroll.metatiles.FULL_VISIBLE_METATILE_COLS - 1
-        ld (scroll.metatiles.ram.maxLeftMetatileCol), a
 
         ; Draw a full screen of tiles (routine then returns)
         jp scroll.metatiles._drawFullScreen
@@ -536,24 +549,43 @@
                 ; point to next metatile row
                 ;===
 
-                ; We'll now be pointing to the first subrow of the next
-                ; metatile, so set rowsRemaining to max
-                ld a, scroll.metatiles.ROWS_PER_METATILE
-                ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
+                ;===
+                ; Check bounds. Screen height (24) is a multiple of the allowed
+                ; ROWS_PER_METATILE values, so we don't need to do this check at
+                ; the subRow level. If variable heights are implemented this
+                ; will need to be changed
+                ;===
 
-                ; Add 1 row to metatileAddress
-                ld a, (scroll.metatiles.ram.bytesPerRow)
-                ld d, 0
-                ld e, a ; set DE to bytesPerRow
-                ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
-                add hl, de  ; add one row to HL
+                ; Set L to maxTopMetatileRow and H to topMetatileRow
+                ld hl, (scroll.metatiles.ram.maxTopMetatileRow)
+                ld a, l     ; set A to maxTopMetatileRow
+                cp h        ; compare to current topMetatileRow
+                jr z, ++    ; jp if topMetatileRow == maxTopMetatileRow
+                    ; In bounds
 
-                ; Store updated metatileAddress
-                ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+                    ; We'll now be pointing to the first subrow of the next
+                    ; metatile, so set rowsRemaining to max
+                    ld a, scroll.metatiles.ROWS_PER_METATILE
+                    ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
 
-                ; Increment topMetatileRow
-                ld hl, scroll.metatiles.ram.topMetatileRow
-                inc (hl)
+                    ; Set DE to bytesPerRow
+                    ld a, (scroll.metatiles.ram.bytesPerRow)
+                    ld d, 0
+                    ld e, a
+
+                    ; Add 1 row to metatileAddress
+                    ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+                    add hl, de  ; add one row to HL
+                    ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+
+                    ; Increment topMetatileRow
+                    ld hl, scroll.metatiles.ram.topMetatileRow
+                    inc (hl)
+                    jp +
+                ++:
+
+                ; Out of bounds - only scroll to bottom edge of in-bound tile
+                tilemap.stopDownRowScroll
         +:
 
         ;===

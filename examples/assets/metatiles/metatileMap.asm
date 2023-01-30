@@ -5,10 +5,6 @@
 ; Here we programmatically generate the map but a real game may have a designed
 ; map that's compressed on the ROM.
 ;====
-
-; The max height for the map will be the MAX_MAP_BYTES value divided by the width
-.define MAP_HEIGHT_METATILES scroll.metatiles.MAX_MAP_BYTES / MAP_WIDTH_METATILES
-
 .repeat MAP_HEIGHT_METATILES index row
     .repeat MAP_WIDTH_METATILES index col
         .if row == 0 || col == 0 || row == MAP_HEIGHT_METATILES - 1 || col == MAP_WIDTH_METATILES - 1
