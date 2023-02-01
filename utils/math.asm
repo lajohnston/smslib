@@ -472,10 +472,10 @@
         ; Bits in the multiplier
         .repeat 8 index bit
             -:
-                add hl, hl      ; advance a bit
+                add hl, hl      ; advance 1 bit
 
                 .if bit < 7
-                    jp nc, +    ; if bit is 0, skip the addition
+                    jr nc, +    ; if bit is 0, skip the addition
                 .else
                     ret nc      ; if final bit is 0, return
                 .endif
