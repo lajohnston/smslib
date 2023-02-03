@@ -820,7 +820,16 @@
                 cp c    ; compare colsRemaining with COLS_PER_METATILE
 
                 ; Calculate tiles to add
-                ld a, ceil(tilemap.COLS / scroll.metatiles.COLS_PER_METATILE)
+                .if ceil(tilemap.COLS / scroll.metatiles.COLS_PER_METATILE) == (scroll.metatiles.COLS_PER_METATILE * 2)
+                    ; Desired value happens to be double what's already loaded into A
+                    rlca    ; double the value currently in A. Note: this doesn't affect the Z flag, used below
+                .elif ceil(tilemap.COLS / scroll.metatiles.COLS_PER_METATILE) == (scroll.metatiles.COLS_PER_METATILE / 2)
+                    ; Desired value happens to be half what's already loaded into A
+                    rrca    ; halve the value currently in A. Note: this doesn't affect the Z flag, used below
+                .else
+                    ld a, ceil(tilemap.COLS / scroll.metatiles.COLS_PER_METATILE)
+                .endif
+
                 jp nz, +
                     ; colsRemaining == COLS_PER_METATILE; there are no
                     ; partial tiles on screen and we need to add one less
