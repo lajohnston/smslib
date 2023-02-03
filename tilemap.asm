@@ -699,7 +699,7 @@
 ; @in   dataAddr    (optional) pointer to the sequential tile data (top of the
 ;                   column). Default to the internal column buffer
 ;====
-.macro "tilemap.writeScrollCol" args dataAddr
+.macro "tilemap._writeScrollCol" args dataAddr
     .ifdef dataAddr
         ld hl, dataAddr
     .else
@@ -726,25 +726,6 @@
 .endm
 
 ;====
-; Write data to the scrolling row. Should be called during VBlank or when
-; the display is off.
-;
-; @in   dataAddr    (optional) the pointer to the tile data to write. Defaults
-;                   to the internal row buffer
-;====
-.macro "tilemap.writeScrollRow" args dataAddr
-    tilemap.setRowScrollSlot
-
-    .ifdef dataAddr
-        ld hl, dataAddr
-    .else
-        ld hl, tilemap.ram.rowBuffer
-    .endif
-
-    tilemap.loadRow
-.endm
-
-;====
 ; Update the scroll registers and send the necessary col/row data to VRAM. This
 ; should be called when the display is off or during VBlank
 ;====
@@ -763,7 +744,7 @@
         ; Detect whether the column buffer should be flushed
         tilemap.ifColScroll +
             ; Write column tiles from buffer to VRAM
-            tilemap.writeScrollCol
+            tilemap._writeScrollCol
         +:
 
         ; Detect whether the row buffer should be flushed

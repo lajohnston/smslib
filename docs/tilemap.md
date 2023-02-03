@@ -236,21 +236,6 @@ During VBlank you can safely write the buffered data to VRAM. The easiest way to
 ```
 tilemap.writeScrollBuffers
 ```
-
-Alternatively you can perform the individual tasks separately:
-
-```
-tilemap.writeScrollRegisters
-
-tilemap.ifRowScroll +
-    tilemap.writeScrollRow
-+:
-
-tilemap.ifColScroll +
-    tilemap.writeScrollCol
-+
-```
-
 ### Bounds checking
 
 If you detect a row or column scroll will take the tilemap out of bounds, you can call the following scroll-stop routines to stop the column and/or row scroll from happening. This will set the pixel scroll to the farthest edge of the in-bounds tiles, but later calls to `tilemap.ifRowScroll` and/or `tilemap.ifColScroll` will no longer detect a scroll and thus not trigger out-of-bounds rows or columns to be drawn.
