@@ -692,37 +692,64 @@
 .endm
 
 ;====
-; Write tile data to the scrolling column in VRAM. The data should be a
-; sequential list of tiles starting with top of the column visible on
-; screen
+; Write tile data to the scrolling column in VRAM, if required. The data should
+; be a sequential list of tiles starting with top of the column visible on screen
 ;
 ; @in   dataAddr    (optional) pointer to the sequential tile data (top of the
-;                   column). Default to the internal column buffer
+;                   column). Defaults to the internal column buffer
 ;====
-.macro "tilemap._writeScrollCol" args dataAddr
+.macro "tilemap._writeScrollCol" isolated args dataAddr
+    ; Calculate the column bits for the write address
+    ; If no col scroll needed, skip to _continue
+    tilemap.ifColScroll, _left, _right, _continue
+        _left:
+            ld a, (tilemap.ram.xScrollBuffer)   ; load X scroll
+            add 8                               ; go right 1 column to correct
+            and %11111000                       ; floor value to nearest 8
+            rrca                                ; divide by 2
+            rrca                                ; divide by 2 again (4)
+            ; We would need to divide by 2 again (8 total) then multiply by 2
+            ; as there are 2 bytes per tile, but these operations cancel each
+            ; other out and so aren't required
+            jp +
+        _right:
+            ld a, (tilemap.ram.xScrollBuffer)   ; load X scroll
+            and %11111000                       ; floor value to nearest 8
+            rrca                                ; divide by 2
+            rrca                                ; divide by 2 again (4)
+            ; We would need to divide by 2 again (8 total) then multiply by 2
+            ; as there are 2 bytes per tile, but these operations cancel each
+            ; other out and so aren't required
+    +:
+
+    ;===
+    ; Prep the call to the address stored in tilemap.ram.colWriteCall, which
+    ; points to an iteration of tilemap._loadColumn
+    ;===
+
+    ; Set E to column address bits
+    ld e, a
+
+    ; Set D to column bits ORed with 128, as required by tilemap._loadColumn
+    or 128  ; OR A by 128 to combine bits
+    ld d, a ; set D to value
+
+    ; Set B to bytes to write (tilemap.COL_SIZE_BYTES), and C to tilemap.VDP_DATA_PORT
+    ld bc, (tilemap.COL_SIZE_BYTES * 256) + tilemap.VDP_DATA_PORT
+
+    ; Set HL to the tile data to write
     .ifdef dataAddr
         ld hl, dataAddr
     .else
         ld hl, tilemap.ram.colBuffer
     .endif
 
-    ; Get the column offset
-    ld a, (tilemap.ram.xScrollBuffer)   ; load X scroll
-    rrca                                ; divide by 2
-    rrca                                ; divide by 2 (4)
-    inc a                               ; adjust tilemap.X_OFFSET (-1 is col 0)
-    and %00111110                       ; clean value
-    ld e, a                             ; load result into E
+    ; Call (tilemap.ram.colWriteCall); This points to an iteration of
+    ; tilemap._loadColumn
+    ld iy, (tilemap.ram.colWriteCall)
+    call tilemap._callIY
 
-    ; Set D to column bytes ORed with 128, as required by tilemap._loadColumn
-    or 128                              ; OR A by 128 to combine bits
-    ld d, a                             ; set D to value
-
-    ; Set B to bytes to write (tilemap.COL_SIZE_BYTES), and C to tilemap.VDP_DATA_PORT
-    ld bc, (tilemap.COL_SIZE_BYTES * 256) + tilemap.VDP_DATA_PORT
-
-    ld iy, (tilemap.ram.colWriteCall)   ; load call address in tilemap._loadColumn
-    call tilemap._callIY                ; call address
+    _continue:
 .endm
 
 ;====
@@ -741,11 +768,8 @@
         ; Set scroll registers
         tilemap.writeScrollRegisters
 
-        ; Detect whether the column buffer should be flushed
-        tilemap.ifColScroll +
-            ; Write column tiles from buffer to VRAM
-            tilemap._writeScrollCol
-        +:
+        ; Write column tiles from buffer to VRAM if required
+        tilemap._writeScrollCol
 
         ; Detect whether the row buffer should be flushed
         tilemap.ifRowScroll +
