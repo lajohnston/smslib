@@ -292,26 +292,40 @@
 .ends
 
 ;====
-; Reset/initialise the RAM buffers and scroll values to 0
+; Alias to call tilemap.reset
 ;====
 .macro "tilemap.reset"
-    ; Initialise values
-    ld a, tilemap.X_OFFSET
-    ld (tilemap.ram.xScrollBuffer), a
-
-    xor a   ; set A to 0
-    ld (tilemap.ram.flags), a
-    ld (tilemap.ram.yScrollBuffer), a
-
-    ld (tilemap.ram.vramRowWrite), a
-    ld (tilemap.ram.vramRowWrite + 1), a
-
-    ld (tilemap.ram.colWriteCall), a
-    ld (tilemap.ram.colWriteCall + 1), a
-
-    ; Zero scroll registers
-    tilemap.writeScrollRegisters
+    call tilemap.reset
 .endm
+
+;====
+; Initialise the RAM buffers and scroll values to their starting state
+;====
+.section "tilemap.reset" free
+    tilemap.reset:
+        xor a   ; set A to 0
+        ld (tilemap.ram.flags), a
+        ld (tilemap.ram.yScrollBuffer), a
+
+        ld (tilemap.ram.vramRowWrite), a
+        ld (tilemap.ram.vramRowWrite + 1), a
+
+        ld (tilemap.ram.colWriteCall), a
+        ld (tilemap.ram.colWriteCall + 1), a
+
+        ; Set the VDP SCROLL_Y_REGISTER to 0
+        utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER
+
+        ; Set the xScrollBuffer to the starting X_OFFSET value
+        ld a, tilemap.X_OFFSET
+        ld (tilemap.ram.xScrollBuffer), a
+
+        ; Write xScrollBuffer to the VDP SCROLL_X_REGISTER (needs to be negated)
+        ld a, -tilemap.X_OFFSET
+        utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
+
+        ret
+.ends
 
 ;====
 ; Adjusts the buffered tilemap xScroll value by a given number of pixels. If this
