@@ -495,6 +495,26 @@
 .endm
 
 ;====
+; Updates topLeftTile to point to the top subrow of the metatile below the
+; current one
+;====
+.macro "scroll.metatiles._scrollDownToNextMetatile"
+    ; Set rowsRemaining to the max value (top subrow)
+    ld a, scroll.metatiles.ROWS_PER_METATILE
+    ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
+
+    ; Set DE to bytesPerRow
+    ld a, (scroll.metatiles.ram.bytesPerRow)
+    ld d, 0 ; zero high byte
+    ld e, a ; set low byte to bytesPerRow
+
+    ; Add 1 row to metatileAddress
+    ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+    add hl, de  ; add one row to HL
+    ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+.endm
+
+;====
 ; Update the scroll buffers
 ;====
 .section "scroll.metatiles.update" free
@@ -570,44 +590,36 @@
                 ; Current metatile was on its last subrow - we'll need to
                 ; point to next metatile row
                 ;===
+                .if scroll.metatiles.ENABLE_BOUNDS_CHECKING == 0
+                    ; Scroll down to the top subrow of the next metatile
+                    scroll.metatiles._scrollDownToNextMetatile
+                .else
+                    ;===
+                    ; Check bounds. Screen height (24) is a multiple of the allowed
+                    ; ROWS_PER_METATILE values, so we don't need to do this check at
+                    ; the subRow level. If variable heights are implemented this
+                    ; will need to be changed
+                    ;===
 
-                ;===
-                ; Check bounds. Screen height (24) is a multiple of the allowed
-                ; ROWS_PER_METATILE values, so we don't need to do this check at
-                ; the subRow level. If variable heights are implemented this
-                ; will need to be changed
-                ;===
+                    ; Set L to maxTopMetatileRow and H to topMetatileRow
+                    ld hl, (scroll.metatiles.ram.bounds.maxTopMetatileRow)
+                    ld a, l     ; set A to maxTopMetatileRow
+                    cp h        ; compare to current topMetatileRow
+                    jr z, ++    ; jp if topMetatileRow == maxTopMetatileRow
+                        ; In bounds
 
-                ; Set L to maxTopMetatileRow and H to topMetatileRow
-                ld hl, (scroll.metatiles.ram.bounds.maxTopMetatileRow)
-                ld a, l     ; set A to maxTopMetatileRow
-                cp h        ; compare to current topMetatileRow
-                jr z, ++    ; jp if topMetatileRow == maxTopMetatileRow
-                    ; In bounds
+                        ; Scroll down to the top subrow of the next metatile
+                        scroll.metatiles._scrollDownToNextMetatile
 
-                    ; We'll now be pointing to the first subrow of the next
-                    ; metatile, so set rowsRemaining to max
-                    ld a, scroll.metatiles.ROWS_PER_METATILE
-                    ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
+                        ; Increment topMetatileRow
+                        ld hl, scroll.metatiles.ram.bounds.topMetatileRow
+                        inc (hl)
+                        jp +
+                    ++:
 
-                    ; Set DE to bytesPerRow
-                    ld a, (scroll.metatiles.ram.bytesPerRow)
-                    ld d, 0
-                    ld e, a
-
-                    ; Add 1 row to metatileAddress
-                    ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
-                    add hl, de  ; add one row to HL
-                    ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
-
-                    ; Increment topMetatileRow
-                    ld hl, scroll.metatiles.ram.bounds.topMetatileRow
-                    inc (hl)
-                    jp +
-                ++:
-
-                ; Out of bounds - only scroll to bottom edge of in-bound tile
-                tilemap.stopDownRowScroll
+                    ; Out of bounds - only scroll to bottom edge of in-bound tile
+                    tilemap.stopDownRowScroll
+                .endif
         +:
 
         ;===
