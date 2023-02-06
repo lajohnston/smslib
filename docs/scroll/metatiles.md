@@ -109,7 +109,8 @@ ld hl, myMetatileDefs
 scroll.metatiles.setDefs
 
 ld a, 64                ; the map has a width of 64 metatiles
-ld d, 64                ; the map has a height of 64 metatiles
+ld d, 64                ; the map has a height of 64 metatiles. Only required
+                        ; if ENABLE_BOUNDS_CHECKING is enabled
 ld b, 0                 ; starting column offset, in metatiles
 ld c, 0                 ; starting row offset, in metatiles
 scroll.metatiles.init   ; draw map
@@ -136,3 +137,14 @@ After adjusting these, use `scroll.metatiles.update` to apply the changes to the
 ### 3. Transfer changes to VRAM (during VBlank)
 
 `scroll.metatiles.render` will apply the scroll register changes to the VDP, and write the new row and/or column to the tilemap if required.
+
+## Bounds Checking
+
+Optional bounds checking can be enabled to ensure the map doesn't scroll beyond the edges of the map data, at the cost of a few bytes of RAM and some additional cycles. This is disabled by default which means if the map does scroll out of bounds the scrolled rows and columns will contain junk data.
+
+Depending on your engine and map designs you might not need these additional checks, for example if the edges of the maps have space around them that the player can't actually move beyond.
+
+```
+.define scroll.metatiles.ENABLE_BOUNDS_CHECKING 1
+.include "scroll/metatiles.asm"
+```

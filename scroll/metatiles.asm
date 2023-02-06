@@ -46,6 +46,12 @@
     .define scroll.metatiles.MAX_MAP_BYTES 4096
 .endif
 
+; When value is 1, ensures the map doesn't scroll out of bounds at the cost of
+; a few bytes of RAM and cycles
+.ifndef scroll.metatiles.ENABLE_BOUNDS_CHECKING
+    .define scroll.metatiles.ENABLE_BOUNDS_CHECKING 0
+.endif
+
 ;====
 ; Validate settings
 ;====
@@ -252,7 +258,8 @@
 ; @in   a   the map's width in metatiles
 ; @in   b   the column offset in metatiles
 ; @in   c   the row offset in metatiles
-; @in   d   the map's height in metatiles
+; @in   d   (optional) the map's height in metatiles. Only required if
+;           ENABLE_BOUNDS_CHECKING is enabled
 ;====
 .section "scroll.metatiles.init" free
     scroll.metatiles.init:
