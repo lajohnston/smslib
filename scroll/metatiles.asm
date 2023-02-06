@@ -178,12 +178,6 @@
     ; Pointer to the top left tile of the on screen map
     scroll.metatiles.ram.topLeftTile:   instanceof scroll.metatiles.TilePointer
 
-    ; Col and row counters, to help with bounds checking
-    scroll.metatiles.ram.maxTopMetatileRow:     db  ; 1-based (1 = row 0)
-    scroll.metatiles.ram.topMetatileRow:        db  ; 1-based (1 = row 0)
-    scroll.metatiles.ram.leftMetatileCol:       db  ; 1-based (1 = col 0)
-    scroll.metatiles.ram.maxLeftMetatileCol:    db  ; 1-based (1 = col 0)
-
     ; Pointer to the metatile definitions
     scroll.metatiles.ram.defsAddress: dw
 
@@ -198,6 +192,14 @@
 
     ; Grid of 1-byte metatile refs
     scroll.metatiles.ram.map: dsb scroll.metatiles.MAX_MAP_BYTES
+.ends
+
+; Col and row counters, to help with bounds checking
+.ramsection "scroll.metatiles.ram.bounds" slot utils.ramSlot
+    scroll.metatiles.ram.bounds.maxTopMetatileRow:  db  ; 1-based (1 = row 0)
+    scroll.metatiles.ram.bounds.topMetatileRow:     db  ; 1-based (1 = row 0)
+    scroll.metatiles.ram.bounds.leftMetatileCol:    db  ; 1-based (1 = col 0)
+    scroll.metatiles.ram.bounds.maxLeftMetatileCol: db  ; 1-based (1 = col 0)
 .ends
 
 ;====
@@ -273,7 +275,7 @@
         ; partial metatile on the right of the screen
         ;===
         sub scroll.metatiles.FULL_VISIBLE_METATILE_COLS - 1
-        ld (scroll.metatiles.ram.maxLeftMetatileCol), a
+        ld (scroll.metatiles.ram.bounds.maxLeftMetatileCol), a
 
         ;====
         ; Subtract screen height in metatiles from map height to get
@@ -281,12 +283,12 @@
         ;====
         ld a, d ; set A to map height in metatiles
         sub scroll.metatiles.FULL_VISIBLE_METATILE_ROWS
-        ld (scroll.metatiles.ram.maxTopMetatileRow), a
+        ld (scroll.metatiles.ram.bounds.maxTopMetatileRow), a
 
         ; Set topMetatileRow to C and leftMetatileCol to B
         inc b   ; make leftMetatileCol 1-based
         inc c   ; make topMetatileRow 1-based
-        ld (scroll.metatiles.ram.topMetatileRow), bc
+        ld (scroll.metatiles.ram.bounds.topMetatileRow), bc
         dec b   ; restore leftMetatileCol
         dec c   ; restore topMetatileRow
 
@@ -505,11 +507,13 @@
                 ;===
 
                 ; Check metatile map bounds
-                ld a, (scroll.metatiles.ram.topMetatileRow)
+                ld a, (scroll.metatiles.ram.bounds.topMetatileRow)
                 dec a       ; decrement top row
                 jr z, ++    ; jp if out of bounds
                     ; In bounds
-                    ld (scroll.metatiles.ram.topMetatileRow), a ; save update topRow
+
+                    ; Save updated topMetatileRow
+                    ld (scroll.metatiles.ram.bounds.topMetatileRow), a
 
                     ;===
                     ; We'll be moving to the buttom subrow of the metatile above
@@ -566,7 +570,7 @@
                 ;===
 
                 ; Set L to maxTopMetatileRow and H to topMetatileRow
-                ld hl, (scroll.metatiles.ram.maxTopMetatileRow)
+                ld hl, (scroll.metatiles.ram.bounds.maxTopMetatileRow)
                 ld a, l     ; set A to maxTopMetatileRow
                 cp h        ; compare to current topMetatileRow
                 jr z, ++    ; jp if topMetatileRow == maxTopMetatileRow
@@ -588,7 +592,7 @@
                     ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
 
                     ; Increment topMetatileRow
-                    ld hl, scroll.metatiles.ram.topMetatileRow
+                    ld hl, scroll.metatiles.ram.bounds.topMetatileRow
                     inc (hl)
                     jp +
                 ++:
@@ -629,12 +633,12 @@
                 ;===
 
                 ; Check bounds
-                ld a, (scroll.metatiles.ram.leftMetatileCol)
+                ld a, (scroll.metatiles.ram.bounds.leftMetatileCol)
                 dec a       ; decrement leftMetatileCol
                 jp z, ++    ; jp if out of bounds
                     ; In bounds
                     ; Store updated leftMetatileCol
-                    ld (scroll.metatiles.ram.leftMetatileCol), a
+                    ld (scroll.metatiles.ram.bounds.leftMetatileCol), a
 
                     ; Set colsRemaining to 1 to refer to the right subcol of
                     ; the previous metatile row (i.e. 1 col left to render when
@@ -674,7 +678,7 @@
                     ld b, a      ; preserve colsRemaining in B
 
                     ; Set L to leftMetatileCol and H to maxLeftMetatileCol
-                    ld hl, (scroll.metatiles.ram.leftMetatileCol)
+                    ld hl, (scroll.metatiles.ram.bounds.leftMetatileCol)
                     ld a, h     ; set A to maxLeftMetatileCol
                     cp l        ; compare to current leftMetatileCol
                     ld a, b     ; set A to colsRemaining
@@ -724,7 +728,7 @@
                 ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
 
                 ; Increment leftMetatileCol
-                ld hl, scroll.metatiles.ram.leftMetatileCol
+                ld hl, scroll.metatiles.ram.bounds.leftMetatileCol
                 inc (hl)
         +:
 
