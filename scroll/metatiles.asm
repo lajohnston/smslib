@@ -401,10 +401,12 @@
                 outi
                 outi
 
+                ; Go to next row when there are no more tiles to output in this row
                 .if scroll.metatiles.COLS_PER_METATILE > 8
-                    jp z, _nextSubRow  ; no more tiles to output in this row
+                    ; Jump is large to we can't use relative jump
+                    jp z, _nextSubRow
                 .else
-                    jr z, _nextSubRow  ; no more tiles to output in this row
+                    jr z, _nextSubRow
                 .endif
             .endr
 
