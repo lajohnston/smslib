@@ -472,6 +472,29 @@
 .endm
 
 ;====
+; Updates topLeftTile to point to the bottom subrow of the metatile above
+; the current one
+;====
+.macro "scroll.metatiles._scrollUpToNextMetatile"
+    ; Set rowsRemaining to 1 (the bottom of the metatile above)
+    ld a, 1
+    ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
+
+    ; Set DE to -bytesPerRow
+    ld a, (scroll.metatiles.ram.bytesPerRow)
+    neg         ; negate bytes
+    ld d, $ff   ; negative high byte
+    ld e, a     ; set E to negated low byte
+
+    ; Subtract 1 subrow from metatileAddress
+    ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+    add hl, de  ; add -bytesPerRow from HL
+
+    ; Store updated metatileAddress
+    ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+.endm
+
+;====
 ; Update the scroll buffers
 ;====
 .section "scroll.metatiles.update" free
@@ -503,43 +526,29 @@
                 ++:
 
                 ;===
-                ; Update topLeftTile to point to previous metatile row
+                ; Update topLeftTile to point to next metatile row up
                 ;===
+                .if scroll.metatiles.ENABLE_BOUNDS_CHECKING == 0
+                    ; Scroll up to the bottom row of the next metatile
+                    scroll.metatiles._scrollUpToNextMetatile
+                    jp +
+                .else
+                    ; Bounds checking enabled. Check bounds
+                    ld a, (scroll.metatiles.ram.bounds.topMetatileRow)
+                    dec a       ; decrement top row
+                    jr z, ++    ; jp if out of bounds
+                        ; Save updated topMetatileRow
+                        ld (scroll.metatiles.ram.bounds.topMetatileRow), a
 
-                ; Check metatile map bounds
-                ld a, (scroll.metatiles.ram.bounds.topMetatileRow)
-                dec a       ; decrement top row
-                jr z, ++    ; jp if out of bounds
-                    ; In bounds
+                        ; Scroll up to the bottom row of the next metatile
+                        scroll.metatiles._scrollUpToNextMetatile
+                        jp +
+                    ++:
 
-                    ; Save updated topMetatileRow
-                    ld (scroll.metatiles.ram.bounds.topMetatileRow), a
-
-                    ;===
-                    ; We'll be moving to the buttom subrow of the metatile above
-                    ; this ones, so set rowsRemaining to 1 (1 row left to
-                    ; render when drawing from top to bottom)
-                    ;===
-                    ld a, 1
-                    ld (scroll.metatiles.ram.topLeftTile.rowsRemaining), a
-
-                    ; Subtract 1 row from metatileAddress
-                    ld a, (scroll.metatiles.ram.bytesPerRow)
-                    neg         ; negate bytes
-                    ld d, $ff   ; negative high byte
-                    ld e, a     ; set E to negated low byte
-                    ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
-                    add hl, de  ; subtract DE from HL
-
-                    ; Store updated metatileAddress
-                    ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
-
-                    jp +    ; escape tilemap.ifRowScroll
-                ++:
-
-                ; Out of bounds
-                tilemap.stopUpRowScroll
-                jp +
+                    ; Out of bounds
+                    tilemap.stopUpRowScroll
+                    jp +
+                .endif
 
             ;===
             ; When moving 1 tile (subrow) down
