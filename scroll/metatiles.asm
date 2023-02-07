@@ -269,28 +269,31 @@
         ld (scroll.metatiles.ram.bytesPerRow), a
         ld e, a ; set E to map width in metatiles
 
-        ;===
-        ; Subtract screen width in metatiles from map width to get
-        ; maxLeftMetatileCol. Minus 1 from the subtraction as this will be the
-        ; partial metatile on the right of the screen
-        ;===
-        sub scroll.metatiles.FULL_VISIBLE_METATILE_COLS - 1
-        ld (scroll.metatiles.ram.bounds.maxLeftMetatileCol), a
+        ; Initialise bounds checking variables
+        .if scroll.metatiles.ENABLE_BOUNDS_CHECKING == 1
+            ;===
+            ; Subtract screen width in metatiles from map width to get
+            ; maxLeftMetatileCol. Minus 1 from the subtraction as this will be the
+            ; partial metatile on the right of the screen
+            ;===
+            sub scroll.metatiles.FULL_VISIBLE_METATILE_COLS - 1
+            ld (scroll.metatiles.ram.bounds.maxLeftMetatileCol), a
 
-        ;====
-        ; Subtract screen height in metatiles from map height to get
-        ; maxTopMetatileRow
-        ;====
-        ld a, d ; set A to map height in metatiles
-        sub scroll.metatiles.FULL_VISIBLE_METATILE_ROWS
-        ld (scroll.metatiles.ram.bounds.maxTopMetatileRow), a
+            ;====
+            ; Subtract screen height in metatiles from map height to get
+            ; maxTopMetatileRow
+            ;====
+            ld a, d ; set A to map height in metatiles
+            sub scroll.metatiles.FULL_VISIBLE_METATILE_ROWS
+            ld (scroll.metatiles.ram.bounds.maxTopMetatileRow), a
 
-        ; Set topMetatileRow to C and leftMetatileCol to B
-        inc b   ; make leftMetatileCol 1-based
-        inc c   ; make topMetatileRow 1-based
-        ld (scroll.metatiles.ram.bounds.topMetatileRow), bc
-        dec b   ; restore leftMetatileCol
-        dec c   ; restore topMetatileRow
+            ; Set topMetatileRow to C and leftMetatileCol to B
+            inc b   ; make leftMetatileCol 1-based
+            inc c   ; make topMetatileRow 1-based
+            ld (scroll.metatiles.ram.bounds.topMetatileRow), bc
+            dec b   ; restore leftMetatileCol
+            dec c   ; restore topMetatileRow
+        .endif
 
         ; Set H to rowsRemaining and L to colsRemaining (both to max, as there
         ; is no subtile offset)
