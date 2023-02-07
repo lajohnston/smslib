@@ -47,7 +47,7 @@
 .endif
 
 ; When value is 1, ensures the map doesn't scroll out of bounds at the cost of
-; a few bytes of RAM and cycles
+; a few bytes of RAM and cycles. Defaults to 0.
 .ifndef scroll.metatiles.ENABLE_BOUNDS_CHECKING
     .define scroll.metatiles.ENABLE_BOUNDS_CHECKING 0
 .endif
@@ -530,6 +530,21 @@
 .endm
 
 ;====
+; Updates topLeft tile to point to the left-most subcol of the metatile to the
+; right of the current one
+;====
+.macro "scroll.metatiles._scrollRightToNextMetatile"
+    ; Set cols remaining to max (left-most subcol)
+    ld a, scroll.metatiles.COLS_PER_METATILE
+    ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
+
+    ; Update metatileAddress to next column (just increment)
+    ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
+    inc hl
+    ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
+.endm
+
+;====
 ; Update the scroll buffers
 ;====
 .section "scroll.metatiles.update" free
@@ -700,67 +715,69 @@
                 ld a, (scroll.metatiles.ram.topLeftTile.colsRemaining)
                 cp 1        ; check if we're on the last subCol of the metatile
                 jr z, ++    ; jp if we're on the last subCol of the metatile
-                    ; There are still subcols left in current topLeft metatile
-
-                    ;===
-                    ; Bounds check. Check if the current leftMetatileCol is
-                    ; already the max value
-                    ;===
-                    ld b, a      ; preserve colsRemaining in B
-
-                    ; Set L to leftMetatileCol and H to maxLeftMetatileCol
-                    ld hl, (scroll.metatiles.ram.bounds.leftMetatileCol)
-                    ld a, h     ; set A to maxLeftMetatileCol
-                    cp l        ; compare to current leftMetatileCol
-                    ld a, b     ; set A to colsRemaining
-                    jr z, +++   ; jp if leftMetatileCol == maxLeftMetatileCol
-                        ; In bounds
+                    ; There are still subcols remaining in current topLeft metatile
+                    .if scroll.metatiles.ENABLE_BOUNDS_CHECKING == 0
                         ; Update topLeftTile's colsRemaining
                         dec a   ; decrement colsRemaining
 
                         ; Store result
                         ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
                         jp +
-                    +++:
+                    .else
+                        ;===
+                        ; Bounds check. Check if the current leftMetatileCol is
+                        ; already the max value
+                        ;===
+                        ld b, a      ; preserve colsRemaining in B
 
-                    ;===
-                    ; leftMetatileCol == maxLeftMetatileCol. If colsRemaining
-                    ; equals scroll.metatiles.COLS_PER_METATILE then we can't
-                    ; scroll further
-                    ;===
-                    cp scroll.metatiles.COLS_PER_METATILE
+                        ; Set L to leftMetatileCol and H to maxLeftMetatileCol
+                        ld hl, (scroll.metatiles.ram.bounds.leftMetatileCol)
+                        ld a, h     ; set A to maxLeftMetatileCol
+                        cp l        ; compare to current leftMetatileCol
+                        ld a, b     ; set A to colsRemaining
+                        jr z, +++   ; jp if leftMetatileCol == maxLeftMetatileCol
+                            ; In bounds
+                            ; Update topLeftTile's colsRemaining
+                            dec a   ; decrement colsRemaining
 
-                    jr z, +++
-                        ; In bounds
-                        ; Update topLeftTile's colsRemaining
-                        dec a       ; decrement colsRemaining
+                            ; Store result
+                            ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
+                            jp +
+                        +++:
 
-                        ; Store result
-                        ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
+                        ;===
+                        ; leftMetatileCol == maxLeftMetatileCol. If colsRemaining
+                        ; equals scroll.metatiles.COLS_PER_METATILE then we can't
+                        ; scroll further
+                        ;===
+                        cp scroll.metatiles.COLS_PER_METATILE
+
+                        jr z, +++
+                            ; In bounds
+                            ; Update topLeftTile's colsRemaining
+                            dec a       ; decrement colsRemaining
+
+                            ; Store result
+                            ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
+                            jp +
+                        +++:
+
+                        ; Otherwise we'll be out of bounds, so stop the column scroll
+                        tilemap.stopRightColScroll
                         jp +
-                    +++:
-
-                    ; Otherwise we'll be out of bounds, so stop the column scroll
-                    tilemap.stopRightColScroll
-                    jp +
+                    .endif
                 ++:
 
                 ;===
                 ; Increment the left metatile to the next metatile column
                 ;===
+                scroll.metatiles._scrollRightToNextMetatile
 
-                ; Set cols remaining to max
-                ld a, scroll.metatiles.COLS_PER_METATILE
-                ld (scroll.metatiles.ram.topLeftTile.colsRemaining), a
-
-                ; Update metatileAddress to next column (just increment)
-                ld hl, (scroll.metatiles.ram.topLeftTile.metatileAddress)
-                inc hl
-                ld (scroll.metatiles.ram.topLeftTile.metatileAddress), hl
-
-                ; Increment leftMetatileCol
-                ld hl, scroll.metatiles.ram.bounds.leftMetatileCol
-                inc (hl)
+                .if scroll.metatiles.ENABLE_BOUNDS_CHECKING == 1
+                    ; Increment leftMetatileCol
+                    ld hl, scroll.metatiles.ram.bounds.leftMetatileCol
+                    inc (hl)
+                .endif
         +:
 
         ; Update tilemap scroll changes
