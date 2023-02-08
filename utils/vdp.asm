@@ -20,7 +20,7 @@
 .define utils.vdp.VDP_DATA_PORT $be
 
 ; Registers
-.define utils.vdp.BORDER_COLOR_SLOT_REGISTER 7
+.define utils.vdp.BORDER_COLOR_REGISTER 7
 .define utils.vdp.SCROLL_X_REGISTER 8
 .define utils.vdp.SCROLL_Y_REGISTER 9
 .define utils.vdp.LINE_COUNTER_REGISTER 10

@@ -301,7 +301,7 @@
         .print "Warning: vdp.setBorderColorIndex value must be between 16 and 31\n"
     .endif
 
-    utils.vdp.setRegister utils.vdp.BORDER_COLOR_SLOT_REGISTER (value - 16)
+    utils.vdp.setRegister utils.vdp.BORDER_COLOR_REGISTER (value - 16)
 .endm
 
 ;====
