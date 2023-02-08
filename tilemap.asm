@@ -146,21 +146,21 @@
 ;====
 ; Define tile data
 ;
-; @in   patternSlot the pattern slot (0-511)
-; @in   attributes  (optional) the tile attributes (see Tile attributes section).
-;                   Note, if patternRef is greater than 255, tilemap.HIGH_BIT
-;                   is set automatically
+; @in   patternIndex    the pattern index (0-511)
+; @in   attributes      (optional) the tile attributes (see Tile attributes section).
+;                       Note, if patternRef is greater than 255, tilemap.HIGH_BIT
+;                       is set automatically
 ;====
-.macro "tilemap.tile" args patternSlot attributes
+.macro "tilemap.tile" args patternIndex attributes
     .ifndef attributes
         .define attributes $00
     .endif
 
-    .ifgr patternSlot 255
+    .ifgr patternIndex 255
         .redefine attributes attributes | tilemap.HIGH_BIT
     .endif
 
-    .db <(patternSlot)  ; low byte of patternSlot
+    .db <(patternIndex) ; low byte of patternIndex
     .db attributes
 .endm
 
