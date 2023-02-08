@@ -43,6 +43,7 @@
 ; Constants and variables
 ;====
 .define sprites.BUFFER_ADDRESS (sprites.bufferAddressHigh * 256) + $3F
+.define sprites.TABLE_OFFSET $40
 .define sprites.GROUP_TERMINATOR 255  ; terminates list of sprites.Sprite instances
 .define sprites.Y_TERMINATOR $D0
 .define sprites.MAX_SPRITES 64
@@ -256,7 +257,7 @@
         ; Load number of sprites set
         ld hl, sprites.ram.buffer.nextIndex
         ld a, (hl)                      ; read nextIndex value
-        sub $40                         ; sub table offset to get sprite count
+        sub sprites.TABLE_OFFSET        ; sub table offset to get sprite count
         jp z, _noSprites                ; jump if no sprites
         ld ixl, a                       ; preserve counter in IXL
 
