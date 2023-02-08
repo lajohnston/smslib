@@ -14,16 +14,20 @@
 ;====
 ; Import smslib
 ;====
-.define interrupts.handleVBlank 1   ; enable VBlanks (see VBlank example)
-.incdir "../../"                    ; point to smslib directory
-.include "smslib.asm"
+.incdir "../../"                        ; point to smslib directory
+    .define interrupts.handleVBlank 1   ; enable VBlanks (see VBlank example)
+    .include "smslib.asm"
 
-; Set the size (each value can be 2, 4, 8, 16)
-; Try changing these values and see for your yourself:
-.define scroll.metatiles.COLS_PER_METATILE 4
-.define scroll.metatiles.ROWS_PER_METATILE 4
-.include "scroll/metatiles.asm"     ; a metatile scroll handler
+    ; Set the size of the metatiles. Each value can be 2, 4, 8 or 16
+    ; Try changing these values to see for your yourself:
+    .define scroll.metatiles.COLS_PER_METATILE 4
+    .define scroll.metatiles.ROWS_PER_METATILE 4
 
+    ; Prevents scrolling outside the map bounds
+    .define scroll.metatiles.ENFORCE_BOUNDS
+
+    ; Include metatile scroll handler
+    .include "scroll/metatiles.asm"
 .incdir "."                         ; point back to current working directory
 
 ;====

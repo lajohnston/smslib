@@ -46,11 +46,9 @@
     .define scroll.metatiles.MAX_MAP_BYTES 4096
 .endif
 
-; When value is 1, ensures the map doesn't scroll out of bounds at the cost of
-; a few bytes of RAM and cycles. Defaults to 0.
-.ifndef scroll.metatiles.ENABLE_BOUNDS_CHECKING
-    .define scroll.metatiles.ENABLE_BOUNDS_CHECKING 0
-.endif
+; When scroll.metatiles.ENFORCE_BOUNDS is defined, ensures the map doesn't
+; scroll out of bounds at the cost of a few bytes of RAM and cycles.
+; Disabled by default. To enable just .define scroll.metatiles.ENFORCE_BOUNDS
 
 ;====
 ; Validate settings
@@ -261,7 +259,7 @@
 ; @in   b   the column offset in metatiles
 ; @in   c   the row offset in metatiles
 ; @in   d   (optional) the map's height in metatiles. Only required if
-;           ENABLE_BOUNDS_CHECKING is enabled
+;           ENFORCE_BOUNDS is defined
 ;====
 .section "scroll.metatiles.init" free
     scroll.metatiles.init:
@@ -270,7 +268,7 @@
         ld e, a ; set E to map width in metatiles
 
         ; Initialise bounds checking variables
-        .if scroll.metatiles.ENABLE_BOUNDS_CHECKING == 1
+        .ifdef scroll.metatiles.ENFORCE_BOUNDS
             ;===
             ; Subtract screen width in metatiles from map width to get
             ; maxLeftMetatileCol. Minus 1 from the subtraction as this will be the
@@ -581,7 +579,7 @@
                 ;===
                 ; Update topLeftTile to point to next metatile row up
                 ;===
-                .if scroll.metatiles.ENABLE_BOUNDS_CHECKING == 0
+                .ifndef scroll.metatiles.ENFORCE_BOUNDS
                     ; Scroll up to the bottom row of the next metatile
                     scroll.metatiles._scrollUpToNextMetatile
                     jp +
@@ -623,7 +621,7 @@
                 ; Current metatile was on its last subrow - we'll need to
                 ; point to next metatile row
                 ;===
-                .if scroll.metatiles.ENABLE_BOUNDS_CHECKING == 0
+                .ifndef scroll.metatiles.ENFORCE_BOUNDS
                     ; Scroll down to the top subrow of the next metatile
                     scroll.metatiles._scrollDownToNextMetatile
                 .else
@@ -685,7 +683,7 @@
                 ;===
                 ; Update topLeftTile to point to previous metatile col
                 ;===
-                .if scroll.metatiles.ENABLE_BOUNDS_CHECKING == 0
+                .ifndef scroll.metatiles.ENFORCE_BOUNDS
                     scroll.metatiles._scrollLeftToNextMetatile
                     jp +
                 .else
@@ -719,7 +717,7 @@
                 cp 1        ; check if we're on the last subCol of the metatile
                 jr z, ++    ; jp if we're on the last subCol of the metatile
                     ; There are still subcols remaining in current topLeft metatile
-                    .if scroll.metatiles.ENABLE_BOUNDS_CHECKING == 0
+                    .ifndef scroll.metatiles.ENFORCE_BOUNDS
                         ; Update topLeftTile's colsRemaining
                         dec a   ; decrement colsRemaining
 
@@ -776,7 +774,7 @@
                 ;===
                 scroll.metatiles._scrollRightToNextMetatile
 
-                .if scroll.metatiles.ENABLE_BOUNDS_CHECKING == 1
+                .ifdef scroll.metatiles.ENFORCE_BOUNDS
                     ; Increment leftMetatileCol
                     ld hl, scroll.metatiles.ram.bounds.leftMetatileCol
                     inc (hl)

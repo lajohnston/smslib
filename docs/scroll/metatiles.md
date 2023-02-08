@@ -110,7 +110,7 @@ scroll.metatiles.setDefs
 
 ld a, 64                ; the map has a width of 64 metatiles
 ld d, 64                ; the map has a height of 64 metatiles. Only required
-                        ; if ENABLE_BOUNDS_CHECKING is enabled
+                        ; if ENFORCE_BOUNDS is enabled
 ld b, 0                 ; starting column offset, in metatiles
 ld c, 0                 ; starting row offset, in metatiles
 scroll.metatiles.init   ; draw map
@@ -145,6 +145,6 @@ Optional bounds checking can be enabled to ensure the map doesn't scroll beyond 
 Depending on your engine and map designs you might not need these additional checks, for example if the edges of the maps have space around them that the player can't actually move beyond.
 
 ```
-.define scroll.metatiles.ENABLE_BOUNDS_CHECKING 1
+.define scroll.metatiles.ENFORCE_BOUNDS
 .include "scroll/metatiles.asm"
 ```
