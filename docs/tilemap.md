@@ -4,7 +4,7 @@ Manages the tilemap, which places patterns/tiles in a grid to create the backgro
 
 ## Define tile data
 
-Each tile in the map is 2 bytes - the first is a pattern slot reference  (see [patterns](./patterns.md)) and the second contains various attributes. The following attributes can be ORed together to create a byte containing all the attributes (i.e. tilemap.FLIP_X|tilemap.PRIORITY).
+Each tile in the map is 2 bytes - the first is a pattern index reference  (see [patterns](./patterns.md)) and the second contains various attributes. The following attributes can be ORed together to create a byte containing all the attributes (i.e. tilemap.FLIP_X|tilemap.PRIORITY).
 
 ```
 tilemap.HIGH_BIT        ; 9th bit for the pattern ref, allows pattern refs 256+

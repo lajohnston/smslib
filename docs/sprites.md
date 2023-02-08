@@ -6,7 +6,7 @@ The VDP holds a sprite table in VRAM containing the tile patterns and x and y po
 
 ## Init
 
-Reset the sprite buffer at the start of each game loop. This will set it back to the first slot so you can start adding sprites to the beginning of the table.
+Reset the sprite buffer at the start of each game loop. This will set it back to the first index so you can start adding sprites to the beginning of the table.
 
 ```
 sprites.reset
@@ -46,9 +46,9 @@ code:
 
 ## Batching
 
-It is more efficient to add multiple sprites and/or sprite groups within a 'batch'. This allows smslib to avoid having to store and retrieve the next slot from RAM for each sprite, and instead can do it once at the beginning of the batch and once at the end.
+It is more efficient to add multiple sprites and/or sprite groups within a 'batch'. This allows smslib to avoid having to store and retrieve the next index from RAM for each sprite, and instead can do it once at the beginning of the batch and once at the end.
 
-During a batch the next sprite slot will be kept in `de` and incremented each time so be careful not to clobber this:
+During a batch the next sprite index will be kept in `de` and incremented each time so be careful not to clobber this:
 
 ```
 sprites.startBatch

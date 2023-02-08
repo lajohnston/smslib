@@ -1,16 +1,16 @@
 # Color Palette (palette.asm)
 
-Handles the VDP color palettes. There are 2 palettes of 16 color slots:
+Handles the VDP color palettes. There are 2 palettes of 16 colors:
 
-- Each background pattern (tile) can use either the first 16 slots (0-15) or
+- Each background pattern (tile) can use either the first 16 indices (0-15) or
   the last 16 (16-31)
-- Sprites can only use the last 16 slots (16-31)
+- Sprites can only use the last 16 indices (16-31)
 
-The first color slot of each palette (slot 0 or slot 16) is used as the transparent color. This color will be omitted for sprites. Background tiles aren't affected by it unless they are marked as a 'priority' in the tilemap. Priority background patterns are rendered in front of sprites, except for the first color which is rendered behind.
+The first color index of each palette (index 0 or index 16) is used as the transparent color. This color will be omitted for sprites. Background tiles aren't affected by it unless they are marked as a 'priority' in the tilemap. Priority background patterns are rendered in front of sprites, except for the first color which is rendered behind.
 
-The color in each slot is a byte containing 2-bit RGB color values (--BBGGRR).
+The color in each index is a byte containing 2-bit RGB color values (--BBGGRR).
 
-The pixel values defined within tiles/patterns don't define their colors directly but rather reference the color slots you set in the palette.
+The pixel values defined within tiles/patterns don't define their colors directly but rather reference the color index you set in the palette.
 
 ## Setting palette colors
 
@@ -62,7 +62,7 @@ palette.loadSlice paletteData, 5, 2
 
 ### palette.loadRGB
 
-Loads an approximate RGB value into the current palette slot. Each component is rounded to the nearest of the following values: 0, 85, 170, 255.
+Loads an approximate RGB value into the current palette index. Each component is rounded to the nearest of the following values: 0, 85, 170, 255.
 
 ```
 palette.setIndex 0

@@ -47,7 +47,7 @@
         palette.setIndex palette.SPRITE_PALETTE
         palette.loadSlice bubblePalette, 6
 
-        ; Load pattern data into slots 256+ (used for sprites, by default)
+        ; Load pattern data into indices 256+ (used for sprites, by default)
         patterns.setIndex 256
         patterns.load bubblePatterns, bubblePatternsSize
 
