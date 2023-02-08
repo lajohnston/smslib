@@ -57,7 +57,7 @@
 ; 'sprites.ram.buffer'
 ;====
 .struct "sprites.Buffer"
-    nextSlot:       DSB 1   ; the low byte address of the next free y slot
+    nextIndex:      DSB 1   ; the low byte address of the next free y index
     yPos:           DSB 64  ; screen yPos for each of the 64 sprites
     xPosAndPattern: DSB 128 ; { 1 byte xPos, 1 byte pattern } * 64 sprites
 .endst
@@ -117,7 +117,7 @@
 ; @out  de  the address of the next available slot
 ;====
 .macro "sprites.getNextSlot"
-    ld de, sprites.ram.buffer + sprites.Buffer.nextSlot
+    ld de, sprites.ram.buffer + sprites.Buffer.nextIndex
     ld a, (de)
     ld e, a
 .endm
@@ -130,7 +130,7 @@
 .macro "sprites._storeNextSlot"
     ; Store next slot
     ld a, e
-    ld de, sprites.ram.buffer + sprites.Buffer.nextSlot
+    ld de, sprites.ram.buffer + sprites.Buffer.nextIndex
     ld (de), a
 .endm
 
@@ -202,7 +202,7 @@
 ;====
 ; Starts a 'batch' of sprites. If adding multiple sprites and sprite groups it
 ; is more efficient to wrap the multiple calls in sprites.startBatch and
-; sprites.endBatch; This ensures the nextSlot value is only read and updated
+; sprites.endBatch; This ensures the nextIndex value is only read and updated
 ; once rather than for each sprite or spriteGroup
 ;====
 .macro "sprites.startBatch"
@@ -231,9 +231,9 @@
 ; Initialises a sprite buffer in RAM
 ;====
 .macro "sprites.init"
-    ; Set nextSlot to slot 0
-    ld a, <(sprites.ram.buffer) + sprites.Buffer.yPos   ; low byte of slot 0
-    ld de, sprites.ram.buffer + sprites.Buffer.nextSlot ; point to 'nextSlot'
+    ; Set nextIndex to index 0
+    ld a, <(sprites.ram.buffer) + sprites.Buffer.yPos   ; low byte of index 0
+    ld de, sprites.ram.buffer.nextIndex                 ; point to nextIndex
     ld (de), a                                          ; store low byte
 .endm
 
@@ -253,12 +253,12 @@
         ; Set VDP write address to y positions
         utils.vdp.prepWrite sprites.vramAddress
 
-        ; Load number of slots occupied
-        ld hl, sprites.ram.buffer + sprites.Buffer.nextSlot ; nextSlot address
-        ld a, (hl)      ; read nextSlot value
-        sub $40         ; remove table offset to get sprite count
-        jp z, _noSprites; jump if no sprites
-        ld ixl, a       ; preserve counter in IXL
+        ; Load number of sprites set
+        ld hl, sprites.ram.buffer.nextIndex
+        ld a, (hl)                      ; read nextIndex value
+        sub $40                         ; sub table offset to get sprite count
+        jp z, _noSprites                ; jump if no sprites
+        ld ixl, a                       ; preserve counter in IXL
 
         ; Copy y positions to VRAM
         ld b, ixl                       ; load size into B
