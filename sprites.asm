@@ -113,25 +113,25 @@
 .endm
 
 ;====
-; Loads the next available sprite slot (y position) into de
+; Loads the next available sprite index (y position) into DE
 ;
-; @out  de  the address of the next available slot
+; @out  de  the address of the next available sprite index
 ;====
-.macro "sprites.getNextSlot"
-    ld de, sprites.ram.buffer + sprites.Buffer.nextIndex
+.macro "sprites.getNextIndex"
+    ld de, sprites.ram.buffer.nextIndex
     ld a, (de)
     ld e, a
 .endm
 
 ;====
-; Stores the current slot
+; Stores the current index
 ;
-; @in   de  the address of the current slot (y position)
+; @in   de  the address of the current sprite index (y position)
 ;====
-.macro "sprites._storeNextSlot"
-    ; Store next slot
+.macro "sprites._storeNextIndex"
+    ; Store next index
     ld a, e
-    ld de, sprites.ram.buffer + sprites.Buffer.nextIndex
+    ld de, sprites.ram.buffer.nextIndex
     ld (de), a
 .endm
 
@@ -140,16 +140,16 @@
 ;====
 .section "sprites.add" free
     ;====
-    ; Add sprite to the next available slot
+    ; Add sprite to the next available index
     ;
     ; @in  a  screen yPos
     ; @in  b  screen xPos
     ; @in  c  pattern number
     ;====
-    sprites.addToNextSlot:
+    sprites.addToNextIndex:
         ; Retrieve next slot
         ld iyl, a               ; preserve yPos
-        sprites.getNextSlot
+        sprites.getNextIndex
         ld a, iyl               ; restore yPos
                                 ; continue to sprites.add
 
@@ -177,7 +177,7 @@
 
         ; Restore de to point back to yPos
         rr e    ; (e - 1) / 2
-        inc e   ; point to next free slot
+        inc e   ; point to next free index
         ret
 .ends
 
@@ -188,15 +188,15 @@
 ; @in  b  screen xPos
 ; @in  c  pattern number
 ;
-; @in  de (optional)    pointer to next available slot (yPos) in sprite buffer
+; @in  de (optional)    pointer to next available index (yPos) in sprite buffer
 ;                       Only required if a batch is in progress
 ;====
 .macro "sprites.add"
     .if sprites.batchInProgress == 1
         call sprites.add
     .else
-        call sprites.addToNextSlot
-        sprites._storeNextSlot
+        call sprites.addToNextIndex
+        sprites._storeNextIndex
     .endif
 .endm
 
@@ -213,7 +213,7 @@
     .endif
 
     .redefine sprites.batchInProgress 1
-    sprites.getNextSlot
+    sprites.getNextIndex
 .endm
 
 ;====
@@ -224,7 +224,7 @@
         .print "Warning: sprites.endBatch called but no batch is in progress"
     .else
         .redefine sprites.batchInProgress 0
-        sprites._storeNextSlot
+        sprites._storeNextIndex
     .endif
 .endm
 
@@ -309,17 +309,17 @@
 ;====
 .section "sprites.addGroup"
     ;====
-    ; Gets the next free sprite slot and adds a sprite group from there onwards
+    ; Gets the next free sprite index and adds a sprite group from there onwards
     ;
     ; @in   b   anchor x position (left-most)
     ; @in   c   anchor y position (top-most)
     ; @in   hl  pointer to sprites.Sprite instances terminated by
     ;           sprites.GROUP_TERMINATOR
     ;
-    ; @out  de  next free sprite slot
+    ; @out  de  next free sprite index
     ;====
-    sprites.addGroupFromNextSlot:
-        sprites.getNextSlot
+    sprites.addGroupFromNextIndex:
+        sprites.getNextIndex
         jp sprites.addGroup
 
     ;====
@@ -378,7 +378,7 @@
     .if sprites.batchInProgress == 1
         call sprites.addGroup
     .else
-        call sprites.addGroupFromNextSlot
-        sprites._storeNextSlot
+        call sprites.addGroupFromNextIndex
+        sprites._storeNextIndex
     .endif
 .endm
