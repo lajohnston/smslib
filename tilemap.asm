@@ -700,7 +700,7 @@
 ; @out  VRAM write address  write address for the row (column 0)
 ; @out  c                   VDP data port
 ;====
-.macro "tilemap.setRowScrollSlot"
+.macro "tilemap._setRowScrollIndex"
     ld hl, (tilemap.ram.vramRowWrite)
     utils.vdp.prepWriteHL
 .endm
@@ -789,7 +789,7 @@
         tilemap.ifRowScroll +
             ; Set VRAM address to the scrolling row
             ; Set C to the VDP output port
-            tilemap.setRowScrollSlot
+            tilemap._setRowScrollIndex
 
             ;===
             ; First write
