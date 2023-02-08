@@ -82,7 +82,7 @@
 .section "init" free
     init:
         ; Load palette
-        palette.setSlot 0
+        palette.setIndex 0
         mapper.pageBank :paletteData        ; ensure paletteData is visible
                       ; ^ note the colon prefix - this gives us the bank number
         palette.loadSlice paletteData, 2    ; we can now use paletteData

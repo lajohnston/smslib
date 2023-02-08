@@ -74,7 +74,7 @@
     ; interrupts.onVBlank is called by interrupts.asm 50/60x a second (PAL/NTSC)
     interrupts.onVBlank:
         ; Load ram.color into palette slot 0
-        palette.setSlot 0
+        palette.setIndex 0
         palette.load ram.color 1
 
         ; End VBlank handler

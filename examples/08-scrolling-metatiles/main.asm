@@ -80,7 +80,7 @@
     ; SMSLib will jump to the init label after booting the system
     init:
         ; Load palette and patterns
-        palette.setSlot 0
+        palette.setIndex 0
         palette.load paletteData, paletteDataSize
         patterns.setSlot 0
         patterns.load patternData, patternDataSize

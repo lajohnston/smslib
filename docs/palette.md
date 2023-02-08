@@ -39,7 +39,7 @@ Load palette data from a binary file to VRAM.
 myPaletteData:
   .incbin "myPalette.inc" fsize myPaletteDataSize
 
-palette.setSlot 0
+palette.setIndex 0
 palette.load myPaletteData, myPaletteDataSize
 ```
 
@@ -48,9 +48,9 @@ palette.load myPaletteData, myPaletteDataSize
 Load specific colors from the data.
 
 ```
-palette.setSlot 0                     ; point to first slot
-palette.loadSlice paletteData, 3      ; load 3 colors from current slot onwards (slot 0, 1, 2)
-palette.loadSlice otherPaletteData, 2 ; then load 2 more colors (slots 3 and 4)
+palette.setIndex 0                    ; point to first palette index
+palette.loadSlice paletteData, 3      ; load 3 colors from current index onwards (indices 0, 1, 2)
+palette.loadSlice otherPaletteData, 2 ; then load 2 more colors (indices 3 and 4)
 ```
 
 An optional third parameter lets you skip some colors in the data:
@@ -65,6 +65,6 @@ palette.loadSlice paletteData, 5, 2
 Loads an approximate RGB value into the current palette slot. Each component is rounded to the nearest of the following values: 0, 85, 170, 255.
 
 ```
-palette.setSlot 0
+palette.setIndex 0
 palette.loadRGB 255, 0, 0  ;  a bright red
 ```

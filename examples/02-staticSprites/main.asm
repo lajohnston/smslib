@@ -40,11 +40,11 @@
 .section "init" free
     init:
         ; Set background colour
-        palette.setSlot 0
+        palette.setIndex 0
         palette.loadRGB 0, 0, 0 ; black
 
         ; Load sprite palette
-        palette.setSlot palette.SPRITE_PALETTE
+        palette.setIndex palette.SPRITE_PALETTE
         palette.loadSlice bubblePalette, 6
 
         ; Load pattern data into slots 256+ (used for sprites, by default)

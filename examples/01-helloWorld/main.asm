@@ -42,7 +42,7 @@
 .section "init" free
     init:
         ; Load palette
-        palette.setSlot 0                   ; point to first color slot
+        palette.setIndex 0                  ; point to first color index
         palette.loadSlice paletteData, 2    ; load 2 colors from paletteData
 
         ; Load font tiles

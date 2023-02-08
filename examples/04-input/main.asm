@@ -62,7 +62,7 @@
 ;====
 .section "init" free
     init:
-        palette.setSlot 0
+        palette.setIndex 0
         palette.load fontPalette 2
 
         patterns.setSlot 0

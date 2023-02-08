@@ -1,15 +1,15 @@
 ;====
 ; Color palette
 ;
-; The color palette consists of 32 slots (0-31). Each color is a byte
+; The color palette consists of 32 color entries (0-31). Each color is a byte
 ; containing 2-bit RGB colors in the format (--bbggrr).
 ;
-; Background tiles/patterns can use either the first 16 slots (0-15), or the
-; last 16 slots (16-31). Sprites can only use the last 16 slots (16-31).
+; Background tiles/patterns can use either the first 16 indices (0-15), or the
+; last 16 (16-31). Sprites can only use the last 16 (16-31).
 ;====
 
 .define palette.VRAM_ADDR $c000
-.define palette.SLOT_SIZE 1
+.define palette.ELEMENT_SIZE_BYTES 1
 .define palette.SPRITE_PALETTE 16
 
 ;====
@@ -42,7 +42,7 @@
 .endm
 
 ;====
-; Load an approximate RGB value into the current palette slot. Each value
+; Load an approximate RGB value into the current palette index. Each value
 ; will be rounded to the nearest of: 0, 85, 170, 255
 ;
 ; @in   red     red value
@@ -84,17 +84,17 @@
 ;====
 .macro "palette.loadSlice" args dataAddr count offset
     .ifndef offset
-        utils.outiBlock.sendSlice dataAddr palette.SLOT_SIZE count 0
+        utils.outiBlock.sendSlice dataAddr palette.ELEMENT_SIZE_BYTES count 0
     .else
-        utils.outiBlock.sendSlice dataAddr palette.SLOT_SIZE count offset
+        utils.outiBlock.sendSlice dataAddr palette.ELEMENT_SIZE_BYTES count offset
     .endif
 .endm
 
 ;====
-; Set the current palette slot (0-31) ready to load data into
+; Set the current palette index (0-31) ready to load data into
 ;
-; @in slot  the palette slot (0-31)
+; @in   index   the palette index (0-31)
 ;====
-.macro "palette.setSlot" args slot
-    utils.vdp.prepWrite (palette.VRAM_ADDR + slot)
+.macro "palette.setIndex" args index
+    utils.vdp.prepWrite (palette.VRAM_ADDR + index)
 .endm
