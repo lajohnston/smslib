@@ -44,7 +44,7 @@
 .define vdp.register4Default    %00000111   ; Pattern base address (last 3 bits always set for SMS1)
 .define vdp.register5Default    %11111111   ; Sprite table base address (usually $ff)
 .define vdp.register6Default    %11111111   ; Sprite pattern generator base address (always $ff)
-.define vdp.register7Default    %00000000   ; Overscan/backdrop color slot (bits 0-3)
+.define vdp.register7Default    %00000000   ; Overscan/backdrop color index (bits 0-3)
 .define vdp.register8Default    %00000000   ; Background X scroll
 .define vdp.register9Default    %00000000   ; Background Y scroll
 .define vdp.register10Default   %11111111   ; Line interrupt counter
@@ -293,12 +293,12 @@
 ;====
 ; Sets the overscan/border color
 ;
-; @in   value   the palette slot to use. Must be slot 16-31 (the sprite palette)
+; @in   value   the palette index to use. Must be index 16-31 (the sprite palette)
 ;====
-.macro "vdp.setBorderColorSlot" args value
+.macro "vdp.setBorderColorIndex" args value
     .if value < 16
         .redefine value 16
-        .print "Warning: vdp.setBorderColorSlot slot must be between 16 and 31\n"
+        .print "Warning: vdp.setBorderColorIndex value must be between 16 and 31\n"
     .endif
 
     utils.vdp.setRegister utils.vdp.BORDER_COLOR_SLOT_REGISTER (value - 16)
