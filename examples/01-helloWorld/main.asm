@@ -46,7 +46,7 @@
         palette.loadSlice paletteData, 2    ; load 2 colors from paletteData
 
         ; Load font tiles
-        patterns.setSlot 0                      ; point to first pattern slot
+        patterns.setIndex 0                     ; point to first pattern index
         patterns.load fontData, fontDataSize    ; load uncompressed font data into pattern VRAM
 
         ; Display font tiles on screen

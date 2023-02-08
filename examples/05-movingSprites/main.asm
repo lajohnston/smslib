@@ -42,8 +42,8 @@
         palette.setIndex palette.SPRITE_PALETTE
         palette.load bubble.palette, bubble.paletteSize
 
-        ; Load pattern data to draw sprites. Sprites use slots 256+ by default
-        patterns.setSlot 256
+        ; Load pattern data to draw sprites. Sprites use indices 256+ by default
+        patterns.setIndex 256
         patterns.load bubble.patterns, bubble.patternsSize
 
         ; Initialise bubble with default values

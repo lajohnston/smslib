@@ -20,7 +20,7 @@
 ;====
 ; Constants
 ;====
-.define patterns.SLOT_SIZE 32
+.define patterns.ELEMENT_SIZE_BYTES 32
 
 ;====
 ; Dependencies
@@ -42,9 +42,9 @@
 ;====
 .macro "patterns.loadSlice" args dataAddr count offset
     .ifndef offset
-        utils.outiBlock.sendSlice dataAddr patterns.SLOT_SIZE count 0
+        utils.outiBlock.sendSlice dataAddr patterns.ELEMENT_SIZE_BYTES count 0
     .else
-        utils.outiBlock.sendSlice dataAddr patterns.SLOT_SIZE count offset
+        utils.outiBlock.sendSlice dataAddr patterns.ELEMENT_SIZE_BYTES count offset
     .endif
 .endm
 
@@ -63,9 +63,10 @@
 .endm
 
 ;====
-; Set the current pattern slot ready to load data into
-; @in   slot    the slot number (0-512)
+; Set the current pattern index ready to load data into
+;
+; @in   index    the index number (0-512)
 ;====
-.macro "patterns.setSlot" args slot
-    utils.vdp.prepWrite (patterns.address + (slot * 32))
+.macro "patterns.setIndex" args index
+    utils.vdp.prepWrite (patterns.address + (index * patterns.ELEMENT_SIZE_BYTES))
 .endm

@@ -48,7 +48,7 @@
         palette.loadSlice bubblePalette, 6
 
         ; Load pattern data into slots 256+ (used for sprites, by default)
-        patterns.setSlot 256
+        patterns.setIndex 256
         patterns.load bubblePatterns, bubblePatternsSize
 
         ; It's more efficient (but optional) to add multiple sprites within a

@@ -65,7 +65,7 @@
         palette.setIndex 0
         palette.load fontPalette 2
 
-        patterns.setSlot 0
+        patterns.setIndex 0
         patterns.load fontPatterns, fontPatternsSize
 
         tilemap.setColRow 0, ROW_OFFSET

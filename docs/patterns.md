@@ -14,8 +14,8 @@ Due to WLA-DX limitations the size parameter must be an `immediate` value, so ca
 uncompressedPatternData:
     .incbin "tiles.bin" fsize patternDataSize
 
-; load pattern data from slot 16 onwards
-patterns.setSlot 16
+; load pattern data from index 16 onwards
+patterns.setIndex 16
 patterns.load uncompressedPatternData, patternDataSize
 ```
 
@@ -27,11 +27,11 @@ Lets you pick out certain tiles from the binary data and load them individually.
 myUncompressedPatternData:
     .incbin 'tiles.bin'
 
-; load 4 patterns into pattern slot 0 onwards (slots 0-3)
-patterns.setSlot 0
+; load 4 patterns into pattern index 0 onwards (indices 0-3)
+patterns.setIndex 0
 patterns.loadSlice myUncompressedPatternData, 4
 
-; ...then load another pattern into the next slot (slot 4)
+; ...then load another pattern into the next index (index 4)
 patterns.loadSlice myUncompressedPatternData, 1
 ```
 
@@ -44,9 +44,9 @@ patterns.loadSlice otherPatternData, 1, 9
 
 ## Data format
 
-Patterns are an image of 8x8 pixels. Each pixel is a 4-bit color palette slot reference, making a total of 32-bytes.
+Patterns are an image of 8x8 pixels. Each pixel is a 4-bit color palette index reference, making a total of 32-bytes.
 
-The 4-bit color palette slot value (0-15) can reference either slots 0-15 or slots 16-31 of the palette, depending on the context where the pattern is used; sprites use slots 16-31 whereas background tiles in the tilemap contain a bit that determines which to use. If the pattern is used for a sprite then color slot 0 is used as the transparent color (i.e. not drawn)
+The 4-bit color palette index value (0-15) can reference either index 0-15 or index 16-31 of the palette, depending on the context where the pattern is used; sprites use indices 16-31 whereas background tiles in the tilemap contain a bit that determines which to use. If the pattern is used for a sprite then color index 0 is used as the transparent color (i.e. not drawn)
 
 Pixels are encoded in bitplanes so the bits of each are strewn across 2-bytes. This is hard to explain, but given 4 pixels (A, B, C, D), the ordering of each bit will be bitplane encoded as:
 

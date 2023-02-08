@@ -82,7 +82,7 @@
         ; Load palette and patterns
         palette.setIndex 0
         palette.load paletteData, paletteDataSize
-        patterns.setSlot 0
+        patterns.setIndex 0
         patterns.load patternData, patternDataSize
 
         ;===

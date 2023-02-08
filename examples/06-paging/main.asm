@@ -88,7 +88,7 @@
         palette.loadSlice paletteData, 2    ; we can now use paletteData
 
         ; Load font tiles
-        patterns.setSlot 0
+        patterns.setIndex 0
         mapper.pageBank :fontData           ; ensure fontData is visible
         patterns.load fontData, fontDataSize
 

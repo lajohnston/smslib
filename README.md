@@ -15,7 +15,7 @@ init:
     palette.load myPalette, myPaletteSize
 
     ; Load patterns (tile graphics)
-    patterns.setSlot 0
+    patterns.setIndex 0
     patterns.load myPatterns, myPatternsSize
 ```
 
