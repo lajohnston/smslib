@@ -75,7 +75,7 @@
     interrupts.onVBlank:
         ; Load ram.color into palette index 0
         palette.setIndex 0
-        palette.load ram.color 1
+        palette.writeBytes ram.color 1
 
         ; End VBlank handler
         ; Will return to the code that was interrupted

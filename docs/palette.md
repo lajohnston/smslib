@@ -40,16 +40,16 @@ palette.setIndex 0                          ; set the first color index
 palette.setIndex palette.SPRITE_PALETTE     ; first color in 'sprite' palette
 palette.setIndex palette.SPRITE_PALETTE + 1 ; second color in 'sprite' palette
 ```
-### palette.load
+### palette.writeBytes
 
-Load palette data from a binary file to VRAM.
+Write bytes of raw data to the color RAM:
 
 ```
 myPaletteData:
   .incbin "myPalette.inc" fsize myPaletteDataSize
 
 palette.setIndex 0
-palette.load myPaletteData, myPaletteDataSize
+palette.writeBytes myPaletteData, myPaletteDataSize
 ```
 
 ### palette.loadSlice

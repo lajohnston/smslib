@@ -49,7 +49,7 @@
     init:
         ; Load palette and patterns
         palette.setIndex 0
-        palette.load paletteData, paletteDataSize
+        palette.writeBytes paletteData, paletteDataSize
         patterns.setIndex 0
         patterns.load patternData, patternDataSize
 

@@ -63,7 +63,7 @@
 .section "init" free
     init:
         palette.setIndex 0
-        palette.load fontPalette 2
+        palette.writeBytes fontPalette 2
 
         patterns.setIndex 0
         patterns.load fontPatterns, fontPatternsSize

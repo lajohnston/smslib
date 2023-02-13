@@ -10,9 +10,9 @@ Low-level Sega Master System libs for the WLA-DX Z80 assembler (v10.3+). Its aim
 
 ; SMSLib will jump to the 'init' label once it has booted the system
 init:
-    ; Load palette colors
+    ; Write palette colors
     palette.setIndex 0
-    palette.load myPalette, myPaletteSize
+    palette.writeBytes myPalette, myPaletteSize
 
     ; Load patterns (tile graphics)
     patterns.setIndex 0

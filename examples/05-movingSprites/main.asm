@@ -40,7 +40,7 @@
 
         ; Load sprite palette
         palette.setIndex palette.SPRITE_PALETTE
-        palette.load bubble.palette, bubble.paletteSize
+        palette.writeBytes bubble.palette, bubble.paletteSize
 
         ; Load pattern data to draw sprites. Sprites use indices 256+ by default
         patterns.setIndex 256
