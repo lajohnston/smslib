@@ -31,6 +31,15 @@ paletteData:
 
 You can then load these into the VDP VRAM the following macros.
 
+### palette.setIndex
+
+Set the color palette index ready to write to:
+
+```
+palette.setIndex 0                          ; set the first color index
+palette.setIndex palette.SPRITE_PALETTE     ; first color in 'sprite' palette
+palette.setIndex palette.SPRITE_PALETTE + 1 ; second color in 'sprite' palette
+```
 ### palette.load
 
 Load palette data from a binary file to VRAM.
