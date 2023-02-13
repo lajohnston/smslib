@@ -84,9 +84,9 @@
 ;====
 .macro "palette.loadSlice" args dataAddr count offset
     .ifndef offset
-        utils.outiBlock.sendSlice dataAddr palette.ELEMENT_SIZE_BYTES count 0
+        utils.outiBlock.writeSlice dataAddr palette.ELEMENT_SIZE_BYTES count 0
     .else
-        utils.outiBlock.sendSlice dataAddr palette.ELEMENT_SIZE_BYTES count offset
+        utils.outiBlock.writeSlice dataAddr palette.ELEMENT_SIZE_BYTES count offset
     .endif
 .endm
 

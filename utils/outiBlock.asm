@@ -126,14 +126,14 @@
 .ends
 
 ;====
-; Copies an array of data using OUTI instructions
+; Writes elements from an array of data to VRAM using OUTI instructions
 ;
-; @in   arrayAddr   the address of the data to transfer
-; @in   itemSize    the size of each array item in bytes
-; @in   count       the number of items to transfer (1-based)
+; @in   dataAddress the address of the data to transfer
+; @in   elementSize the size of each array element in bytes
+; @in   count       the number of elements to transfer (1-based)
 ; @in   offset      the first item in the array to copy (0-based)
 ;====
-.macro "utils.outiBlock.sendSlice" args arrayAddr itemSize count offset
-    ld hl, arrayAddr + (offset * itemSize)
-    utils.outiBlock.write (count * itemSize)
+.macro "utils.outiBlock.writeSlice" args dataAddress elementSize count offset
+    ld hl, dataAddress + (offset * elementSize)
+    utils.outiBlock.write (count * elementSize)
 .endm
