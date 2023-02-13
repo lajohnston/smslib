@@ -257,7 +257,7 @@
 ;====
 .macro "tilemap.loadRow"
     ; Output 1 row of data
-    utils.outiBlock.send tilemap.ROW_SIZE_BYTES
+    utils.outiBlock.write tilemap.ROW_SIZE_BYTES
 .endm
 
 ;====

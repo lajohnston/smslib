@@ -59,7 +59,7 @@
 ;====
 ; Creates a block of OUTI instructions to provide the fastest means of
 ; outputting data to the VDP. Generate calls to this using the
-; utils.outiBlock.send macro
+; utils.outiBlock.write macro
 ;
 ; @in     c     the port to write to
 ; @in     hl    the address to copy from
@@ -78,13 +78,13 @@
 .ends
 
 ;====
-; Send data using the fast OUTI block
+; Write data to VRAM using the fast OUTI block
 ;
 ; @in   bytes   the number of bytes to output
 ; @in   c       the output port
 ; @in   hl      the source data address
 ;====
-.macro "utils.outiBlock.send" args bytes
+.macro "utils.outiBlock.write" args bytes
     ; Transfer chunks if data exceeds outi block size
     .rept bytes / utils.outiBlock.size
         call utils.outiBlock.block - utils.outiBlock.SIZE_BYTES
@@ -135,5 +135,5 @@
 ;====
 .macro "utils.outiBlock.sendSlice" args arrayAddr itemSize count offset
     ld hl, arrayAddr + (offset * itemSize)
-    utils.outiBlock.send (count * itemSize)
+    utils.outiBlock.write (count * itemSize)
 .endm

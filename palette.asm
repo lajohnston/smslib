@@ -71,7 +71,7 @@
 ;====
 .macro "palette.writeBytes" args address size
     ld hl, address
-    utils.outiBlock.send size
+    utils.outiBlock.write size
 .endm
 
 ;====
