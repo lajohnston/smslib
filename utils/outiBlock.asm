@@ -108,8 +108,8 @@
 ; @in   c   the port to output the data to
 ; @in   hl  the address of the source data
 ;====
-.section "utils.outiBlock.sendUpTo128Bytes" free
-    utils.outiBlock.sendUpTo128Bytes:
+.section "utils.outiBlock.writeUpTo128Bytes" free
+    utils.outiBlock.writeUpTo128Bytes:
         ; Address of last OUTI instruction
         ld iyh, >(utils.outiBlock.lastOuti) ; high-byte address of last outi
         ld a, <(utils.outiBlock.lastOuti)   ; load low-byte address of last outi

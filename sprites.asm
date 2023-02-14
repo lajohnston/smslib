@@ -264,7 +264,7 @@
         ; Copy y positions to VRAM
         ld b, ixl                       ; load size into B
         inc l                           ; point to y positions in buffer
-        call utils.outiBlock.sendUpTo128Bytes ; send data
+        call utils.outiBlock.writeUpTo128Bytes  ; write data
 
         ; Output sprite terminator at end of y positions
         ld a, ixl                       ; load counter into A
@@ -281,7 +281,7 @@
         ; Copy x positions and patterns from buffer to VRAM
         ld b, ixl                       ; restore sprite count
         rlc b                           ; double to get xPos + pattern
-        jp utils.outiBlock.sendUpTo128Bytes   ; send bytes, then ret
+        jp utils.outiBlock.writeUpTo128Bytes    ; write bytes, then ret
 
     ; No sprites in buffer - cap table with sprite terminator then return
     ; VRAM address must be set

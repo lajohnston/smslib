@@ -818,7 +818,7 @@
                 ld l, a
 
                 ; Copy bytes from buffer to VDP
-                call utils.outiBlock.sendUpTo128Bytes
+                call utils.outiBlock.writeUpTo128Bytes
 
             ;===
             ; Second write
@@ -836,7 +836,7 @@
 
                 ; Write bytes then return to caller
                 ld b, a     ; set B to bytes to write
-                jp utils.outiBlock.sendUpTo128Bytes
+                jp utils.outiBlock.writeUpTo128Bytes
         +:
 
         ret
