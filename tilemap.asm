@@ -739,13 +739,13 @@
 
     ;===
     ; Prep the call to the address stored in tilemap.ram.colWriteCall, which
-    ; points to an iteration of tilemap._loadColumn
+    ; points to an iteration of tilemap._writeColumn
     ;===
 
     ; Set E to column address bits
     ld e, a
 
-    ; Set D to column bits ORed with 128, as required by tilemap._loadColumn
+    ; Set D to column bits ORed with 128, as required by tilemap._writeColumn
     or 128  ; OR A by 128 to combine bits
     ld d, a ; set D to value
 
@@ -760,7 +760,7 @@
     .endif
 
     ; Call (tilemap.ram.colWriteCall); This points to an iteration of
-    ; tilemap._loadColumn
+    ; tilemap._writeColumn
     ld iy, (tilemap.ram.colWriteCall)
     call tilemap._callIY
 
@@ -1091,7 +1091,7 @@
         and %00111110   ; clean value
 
         ; Point HL to item in lookup table
-        ld hl, tilemap._loadColumnLookup
+        ld hl, tilemap._writeColumnLookup
         add l           ; add L to row offset in A
         ld l, a         ; store result in L
 
@@ -1108,7 +1108,7 @@
 
 ;====
 ; Unrolled loop of column tile writes. Call one of the addresses stored in the
-; tilemap._loadColumnLookup lookup table to start from a given row. The loop
+; tilemap._writeColumnLookup lookup table to start from a given row. The loop
 ; will wrap back to 0 after the 28th tile is written and continue until all
 ; bytes are written
 ;
@@ -1117,24 +1117,24 @@
 ; @in   d   column number * 2 ORed with 128
 ; @in   e   column number * 2
 ;====
-.section "tilemap._loadColumn" free
-    tilemap._loadColumn:
+.section "tilemap._writeColumn" free
+    tilemap._writeColumn:
         .repeat tilemap.ROWS index rowNumber
             ; Calculate write address for column 0
-            .redefine tilemap._loadColumn_writeAddress ($4000 | tilemap.vramAddress) + (rowNumber * tilemap.COLS * tilemap.TILE_SIZE_BYTES)
-            .redefine tilemap._loadColumn_writeAddressHigh >tilemap._loadColumn_writeAddress
-            .redefine tilemap._loadColumn_writeAddressLow <tilemap._loadColumn_writeAddress
+            .redefine tilemap._writeColumn_writeAddress ($4000 | tilemap.vramAddress) + (rowNumber * tilemap.COLS * tilemap.TILE_SIZE_BYTES)
+            .redefine tilemap._writeColumn_writeAddressHigh >tilemap._writeColumn_writeAddress
+            .redefine tilemap._writeColumn_writeAddressLow <tilemap._writeColumn_writeAddress
 
             ; Calculate VRAM low byte write address (0, 64, 128, 192)
-            .if tilemap._loadColumn_writeAddressLow == 0
+            .if tilemap._writeColumn_writeAddressLow == 0
                 ; Row address low byte is 0; Just set A to column address
                 ld a, e ; set A to column address
-            .elif tilemap._loadColumn_writeAddressLow == 128
+            .elif tilemap._writeColumn_writeAddressLow == 128
                 ; Row address low byte is 128; This value (and col address) is cached in D
                 ld a, d
             .else
                 ; Set A to low address
-                ld a, tilemap._loadColumn_writeAddressLow
+                ld a, tilemap._writeColumn_writeAddressLow
 
                 ; Set column address bits
                 or e
@@ -1144,7 +1144,7 @@
             out (utils.vdp.VDP_COMMAND_PORT), a
 
             ; Set VRAM high byte write address
-            ld a,  tilemap._loadColumn_writeAddressHigh ; set A to high address
+            ld a,  tilemap._writeColumn_writeAddressHigh; set A to high address
             out (utils.vdp.VDP_COMMAND_PORT), a         ; send to VDP
 
             ; Output tile
@@ -1153,32 +1153,32 @@
             ret z   ; return if no more tiles to output (B = 0)
         .endr
 
-        jp tilemap._loadColumn ; continue from row 0
+        jp tilemap._writeColumn  ; continue from row 0
 .ends
 
 ;====
-; Lookup table for the loop iterations in tilemap._loadColumn
-; Usage: load HL with tilemap._loadColumnLookup then add row * 2 to L; HL will
+; Lookup table for the loop iterations in tilemap._writeColumn
+; Usage: load HL with tilemap._writeColumnLookup then add row * 2 to L; HL will
 ; then point to the address to call in the loop
 ;=====
-.section "tilemap._loadColumnLookup" free bitwindow 8
-    tilemap._loadColumnLookup:
-        ; The offset to the current tilemap._loadColumn iteration
-        .redefine tilemap._loadColumnLookup_currentOffset 0
+.section "tilemap._writeColumnLookup" free bitwindow 8
+    tilemap._writeColumnLookup:
+        ; The offset to the current tilemap._writeColumn iteration
+        .redefine tilemap._writeColumnLookup_currentOffset 0
 
         ; Iterate over each potential row, starting from 0
         .repeat tilemap.ROWS index rowNumber
-            ; Set address of the row iteration in tilemap._loadColumn
-            .dw tilemap._loadColumn + tilemap._loadColumnLookup_currentOffset
+            ; Set address of the row iteration in tilemap._writeColumn
+            .dw tilemap._writeColumn + tilemap._writeColumnLookup_currentOffset
 
             ; Update offset to next iteration
             .if rowNumber # 2 == 0
                 ; Every second iteration uses additional optimisations, so we
                 ; only need to increase the offset by 12 bytes
-                .redefine tilemap._loadColumnLookup_currentOffset tilemap._loadColumnLookup_currentOffset + 12
+                .redefine tilemap._writeColumnLookup_currentOffset tilemap._writeColumnLookup_currentOffset + 12
             .else
                 ; Increase offset by 14 bytes
-                .redefine tilemap._loadColumnLookup_currentOffset tilemap._loadColumnLookup_currentOffset + 14
+                .redefine tilemap._writeColumnLookup_currentOffset tilemap._writeColumnLookup_currentOffset + 14
             .endif
         .endr
 .ends
