@@ -75,9 +75,9 @@ Many of the lib files include settings that default to sensible values but can b
 
 The library includes a number of optimisations and quality of life tricks, including:
 
-- An 'OUTI block' - the fastest way to send data to the VDP
+- An 'OUTI block' - the fastest way to write data to the VDP
 - Sprite buffer offset - table is offset in RAM to allow efficient sprite adding
-- Fast sprite buffer send - only used sprite entries are sent to the VDP
+- Fast sprite buffer write - only used sprite entries are sent to the VDP
 - VDP register buffer - allows changing of settings without affecting other settings
 - Fast interrupt handling - HBlank handling pretty as fast as practical (OutRun handler)
 

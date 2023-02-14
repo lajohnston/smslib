@@ -226,7 +226,7 @@ tilemap.loadBRowBytes   ; load B with the number of bytes to write to the buffer
 tilemap.loadBCRowBytes  ; or, load BC with the value (for use with ldi)
 ```
 
-You will need a routine that sends the row data to the buffer from left to right. If copying uncompressed data you would just need to point HL to the left-most visible column and use `ldir` to copy the bytes until BC is 0.
+You will need a routine that writes the row data to the buffer from left to right. If copying uncompressed data you would just need to point HL to the left-most visible column and use `ldir` to copy the bytes until BC is 0.
 
 ### Updating VRAM
 

@@ -37,7 +37,7 @@ You will also need to define an `interrupts.onVBlank` label that the handler wil
 
 ```
 interrupts.onVBlank:
-    ...                     ; send data to VDP
+    ...                     ; write data to VRAM
     interrupts.endVBlank    ; return from VBlank
 ```
 

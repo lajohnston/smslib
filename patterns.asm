@@ -3,7 +3,7 @@
 ;
 ; Provided for example purposes to get you started. For an actual game you
 ; would want to compress pattern data using an algorithm such as zx7 or aPLib
-; and use the appropriate lib to decompress and send to VRAM
+; and use the appropriate lib to decompress and write to VRAM
 ;====
 
 ;====

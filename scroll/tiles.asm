@@ -373,7 +373,7 @@
             .repeat tilemap.MAX_VISIBLE_ROWS index row
                 ; Copy tile from the tilemap to the buffer
                 .repeat tilemap.TILE_SIZE_BYTES
-                    ldi ; send byte to the buffer
+                    ldi ; copy byte to the buffer
                 .endr
 
                 ; Return, or go to next row

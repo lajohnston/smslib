@@ -2,7 +2,7 @@
 
 Loads patterns (tiles) into the VRAM, which can be used for background images or sprites.
 
-This only deals with uncompressed tile data and is provided for example purposes to get you started. For an actual game you would want to compress pattern data using an algorithm such as zx7 or aPLib and use the appropriate lib to decompress the data and send it to VRAM.
+This only deals with uncompressed tile data and is provided for example purposes to get you started. For an actual game you would want to compress pattern data using an algorithm such as zx7 or aPLib and use the appropriate lib to decompress the data and write it to VRAM.
 
 ## patterns.writeBytes
 

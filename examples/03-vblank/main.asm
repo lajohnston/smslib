@@ -11,7 +11,7 @@
 ;
 ; Sending data to the VDP while it is actively drawing a frame can result in
 ; graphical corruption. The VBlank therefore provides us a small time window
-; between frames where we can send data to the VDP without restriction.
+; between frames where we can write data to VRAM without restriction.
 ;
 ; In addition, as the interrupt occurs every 50 or 60 times a second for
 ; PAL/NTSC respectively, we can use this frequency to regulate the speed our
@@ -66,8 +66,8 @@
 
 ;====
 ; The VBlank interrupt is triggered after the VDP has finished drawing a frame.
-; Any data we want to send to the VDP should be done here (or while the display
-; is disabled) as sending this data while the VDP is actively rendering a frame
+; Any data we want to write to the VDP should be done here (or while the display
+; is disabled) as writing this data while the VDP is actively rendering a frame
 ; can lead to graphical corruption and visual artefacts.
 ;====
 .section "render" free

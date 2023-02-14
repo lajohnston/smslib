@@ -95,8 +95,8 @@
 ;====
 ; VBlank routine called by interrupts.asm after each frame is drawn.
 ;
-; This is a good time to send data to the VDP before it starts drawing the next
-; frame.
+; This is a good time to write data to VRAM before it starts drawing the
+; next frame.
 ;
 ; When this has finished, interrupts.waitForVBlank in the main loop will be
 ; satisfied and the rest of the loop will continue

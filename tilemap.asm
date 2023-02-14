@@ -168,9 +168,9 @@
 ; Reads pattern ref bytes and writes to the tilemap until a terminator byte is
 ; reached.
 ;
-; @in   hl  address of the data to send
+; @in   hl  address of the data to write
 ; @in   b   tile attributes to use for all the tiles
-; @in   c   the data port to send to
+; @in   c   the data port to write to
 ; @in   d   the terminator byte value
 ;====
 .section "tilemap.writeBytesUntil" free
@@ -186,8 +186,7 @@
 .ends
 
 ;====
-; Writes pattern ref bytes and sends to the tilemap until a terminator byte is
-; reached
+; Copies pattern ref bytes to VRAM until a terminator byte is reached
 ;
 ; @in   terminator  value that signifies the end of the data
 ; @in   dataAddr    address of the first byte of ASCII data
@@ -768,8 +767,8 @@
 .endm
 
 ;====
-; Update the scroll registers and send the necessary col/row data to VRAM. This
-; should be called when the display is off or during VBlank
+; Update the scroll registers and write the necessary col/row data to VRAM.
+; This should be called when the display is off or during VBlank
 ;====
 .macro "tilemap.writeScrollBuffers"
     call tilemap.writeScrollBuffers
