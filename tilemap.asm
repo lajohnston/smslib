@@ -165,7 +165,7 @@
 .endm
 
 ;====
-; Reads pattern ref bytes and sends to the tilemap until a terminator byte is
+; Reads pattern ref bytes and writes to the tilemap until a terminator byte is
 ; reached.
 ;
 ; @in   hl  address of the data to send
@@ -173,28 +173,28 @@
 ; @in   c   the data port to send to
 ; @in   d   the terminator byte value
 ;====
-.section "tilemap.loadBytesUntil" free
-    tilemap.loadBytesUntil:
+.section "tilemap.writeBytesUntil" free
+    tilemap.writeBytesUntil:
         ld a, (hl)                      ; read byte
         cp d                            ; compare value with terminator
         ret z                           ; return if terminator byte found
-        out (tilemap.VDP_DATA_PORT), a  ; output pattern ref
-        ld a, b                         ; load attributes
+        out (tilemap.VDP_DATA_PORT), a  ; write pattern ref
+        ld a, b                         ; write attributes
         out (tilemap.VDP_DATA_PORT), a  ; output attributes
         inc hl                          ; next char
-        jp tilemap.loadBytesUntil       ; repeat
+        jp tilemap.writeBytesUntil      ; repeat
 .ends
 
 ;====
-; Reads pattern ref bytes and sends to the tilemap until a terminator byte is
+; Writes pattern ref bytes and sends to the tilemap until a terminator byte is
 ; reached
 ;
 ; @in   terminator  value that signifies the end of the data
 ; @in   dataAddr    address of the first byte of ASCII data
 ; @in   [attributes] tile attributes to use for all the tiles (see tile
-;                    attribute options at top)
+;                    attribute options at top). Defaults to 0
 ;====
-.macro "tilemap.loadBytesUntil" args terminator dataAddr attributes
+.macro "tilemap.writeBytesUntil" args terminator dataAddr attributes
     ld d, terminator
     ld hl, dataAddr
 
@@ -204,7 +204,7 @@
         ld b, 0
     .endif
 
-    call tilemap.loadBytesUntil
+    call tilemap.writeBytesUntil
 .endm
 
 ;====

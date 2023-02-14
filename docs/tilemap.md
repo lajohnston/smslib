@@ -45,7 +45,7 @@ message:
     .db $ff ; terminator byte
 
 tilemap.setColRow 0, 0              ; top left tile
-tilemap.loadBytesUntil $ff message  ; load from 'message' label until $ff reached
+tilemap.writeBytesUntil $ff message ; load from 'message' label until $ff reached
 ```
 
 ## Load bytes

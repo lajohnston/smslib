@@ -78,8 +78,8 @@
 ; Writes colors into color RAM. Each color should be a byte containing an RGB
 ; value in the format --bbggrr
 ;
-; @in       dataAddr    the address of the data to load
-; @in       count       the number of colors to load
+; @in       dataAddr    the address of the data to write
+; @in       count       the number of colors to write
 ; @in       [offset=0]  how many colors to skip from the start of the data
 ;====
 .macro "palette.writeSlice" args dataAddr count offset
@@ -91,7 +91,7 @@
 .endm
 
 ;====
-; Set the current palette index (0-31) ready to load data into
+; Set the current palette index (0-31) ready to write data into
 ;
 ; @in   index   the palette index (0-31)
 ;====

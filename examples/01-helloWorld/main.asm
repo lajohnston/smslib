@@ -50,8 +50,8 @@
         patterns.writeBytes fontData, fontDataSize  ; load uncompressed font data into pattern VRAM
 
         ; Display font tiles on screen
-        tilemap.setColRow 0, 0              ; Set tilemap index x0, y0 (top left)
-        tilemap.loadBytesUntil $ff message  ; Load data from 'message' until reaching terminator ($ff) byte
+        tilemap.setColRow 0, 0              ; set tilemap index x0, y0 (top left)
+        tilemap.writeBytesUntil $ff message ; write data from 'message' until reaching terminator ($ff) byte
 
         ; Enable the display
         vdp.enableDisplay

@@ -95,7 +95,7 @@
         ; Display font tiles on screen
         tilemap.setColRow 0, 6
         mapper.pageBank :instructions       ; ensure instructions is visible
-        tilemap.loadBytesUntil $ff instructions
+        tilemap.writeBytesUntil $ff instructions
 
         ; Enable the display and VBlank
         vdp.startBatch

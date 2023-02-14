@@ -69,7 +69,7 @@
         patterns.writeBytes fontPatterns, fontPatternsSize
 
         tilemap.setColRow 0, ROW_OFFSET
-        tilemap.loadBytesUntil $ff, template
+        tilemap.writeBytesUntil $ff, template
 
         vdp.startBatch
             vdp.enableDisplay

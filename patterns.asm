@@ -37,7 +37,7 @@
 ; Write patterns (tile graphics) into VRAM
 ;
 ; @in  dataAddress   the address of the first byte of data
-; @in  count         the number of patterns to load (1-based)
+; @in  count         the number of patterns to write (1-based)
 ; @in  [offset=0]    the number of patterns to skip at the beginning of the data
 ;====
 .macro "patterns.writeSlice" args dataAddr count offset
