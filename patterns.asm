@@ -63,7 +63,7 @@
 .endm
 
 ;====
-; Set the current pattern index ready to load data into
+; Set the current pattern index ready to write data into
 ;
 ; @in   index    the index number (0-512)
 ;====

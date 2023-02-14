@@ -45,12 +45,12 @@ message:
     .db $ff ; terminator byte
 
 tilemap.setColRow 0, 0              ; top left tile
-tilemap.writeBytesUntil $ff message ; load from 'message' label until $ff reached
+tilemap.writeBytesUntil $ff message ; write from 'message' label until $ff reached
 ```
 
-## Load bytes
+## Write bytes
 
-Load bytes of data representing pattern refs. Each tile will contain the same [tile attributes](#tile-attributes). These attributes can be passed in as an optional 3rd parameter.
+Write bytes of data representing pattern refs. Each tile will contain the same [tile attributes](#tile-attributes). These attributes can be passed in as an optional 3rd parameter.
 
 ```
 message:
@@ -59,15 +59,15 @@ message:
 tilemap.setColRow 5, 10         ; column 5, row 10
 tilemap.writeBytes message 5    ; write first 5 bytes of message ('Hello')
 
-; load 12 bytes, all flipped horizontally and vertically
+; Write 12 bytes, all flipped horizontally and vertically
 tilemap.writeBytes message 12, (tilemap.FLIP_X|tilemap.FLIP_Y)
 ```
 
-## Load tiles
+## Write tiles
 
 ### tilemap.writeRow
 
-Load 32 uncompressed tiles.
+Write 32 uncompressed tiles.
 
 ```
 myRow:
@@ -77,12 +77,12 @@ myRow:
 
 tilemap.setColRow 0, 0  ; write from column 0, row 0 onwards
 ld hl, myRow            ; point to data
-tilemap.writeRow        ; load data (32 tiles)
+tilemap.writeRow        ; write data (32 tiles)
 ```
 
 ### tilemap.writeRows
 
-Load multiple rows from an uncompressed tilemap. The visible tilemap is 32 tiles wide (columns) by 25 tiles high (rows) but the full map can be larger than the screen.
+Write multiple rows from an uncompressed tilemap. The visible tilemap is 32 tiles wide (columns) by 25 tiles high (rows) but the full map can be larger than the screen.
 
 ```
 .define MAP_ROWS 64
@@ -95,13 +95,12 @@ myTilemap:
         .endr
     .endr
 
-tilemap.setColRow 0, 0          ; load from column 0, row 0 onwards
-ld hl, myTilemap                ; point to top left corner to load
-ld d, tilemap.MAX_VISIBLE_ROWS  ; number of rows to load; all visible rows (25)
+tilemap.setColRow 0, 0          ; write from column 0, row 0 onwards
+ld hl, myTilemap                ; point to top left corner to write
+ld d, tilemap.MAX_VISIBLE_ROWS  ; number of rows to write; all visible rows (25)
 ld e, tilemap.MAP_COLS * 2      ; number of full map columns * 2 (each tile is 2 bytes)
 
-tilemap.writeRows               ; load row data
-
+tilemap.writeRows               ; write row data
 ```
 
 ## Scrolling
@@ -115,7 +114,7 @@ A suggested workflow is to maintain a pointer to the top-left visible tile of yo
 1. Adjust the tilemap by x and y number of pixels
 2. If row or column scrolling detected, adjust row/col of the top-left pointer
     - (Optional) Prevent the pointer going out of bounds
-4. Load the new row and/or column into the RAM buffers
+4. Write the new row and/or column into the RAM buffers
     - Right edge will be top-left pointer + 31 columns
     - Bottom edge will be top-left pointer + 24 rows
 5. During VBlank, transfer these changes from the RAM buffer to the VDP

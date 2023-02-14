@@ -208,10 +208,10 @@
 .endm
 
 ;====
-; Loads bytes of data representing tile pattern refs
+; Write bytes of data representing tile pattern refs
 ;
-; @in   hl  the address of the data to load
-; @in   b   the number of bytes to load
+; @in   hl  the address of the data to write
+; @in   b   the number of bytes to write
 ; @in   c   tile attributes to use for all the tiles (see tile
 ;           attribute options at top)
 ;====
@@ -221,9 +221,9 @@
 
     tilemap.writeBytes:
         ld a, (hl)                      ; read byte
-        out (tilemap.VDP_DATA_PORT), a  ; output pattern ref
+        out (tilemap.VDP_DATA_PORT), a  ; write pattern ref
         ld a, c                         ; load attributes
-        out (tilemap.VDP_DATA_PORT), a  ; output attributes
+        out (tilemap.VDP_DATA_PORT), a  ; write attributes
         djnz _nextByte                  ; repeat until b = 0
         ret
 .ends
@@ -329,10 +329,10 @@
 .ends
 
 ;====
-; Adjusts the buffered tilemap xScroll value by a given number of pixels. If this
-; results in a new column needing to be drawn it sets flags in RAM indicating
-; whether the left or right column needs reloading. You can interpret these flags
-; using tilemap.ifColScroll.
+; Adjusts the buffered tilemap xScroll value by a given number of pixels. If
+; this results in a new column needing to be drawn it sets flags in RAM
+; indicating whether the left or right column needs re-writing. You can
+; interpret these flags using tilemap.ifColScroll.
 ;
 ; The scroll value won't apply until you call tilemap.writeScrollRegisters
 ;
@@ -345,9 +345,9 @@
 .endm
 
 ;====
-; Adjusts the buffered tilemap yScroll value by a given number of pixels. If this
-; results in a new row needing to be drawn it sets flags in RAM indicating
-; whether the top or bottom rows need reloading. You can interpret these flags
+; Adjusts the buffered tilemap yScroll value by a given number of pixels. If
+; this results in a new row needing to be drawn it sets flags in RAM indicating
+; whether the top or bottom rows need re-writing. You can interpret these flags
 ; using tilemap.ifRowScroll.
 ;
 ; The scroll value won't apply until you call tilemap.writeScrollRegisters

@@ -73,7 +73,7 @@
 .section "render" free
     ; interrupts.onVBlank is called by interrupts.asm 50/60x a second (PAL/NTSC)
     interrupts.onVBlank:
-        ; Load ram.color into palette index 0
+        ; Write ram.color into palette index 0
         palette.setIndex 0
         palette.writeBytes ram.color 1
 

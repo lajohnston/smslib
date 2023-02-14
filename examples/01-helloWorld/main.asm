@@ -43,11 +43,11 @@
     init:
         ; Load palette
         palette.setIndex 0                  ; point to first color index
-        palette.writeSlice paletteData, 2   ; load 2 colors from paletteData
+        palette.writeSlice paletteData, 2   ; write 2 colors from paletteData
 
         ; Load font tiles
         patterns.setIndex 0                         ; point to first pattern index
-        patterns.writeBytes fontData, fontDataSize  ; load uncompressed font data into pattern VRAM
+        patterns.writeBytes fontData, fontDataSize  ; write uncompressed font data into pattern VRAM
 
         ; Display font tiles on screen
         tilemap.setColRow 0, 0              ; set tilemap index x0, y0 (top left)

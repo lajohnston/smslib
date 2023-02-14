@@ -29,7 +29,7 @@ paletteData:
     palette.rgb 170, 0, 255 ; violet
 ```
 
-You can then load these into the VDP VRAM the following macros.
+You can then write these into the VDP VRAM the following macros.
 
 ### palette.setIndex
 
@@ -54,12 +54,12 @@ palette.writeBytes myPaletteData, myPaletteDataSize
 
 ### palette.writeSlice
 
-Load specific colors from the data.
+Write specific colors from the data.
 
 ```
 palette.setIndex 0                    ; point to first palette index
-palette.writeSlice paletteData, 3     ; load 3 colors from current index onwards (indices 0, 1, 2)
-palette.writeSlice otherPaletteData, 2; load 2 more colors (indices 3 and 4)
+palette.writeSlice paletteData, 3     ; write 3 colors from current index onwards (indices 0, 1, 2)
+palette.writeSlice otherPaletteData, 2; write 2 more colors (indices 3 and 4)
 ```
 
 An optional third parameter lets you skip some colors in the data:

@@ -80,7 +80,7 @@
 .ends
 
 ;====
-; Defines the default register values ready to be loaded with vdp.writeRegisters
+; Defines the default register values ready to be written with vdp.writeRegisters
 ;====
 .section "vdp.initData" free
     vdp.initData:

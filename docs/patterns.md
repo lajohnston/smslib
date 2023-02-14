@@ -14,31 +14,31 @@ Due to WLA-DX limitations the size parameter must be an `immediate` value, so ca
 uncompressedPatternData:
     .incbin "tiles.bin" fsize patternDataSize
 
-; load pattern data from index 16 onwards
+; Write pattern data from index 16 onwards
 patterns.setIndex 16
 patterns.writeBytes uncompressedPatternData, patternDataSize
 ```
 
 ## patterns.writeSlice
 
-Lets you pick out certain tiles from the binary data and load them individually.
+Lets you pick out certain tiles from the binary data and write them individually.
 
 ```
 myUncompressedPatternData:
     .incbin 'tiles.bin'
 
-; load 4 patterns into pattern index 0 onwards (indices 0-3)
+; Write 4 patterns into pattern index 0 onwards (indices 0-3)
 patterns.setIndex 0
 patterns.writeSlice myUncompressedPatternData, 4
 
-; ...then load another pattern into the next index (index 4)
+; ...then write another pattern into the next index (index 4)
 patterns.writeSlice myUncompressedPatternData, 1
 ```
 
 An optional third parameter lets you skip a certain number of patterns in the data:
 
 ```
-; load another pattern, skipping the first 9
+; Write another pattern, skipping the first 9
 patterns.writeSlice otherPatternData, 1, 9
 ```
 

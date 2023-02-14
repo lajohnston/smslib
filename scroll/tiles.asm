@@ -149,7 +149,7 @@
         ld a, (scroll.tiles.ram.bytesPerRow); load bytesPerRow
         ld e, a                             ; set E to bytesPerRow
 
-        ; Load rows of tiles into VRAM
+        ; Write rows of tiles into VRAM
         jp tilemap.writeRows                ; jp to writeRows, which returns
 .ends
 
@@ -323,7 +323,7 @@
                 ld hl, (scroll.tiles.ram.topLeft)   ; load topLeft pointer
                 jp _loadRowBuffer
 
-            ; Load the row at the bottom of the screen
+            ; Write the row at the bottom of the screen
             _updateDownBuffer:
                 ld hl, (scroll.tiles.ram.topLeft)   ; point to top left tile
                 ex de, hl                           ; preserve top left pointer in DE
@@ -331,7 +331,7 @@
                 add hl, de                          ; add screen height to topLeft pointer
                 ; continue to _loadRowBuffer
 
-        ; Load the tiles into the row buffer
+        ; Write the tiles into the row buffer
         _loadRowBuffer:
             tilemap.loadDERowBuffer ; point DE to row buffer
             tilemap.loadBCRowBytes  ; set BC to bytes to write
@@ -357,7 +357,7 @@
                 utils.math.addHLA                   ; add A to HL
                 ; continue to _loadColBuffer
 
-        ; Load the tiles into the column buffer
+        ; Write the tiles into the column buffer
         _loadColBuffer:
             ; Populate the column buffer with the tiles we wish to draw
             tilemap.loadDEColBuffer ; point DE to the column buffer
