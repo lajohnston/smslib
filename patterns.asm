@@ -34,13 +34,13 @@
 .endif
 
 ;====
-; Loads patterns into VRAM
+; Write patterns (tile graphics) into VRAM
 ;
 ; @in  dataAddress   the address of the first byte of data
 ; @in  count         the number of patterns to load (1-based)
 ; @in  [offset=0]    the number of patterns to skip at the beginning of the data
 ;====
-.macro "patterns.loadSlice" args dataAddr count offset
+.macro "patterns.writeSlice" args dataAddr count offset
     .ifndef offset
         utils.outiBlock.writeSlice dataAddr patterns.ELEMENT_SIZE_BYTES count 0
     .else

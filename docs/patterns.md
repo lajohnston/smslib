@@ -19,7 +19,7 @@ patterns.setIndex 16
 patterns.load uncompressedPatternData, patternDataSize
 ```
 
-## patterns.loadSlice
+## patterns.writeSlice
 
 Lets you pick out certain tiles from the binary data and load them individually.
 
@@ -29,17 +29,17 @@ myUncompressedPatternData:
 
 ; load 4 patterns into pattern index 0 onwards (indices 0-3)
 patterns.setIndex 0
-patterns.loadSlice myUncompressedPatternData, 4
+patterns.writeSlice myUncompressedPatternData, 4
 
 ; ...then load another pattern into the next index (index 4)
-patterns.loadSlice myUncompressedPatternData, 1
+patterns.writeSlice myUncompressedPatternData, 1
 ```
 
 An optional third parameter lets you skip a certain number of patterns in the data:
 
 ```
 ; load another pattern, skipping the first 9
-patterns.loadSlice otherPatternData, 1, 9
+patterns.writeSlice otherPatternData, 1, 9
 ```
 
 ## Data format
