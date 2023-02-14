@@ -75,14 +75,14 @@
 .endm
 
 ;====
-; Loads colors into the palette. Each color should be a byte containing an RGB
+; Writes colors into color RAM. Each color should be a byte containing an RGB
 ; value in the format --bbggrr
 ;
 ; @in       dataAddr    the address of the data to load
 ; @in       count       the number of colors to load
 ; @in       [offset=0]  how many colors to skip from the start of the data
 ;====
-.macro "palette.loadSlice" args dataAddr count offset
+.macro "palette.writeSlice" args dataAddr count offset
     .ifndef offset
         utils.outiBlock.writeSlice dataAddr palette.ELEMENT_SIZE_BYTES count 0
     .else

@@ -52,21 +52,21 @@ palette.setIndex 0
 palette.writeBytes myPaletteData, myPaletteDataSize
 ```
 
-### palette.loadSlice
+### palette.writeSlice
 
 Load specific colors from the data.
 
 ```
 palette.setIndex 0                    ; point to first palette index
-palette.loadSlice paletteData, 3      ; load 3 colors from current index onwards (indices 0, 1, 2)
-palette.loadSlice otherPaletteData, 2 ; then load 2 more colors (indices 3 and 4)
+palette.writeSlice paletteData, 3     ; load 3 colors from current index onwards (indices 0, 1, 2)
+palette.writeSlice otherPaletteData, 2; load 2 more colors (indices 3 and 4)
 ```
 
 An optional third parameter lets you skip some colors in the data:
 
 ```
 ; Load 5 colors but skip the first 2
-palette.loadSlice paletteData, 5, 2
+palette.writeSlice paletteData, 5, 2
 ```
 
 ### palette.loadRGB

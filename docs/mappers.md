@@ -39,8 +39,8 @@ Before accessing data from the page slots (e.g. when loading an asset) remember 
 
 ```
 mapper.pageBank :paletteData        ; ensure the bank containing paletteData is accessible
-palette.loadSlice paletteData, 1    ; you can now use paletteData
-```
+palette.writeSlice paletteData, 1   ; you can now use paletteData
+``
 
 ### Page Slot B
 
@@ -54,7 +54,7 @@ paletteData:
 
 ; you must provide PAGE_SLOT_B as the second parameter
 mapper.pageBank :paletteData, mapper.PAGE_SLOT_B
-palette.loadSlice paletteData, 1  ; palette data now accessible
+palette.writeSlice paletteData, 1   ; palette data now accessible
 
 ```
 

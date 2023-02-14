@@ -43,7 +43,7 @@
     init:
         ; Load palette
         palette.setIndex 0                  ; point to first color index
-        palette.loadSlice paletteData, 2    ; load 2 colors from paletteData
+        palette.writeSlice paletteData, 2   ; load 2 colors from paletteData
 
         ; Load font tiles
         patterns.setIndex 0                     ; point to first pattern index
