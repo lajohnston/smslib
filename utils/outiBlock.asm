@@ -1,5 +1,5 @@
 ;====
-; Manages a big block of OUTI instructions, the fastest way to output data to
+; Manages a big block of OUTI instructions, the fastest way to write data to
 ; the VDP
 ;====
 
@@ -14,7 +14,7 @@
 
 ;==
 ; The number of OUTI instructions in the OUTI block. This block is used to
-; provide a fast means of outputting data to the VDP but requires a chunk of ROM
+; provide a fast means of writing data to the VDP but requires a chunk of ROM
 ; space.
 ;
 ; Each OUTI transfers 1-byte. Lower values may mean transfers require multiple
@@ -58,7 +58,7 @@
 
 ;====
 ; Creates a block of OUTI instructions to provide the fastest means of
-; outputting data to the VDP. Generate calls to this using the
+; writing data to the VDP. Generate calls to this using the
 ; utils.outiBlock.write macro
 ;
 ; @in     c     the port to write to
@@ -80,7 +80,7 @@
 ;====
 ; Write data to VRAM using the fast OUTI block
 ;
-; @in   bytes   the number of bytes to output
+; @in   bytes   the number of bytes to write
 ; @in   c       the output port
 ; @in   hl      the source data address
 ;====
@@ -115,7 +115,7 @@
         ld a, <(utils.outiBlock.lastOuti)   ; load low-byte address of last outi
 
         ; Subtract outi instructions required
-        dec b       ; exclude the byte the last outi will output
+        dec b       ; exclude the byte the last outi will write
         sub b       ; subtract remaining bytes
         sub b       ; subtract again (1 outi = 2 bytes)
         ld iyl, a   ; set low-byte of address in IY

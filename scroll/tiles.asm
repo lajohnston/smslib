@@ -143,7 +143,7 @@
 
         ; Draw the screen
         ld hl, (scroll.tiles.ram.topLeft)   ; point HL to topLeft pointer
-        ld d, tilemap.MAX_VISIBLE_ROWS      ; number of rows to output
+        ld d, tilemap.MAX_VISIBLE_ROWS      ; number of rows to write
 
         ; Set E to bytesPerRow
         ld a, (scroll.tiles.ram.bytesPerRow); load bytesPerRow
@@ -364,9 +364,9 @@
             tilemap.loadBCColBytes  ; set BC to number of bytes to write
 
             ; Get bytes to add to point to the next row (bytes per row minus
-            ; the 2 bytes we'll have just outputted)
+            ; the 2 bytes we'll have just written)
             ld a, (scroll.tiles.ram.bytesPerRow)
-            sub tilemap.TILE_SIZE_BYTES ; sub 2 bytes we'll have just outputted
+            sub tilemap.TILE_SIZE_BYTES ; sub 2 bytes we'll have just written
             ld ixl, a                   ; preserve in ixl
 
             ; For each row in the column

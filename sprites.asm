@@ -271,7 +271,7 @@
         cp sprites.MAX_SPRITES          ; compare with max sprites
         jp nc, +                        ; skip if counter == max sprites
             ld a, sprites.Y_TERMINATOR  ; load y terminator into A
-            out (c), a                  ; output y terminator
+            out (c), a                  ; write y terminator
         +:
 
         ; Point to x positions in VRAM and buffer
@@ -287,7 +287,7 @@
     ; VRAM address must be set
     _noSprites:
         ld a, sprites.Y_TERMINATOR      ; load y terminator into A
-        out (c), a                      ; output y terminator
+        out (c), a                      ; write y terminator
         ret
 .ends
 

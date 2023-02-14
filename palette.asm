@@ -57,7 +57,7 @@
 
     ; Convert to --bbggrr
     ld a, (\.\@blue * 16) + (\.\@green * 4) + \.\@red
-    out (c), a  ;   output color
+    out (c), a  ;   write color
 .endm
 
 ;====

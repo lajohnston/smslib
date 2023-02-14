@@ -179,7 +179,7 @@
     ; Pointer to the metatile definitions
     scroll.metatiles.ram.defsAddress: dw
 
-    ; Base address + an offset to the current row or col being output
+    ; Base address + an offset to the current row or col being written
     scroll.metatiles.ram.defsWithOffset: dw
 
     ; How many metatile columns there are in the map (0-based; 0=1, 255=256)
@@ -341,16 +341,16 @@
         ; Load bytes/metatiles per map row
         ld a, (scroll.metatiles.ram.bytesPerRow)
 
-        ; Subtract metatiles we'll have already output.
+        ; Subtract metatiles we'll have already written.
         ; Minus 1 as pointer isn't incremented for last one
         sub scroll.metatiles.FULL_VISIBLE_METATILE_COLS - 1
         ld i, a                                     ; store result in I
 
-        ; Prep tile output
-        ld b, tilemap.ROW_SIZE_BYTES                ; bytes to output (1 row)
+        ; Prep tile write
+        ld b, tilemap.ROW_SIZE_BYTES                ; bytes to write (1 row)
         ld de, (scroll.metatiles.ram.defsAddress)   ; base definition address
         ld ix, (scroll.metatiles.ram.topLeftTile.metatileAddress) ; map pointer
-        ld iyh, tilemap.MAX_VISIBLE_ROWS            ; set IYH to rows to output
+        ld iyh, tilemap.MAX_VISIBLE_ROWS            ; set IYH to rows to write
 
         ; Set IYL to subrows left in current row of metatiles
         ld a, (scroll.metatiles.ram.topLeftTile.rowsRemaining)
@@ -360,9 +360,9 @@
 
         _nextSubRow:
             dec iyh ; decrement tilemap rows remaining
-            ret z   ; return if no rows left to output
+            ret z   ; return if no rows left to write
 
-            ld b, tilemap.ROW_SIZE_BYTES    ; bytes to output (1 row)
+            ld b, tilemap.ROW_SIZE_BYTES    ; bytes to write (1 row)
 
             ; Decrement subrows remaining in current metatile row
             dec iyl
@@ -390,7 +390,7 @@
             ; Reset rows per metatile
             ld iyl, scroll.metatiles.ROWS_PER_METATILE
 
-            ; ...output next metatile
+            ; ...write next metatile
 
         ;===
         ; Write a metatile along a row and return if there are no more bytes
@@ -411,7 +411,7 @@
                 outi
                 outi
 
-                ; Go to next row when there are no more tiles to output in this row
+                ; Go to next row when there are no more tiles to write in this row
                 .if scroll.metatiles.COLS_PER_METATILE > 8
                     ; Jump is large to we can't use relative jump
                     jp z, _nextSubRow
@@ -420,7 +420,7 @@
                 .endif
             .endr
 
-            ; Keep outputting metatiles along the row
+            ; Keep writing metatiles along the row
             inc ix
             jp _writeMetatileAlongRow
 .ends
@@ -924,7 +924,7 @@
 ;
 ; @in   b   rowsRemaining in the left-most metatile
 ; @in   c   colsRemaining in the left-most metatile
-; @in   ix  pointer to the left-most metatile to output
+; @in   ix  pointer to the left-most metatile to copy
 ;====
 .section "scroll.metatiles._populateRowBuffer" free
     scroll.metatiles._populateRowBuffer:
@@ -995,14 +995,14 @@
         ;===
         ; Send the first metatile, which may have a column offset, to the buffer
         ;
-        ; @in   a   the columns left to output for the current metatile
+        ; @in   a   the columns left to copy for the current metatile
         ; @in   de  pointer to the buffer
         ; @in   bc  bytes to write to the buffer
         ;===
         -:
-            ; Output one tile
-            ldi         ; output pattern number
-            ldi         ; output tile attributes
+            ; Copy one tile
+            ldi         ; copy pattern number
+            ldi         ; copy tile attributes
             ret po      ; return if current buffer is full (BC == 0)
             dec a       ; dec colsRemaining of current metatile
             jp nz, -    ; jump if no cols left in this metatile
@@ -1035,12 +1035,12 @@
             ; For each column in the metatile
             .repeat scroll.metatiles.COLS_PER_METATILE index col
                 ; Output one tile
-                ldi     ; output pattern number
-                ldi     ; output tile attributes
+                ldi     ; copy pattern number
+                ldi     ; copy tile attributes
                 ret po  ; return if current buffer is full (BC == 0)
             .endr
 
-            ; Keep outputting metatiles (until BC == 0)
+            ; Keep copying metatiles (until BC == 0)
             jp _nextMetatile
 .ends
 
@@ -1049,7 +1049,7 @@
 ;
 ; @in   b   rowsRemaining in the top-most metatile of the column
 ; @in   c   colsRemaining in the top-most metatile of the column
-; @in   ix  pointer to the top-most metatileRef to output
+; @in   ix  pointer to the top-most metatileRef to copy
 ;====
 .section "scroll.metatiles._populateColBuffer" free
     scroll.metatiles._populateColBuffer:
@@ -1070,7 +1070,7 @@
         ;===
         ; The top metatile may be partly off the top of the screen, so we'll
         ; need skip to the first visible subrow and draw from there. We also
-        ; need to keep track of how many subrows to output before moving to the
+        ; need to keep track of how many subrows to copy before moving to the
         ; next metatile.
         ;
         ; @in   b   rowsRemaining in the top metatile
@@ -1078,7 +1078,7 @@
         ; @in   de  address of the definitions + offset to the subcol
         ; @in   ix  pointer to the top metatileRef in the column
         ;===
-        _outputTopMetatile:
+        _copyTopMetatile:
             ;===
             ; Add subrow offset
             ;===
@@ -1121,13 +1121,13 @@
             tilemap.loadBCColBytes      ; set BC to bytes to write
 
             ;===
-            ; Output each potential subrow in the metatile
+            ; Copy each potential subrow in the metatile
             ; Jump to _nextMetatileRow when iyl reaches 0
             ;===
             .repeat scroll.metatiles.ROWS_PER_METATILE index row
-                ; Output one tile
-                ldi     ; output pattern number
-                ldi     ; output tile attributes
+                ; Copy one tile
+                ldi     ; copy pattern number
+                ldi     ; copy tile attributes
 
                 ; Increment subrow (unless this is the last possible one)
                 .if row < scroll.metatiles.ROWS_PER_METATILE - 1
@@ -1135,7 +1135,7 @@
                     jp z, _nextMetatileRow  ; jump if no rows left in this metatile
 
                     ; Skip remaining columns in metatile (total minus the one
-                    ; we've just output, multiplied by bytes)
+                    ; we've just copied, multiplied by bytes)
                     ld a, tilemap.TILE_SIZE_BYTES * (scroll.metatiles.COLS_PER_METATILE - 1)
 
                     .if scroll.metatiles.METATILE_DEF_SIZE_BYTES > 255
@@ -1159,9 +1159,9 @@
 
         ;===
         ; Copy a metatile column to the buffer, starting from the top subrow.
-        ; Continues outputting metatiles until bytes remaining is 0.
+        ; Continues writing metatiles until bytes remaining is 0.
         ;
-        ; @in   c   bytes left to output in this column
+        ; @in   c   bytes left to write in this column
         ; @in   de  pointer to column buffer
         ; @in   ix  pointer to metatileRef in the map
         ;===
@@ -1180,15 +1180,15 @@
 
             ; Each potential row in the metatile
             .repeat scroll.metatiles.ROWS_PER_METATILE index row
-                ; Output one tile
-                ldi     ; output pattern number
-                ldi     ; output tile attributes
-                ret po  ; return if no more bytes to output (BC == 0)
+                ; Copy one tile
+                ldi     ; copy pattern number
+                ldi     ; copy tile attributes
+                ret po  ; return if no more bytes to copy (BC == 0)
 
                 ; Increment subrow (unless this is the last possible one)
                 .if row < scroll.metatiles.ROWS_PER_METATILE - 1
                     ; Skip remaining columns in metatile (total minus the one
-                    ; we've just output, multiplied by bytes)
+                    ; we've just copied, multiplied by bytes)
                     ld a, tilemap.TILE_SIZE_BYTES * (scroll.metatiles.COLS_PER_METATILE - 1)
 
                     .if scroll.metatiles.METATILE_DEF_SIZE_BYTES > 255

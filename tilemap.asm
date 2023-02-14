@@ -179,8 +179,8 @@
         cp d                            ; compare value with terminator
         ret z                           ; return if terminator byte found
         out (tilemap.VDP_DATA_PORT), a  ; write pattern ref
-        ld a, b                         ; write attributes
-        out (tilemap.VDP_DATA_PORT), a  ; output attributes
+        ld a, b                         ; load attributes
+        out (tilemap.VDP_DATA_PORT), a  ; write attributes
         inc hl                          ; next char
         jp tilemap.writeBytesUntil      ; repeat
 .ends
@@ -821,7 +821,7 @@
 
             ;===
             ; Second write
-            ; Set B to ROW_SIZE_BYTES minus bytes outputted in first write
+            ; Set B to ROW_SIZE_BYTES minus bytes written in first write
             ; Set HL to start of rowBuffer
             ;===
             _secondWrite:
@@ -1146,10 +1146,10 @@
             ld a,  tilemap._writeColumn_writeAddressHigh; set A to high address
             out (utils.vdp.VDP_COMMAND_PORT), a         ; send to VDP
 
-            ; Output tile
+            ; Write tile
             outi    ; pattern ref
             outi    ; tile attributes
-            ret z   ; return if no more tiles to output (B = 0)
+            ret z   ; return if no more tiles to write (B = 0)
         .endr
 
         jp tilemap._writeColumn  ; continue from row 0
