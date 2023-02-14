@@ -69,11 +69,11 @@ An optional third parameter lets you skip some colors in the data:
 palette.writeSlice paletteData, 5, 2
 ```
 
-### palette.loadRGB
+### palette.writeRgb
 
 Loads an approximate RGB value into the current palette index. Each component is rounded to the nearest of the following values: 0, 85, 170, 255.
 
 ```
 palette.setIndex 0
-palette.loadRGB 255, 0, 0  ;  a bright red
+palette.writeRgb 255, 0, 0  ; a bright red
 ```

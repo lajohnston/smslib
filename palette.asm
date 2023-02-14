@@ -42,14 +42,14 @@
 .endm
 
 ;====
-; Load an approximate RGB value into the current palette index. Each value
+; Write an approximate RGB value into the current palette index. Each value
 ; will be rounded to the nearest of: 0, 85, 170, 255
 ;
 ; @in   red     red value
 ; @in   green   green value
 ; @in   blue    blue value
 ;====
-.macro "palette.loadRGB" args red, green, blue
+.macro "palette.writeRgb" args red, green, blue
     ; Round to nearest 85 then AND with $ff to calculate floor
     .define \.\@red = (red + 42.5) / 85 & $ff
     .define \.\@green = (green + 42.5) / 85 & $ff

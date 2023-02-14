@@ -41,7 +41,7 @@
     init:
         ; Set background colour
         palette.setIndex 0
-        palette.loadRGB 0, 0, 0 ; black
+        palette.writeRgb 0, 0, 0    ; black
 
         ; Load sprite palette
         palette.setIndex palette.SPRITE_PALETTE
