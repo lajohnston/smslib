@@ -125,7 +125,7 @@
         input.if input.BUTTON_1, +
             tilemap.setColRow 0, 10
             mapper.pageBank :lotsOf1s       ; make lotsOf1s available
-            tilemap.loadBytes lotsOf1s, 224 ; load first 224 bytes
+            tilemap.writeBytes lotsOf1s, 224; write first 224 bytes
             jp _end
         +:
 
@@ -133,7 +133,7 @@
         input.if input.BUTTON_2, +
             tilemap.setColRow 0, 10
             mapper.pageBank :lotsOf2s       ; make lotsOf2s available
-            tilemap.loadBytes lotsOf2s, 224 ; load first 224 bytes
+            tilemap.writeBytes lotsOf2s, 224; write first 224 bytes
         +:
 
     _end:

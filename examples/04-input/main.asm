@@ -94,58 +94,58 @@
         ; Update X direction
         ;==
         tilemap.setColRow VALUE_COLUMN, DIR_X_ROW
-        tilemap.loadBytes asciiZero, 2          ; set value to 0 by default
+        tilemap.writeBytes asciiZero, 2         ; set value to 0 by default
 
         ; If left is being pressed
         input.if input.LEFT, +
             tilemap.setColRow VALUE_COLUMN, DIR_X_ROW
-            tilemap.loadBytes asciiMinusOne, 2  ; set to -1
+            tilemap.writeBytes asciiMinusOne, 2 ; set to -1
         +:
 
         ; If right is being pressed
         input.if input.RIGHT, +
             tilemap.setColRow VALUE_COLUMN, DIR_X_ROW
-            tilemap.loadBytes asciiOne, 2       ; set to 1
+            tilemap.writeBytes asciiOne, 2     ; set to 1
         +:
 
         ;==
         ; Update Y direction
         ;==
         tilemap.setColRow VALUE_COLUMN, DIR_Y_ROW
-        tilemap.loadBytes asciiZero, 2          ; set value to 0 by default
+        tilemap.writeBytes asciiZero, 2        ; set value to 0 by default
 
         ; If up is being pressed
         input.if input.UP, +
             tilemap.setColRow VALUE_COLUMN, DIR_Y_ROW
-            tilemap.loadBytes asciiMinusOne, 2  ; set to -1
+            tilemap.writeBytes asciiMinusOne, 2; set to -1
         +:
 
         ; If down is being pressed
         input.if input.DOWN, +
             tilemap.setColRow VALUE_COLUMN, DIR_Y_ROW
-            tilemap.loadBytes asciiOne, 2       ; set to 1
+            tilemap.writeBytes asciiOne, 2      ; set to 1
         +:
 
         ;==
         ; Update Button 1
         ;==
         tilemap.setColRow VALUE_COLUMN, BUTTON_1_ROW
-        tilemap.loadBytes asciiZero, 2          ; set value to 0 by default
+        tilemap.writeBytes asciiZero, 2         ; set value to 0 by default
 
         input.if input.BUTTON_1, +
             tilemap.setColRow VALUE_COLUMN, BUTTON_1_ROW
-            tilemap.loadBytes asciiOne, 2       ; set to 1
+            tilemap.writeBytes asciiOne, 2      ; set to 1
         +:
 
         ;==
         ; Update Button 2
         ;==
         tilemap.setColRow VALUE_COLUMN, BUTTON_2_ROW
-        tilemap.loadBytes asciiZero, 2          ; set value to 0 by default
+        tilemap.writeBytes asciiZero, 2         ; set value to 0 by default
 
         input.if input.BUTTON_2, +
             tilemap.setColRow VALUE_COLUMN, BUTTON_2_ROW
-            tilemap.loadBytes asciiOne, 2       ; set to 1
+            tilemap.writeBytes asciiOne, 2      ; set to 1
         +:
 
         ; End VBlank handler

@@ -57,10 +57,10 @@ message:
     .asc "Hello, world"
 
 tilemap.setColRow 5, 10         ; column 5, row 10
-tilemap.loadBytes message 5     ; load first 5 bytes of message ('Hello')
+tilemap.writeBytes message 5    ; write first 5 bytes of message ('Hello')
 
 ; load 12 bytes, all flipped horizontally and vertically
-tilemap.loadBytes message 12 (tilemap.FLIP_X|tilemap.FLIP_Y)
+tilemap.writeBytes message 12, (tilemap.FLIP_X|tilemap.FLIP_Y)
 ```
 
 ## Load tiles

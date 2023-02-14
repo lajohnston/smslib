@@ -215,11 +215,11 @@
 ; @in   c   tile attributes to use for all the tiles (see tile
 ;           attribute options at top)
 ;====
-.section "tilemap.loadBytes" free
+.section "tilemap.writeBytes" free
     _nextByte:
         inc hl                          ; next byte
 
-    tilemap.loadBytes:
+    tilemap.writeBytes:
         ld a, (hl)                      ; read byte
         out (tilemap.VDP_DATA_PORT), a  ; output pattern ref
         ld a, c                         ; load attributes
@@ -229,14 +229,15 @@
 .ends
 
 ;====
-; Loads bytes of data representing tile pattern refs
+; Writes bytes of data representing tile pattern refs. The patterns will all
+; share the same attributes
 ;
-; @in   address         the address of the data to load
-; @in   count           the number of bytes to load
-; @in   [attributes]    the attributes to use for each tile
-;                       See tile attribute options at top
+; @in   address         the address of the data to write
+; @in   count           the number of bytes to write
+; @in   attributes      (optional) the attributes to use for each tile
+;                       See tile attribute options at top. Defaults to $00
 ;====
-.macro "tilemap.loadBytes" args address count attributes
+.macro "tilemap.writeBytes" args address count attributes
     ld hl, address
     ld b,  count
 
@@ -246,7 +247,7 @@
         ld c, 0
     .endif
 
-    call tilemap.loadBytes
+    call tilemap.writeBytes
 .endm
 
 ;====
