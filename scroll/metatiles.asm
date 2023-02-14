@@ -1155,7 +1155,7 @@
         _nextMetatileRow:
             ld a, iyh           ; set A to bytesPerRow (stored in IYH)
             utils.math.addIXA   ; add bytesPerRow to map pointer
-                                ; continue to _outputMetatileColumn
+                                ; continue to _copyMetatileColumn
 
         ;===
         ; Copy a metatile column to the buffer, starting from the top subrow.
@@ -1165,7 +1165,7 @@
         ; @in   de  pointer to column buffer
         ; @in   ix  pointer to metatileRef in the map
         ;===
-        _outputMetatileColumn:
+        _copyMetatileColumn:
             ld h, (ix + 0)              ; load metatileRef
             scroll.metatiles._lookupH   ; lookup relative metatileDef address
 
