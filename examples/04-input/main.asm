@@ -66,7 +66,7 @@
         palette.writeBytes fontPalette 2
 
         patterns.setIndex 0
-        patterns.load fontPatterns, fontPatternsSize
+        patterns.writeBytes fontPatterns, fontPatternsSize
 
         tilemap.setColRow 0, ROW_OFFSET
         tilemap.loadBytesUntil $ff, template

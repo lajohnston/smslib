@@ -49,7 +49,7 @@
 .endm
 
 ;====
-; Load uncompressed patterns into VRAM
+; Write uncompressed patterns into VRAM
 ;
 ; @in address   start address of the data
 ; @in size      data size in bytes. Due to WLA-DX limitations this must be an immediate
@@ -57,7 +57,7 @@
 ;               It can be a size label (such as using .incbin "file.bin" fsize size)
 ;               so long as this label is defined before this macro is called.
 ;====
-.macro "patterns.load" args address size
+.macro "patterns.writeBytes" args address size
     ld hl, address
     utils.outiBlock.write size
 .endm

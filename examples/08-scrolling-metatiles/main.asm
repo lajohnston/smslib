@@ -83,7 +83,7 @@
         palette.setIndex 0
         palette.writeBytes paletteData, paletteDataSize
         patterns.setIndex 0
-        patterns.load patternData, patternDataSize
+        patterns.writeBytes patternData, patternDataSize
 
         ;===
         ; Load the metatile map into RAM

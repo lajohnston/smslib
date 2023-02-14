@@ -16,7 +16,7 @@ init:
 
     ; Load patterns (tile graphics)
     patterns.setIndex 0
-    patterns.load myPatterns, myPatternsSize
+    patterns.writeBytes myPatterns, myPatternsSize
 ```
 
 Each module is decoupled from the others and can be imported individually. `smslib.asm` is just a file that pulls in all the modules for convenience.

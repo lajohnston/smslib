@@ -4,9 +4,9 @@ Loads patterns (tiles) into the VRAM, which can be used for background images or
 
 This only deals with uncompressed tile data and is provided for example purposes to get you started. For an actual game you would want to compress pattern data using an algorithm such as zx7 or aPLib and use the appropriate lib to decompress the data and send it to VRAM.
 
-## patterns.load
+## patterns.writeBytes
 
-Loads uncompressed pattern data into VRAM.
+Writes uncompressed pattern data into VRAM.
 
 Due to WLA-DX limitations the size parameter must be an `immediate` value, so cannot be calculated using something like `endAddr - startAddr`. It can therefore either be a constant, or if using `fsize` to calculate the size of an included binary you just have to ensure this label is defined before this macro is called.
 
@@ -16,7 +16,7 @@ uncompressedPatternData:
 
 ; load pattern data from index 16 onwards
 patterns.setIndex 16
-patterns.load uncompressedPatternData, patternDataSize
+patterns.writeBytes uncompressedPatternData, patternDataSize
 ```
 
 ## patterns.writeSlice

@@ -44,7 +44,7 @@
 
         ; Load pattern data to draw sprites. Sprites use indices 256+ by default
         patterns.setIndex 256
-        patterns.load bubble.patterns, bubble.patternsSize
+        patterns.writeBytes bubble.patterns, bubble.patternsSize
 
         ; Initialise bubble with default values
         ld ix, bubbleInstance

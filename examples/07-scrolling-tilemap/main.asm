@@ -51,7 +51,7 @@
         palette.setIndex 0
         palette.writeBytes paletteData, paletteDataSize
         patterns.setIndex 0
-        patterns.load patternData, patternDataSize
+        patterns.writeBytes patternData, patternDataSize
 
         ; Initialise map (offset x0, y0)
         scroll.tiles.init tilemapData MAP_COLS MAP_ROWS 0 0

@@ -90,7 +90,7 @@
         ; Load font tiles
         patterns.setIndex 0
         mapper.pageBank :fontData           ; ensure fontData is visible
-        patterns.load fontData, fontDataSize
+        patterns.writeBytes fontData, fontDataSize
 
         ; Display font tiles on screen
         tilemap.setColRow 0, 6

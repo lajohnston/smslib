@@ -49,7 +49,7 @@
 
         ; Load pattern data into indices 256+ (used for sprites, by default)
         patterns.setIndex 256
-        patterns.load bubblePatterns, bubblePatternsSize
+        patterns.writeBytes bubblePatterns, bubblePatternsSize
 
         ; It's more efficient (but optional) to add multiple sprites within a
         ; batch, so start a new batch
