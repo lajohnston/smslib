@@ -80,7 +80,7 @@
 .ends
 
 ;====
-; Defines the default register values ready to be loaded with vdp.loadRegisters
+; Defines the default register values ready to be loaded with vdp.writeRegisters
 ;====
 .section "vdp.initData" free
     vdp.initData:
@@ -102,7 +102,7 @@
 ; Initialises the vdp registers with sensible defaults
 ;====
 .macro "vdp.init"
-    vdp.loadRegisters vdp.initData, vdp.initDataEnd
+    vdp.writeRegisters vdp.initData, vdp.initDataEnd
 
     ; Set register buffers
     ld de, vdp.ram.register0Buffer
@@ -123,7 +123,7 @@
 ; @in   end     end address of the data
 ; @clobs        bc, hl
 ;====
-.macro "vdp.loadRegisters" args start end
+.macro "vdp.writeRegisters" args start end
     ld hl, start
     ld c, vdp.COMMAND_PORT
     ld b, end - start
