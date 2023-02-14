@@ -256,35 +256,35 @@
 ;
 ; @in   hl  pointer to the raw data
 ;====
-.macro "tilemap.loadRow"
+.macro "tilemap.writeRow"
     ; Output 1 row of data
     utils.outiBlock.write tilemap.ROW_SIZE_BYTES
 .endm
 
 ;====
-; Alias for tilemap.loadRows
+; Alias for tilemap.writeRows
 ;====
-.macro "tilemap.loadRows"
-    call tilemap.loadRows
+.macro "tilemap.writeRows"
+    call tilemap.writeRows
 .endm
 
 ;====
-; Load tile data from an uncompressed map. Each tile is 2-bytes - the first is
+; Write tile data from an uncompressed map. Each tile is 2-bytes - the first is
 ; the tileRef and the second is the tile's attributes.
 ;
-; @in   d   number of rows to load
+; @in   d   number of rows to write
 ; @in   e   the amount to increment the pointer by each row i.e. the number of
 ;           columns in the full map * 2 (as each tile is 2-bytes)
-; @in   hl  pointer to the first tile to load
+; @in   hl  pointer to the first tile to write
 ;====
-.section "tilemap.loadRows"
+.section "tilemap.writeRows"
     _nextRow:
-        ld a, e                 ; load row width into A
+        ld a, e                 ; write row width into A
         utils.math.addHLA       ; add 1 row to full tilemap pointer
 
-    tilemap.loadRows:
+    tilemap.writeRows:
         push hl                 ; preserve HL
-            tilemap.loadRow     ; load a row of data
+            tilemap.writeRow    ; write a row of data
         pop hl                  ; restore HL
 
         dec d

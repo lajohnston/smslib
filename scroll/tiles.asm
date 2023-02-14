@@ -150,7 +150,7 @@
         ld e, a                             ; set E to bytesPerRow
 
         ; Load rows of tiles into VRAM
-        jp tilemap.loadRows                 ; jp to loadRows, which returns
+        jp tilemap.writeRows                ; jp to writeRows, which returns
 .ends
 
 ;====
