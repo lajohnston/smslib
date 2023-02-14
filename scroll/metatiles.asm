@@ -356,7 +356,7 @@
         ld a, (scroll.metatiles.ram.topLeftTile.rowsRemaining)
         ld iyl, a
 
-        jp _outputMetatileAlongRow
+        jp _writeMetatileAlongRow
 
         _nextSubRow:
             dec iyh ; decrement tilemap rows remaining
@@ -377,7 +377,7 @@
                 ld hl, scroll.metatiles.COLS_PER_METATILE * tilemap.TILE_SIZE_BYTES
                 add hl, de  ; add a row
                 ex hl, de   ; store result in DE
-                jp _outputMetatileAlongRow
+                jp _writeMetatileAlongRow
             +:
 
             ; No sub rows left - point IX to next metatile row
@@ -393,20 +393,20 @@
             ; ...output next metatile
 
         ;===
-        ; Output a metatile along a row and return if there are no more bytes
-        ; to output in the row
+        ; Write a metatile along a row and return if there are no more bytes
+        ; to write in the row
         ;
-        ; @in   bc  bytes remaining to output in the row
+        ; @in   bc  bytes remaining to write in the row
         ; @in   de  defsAddress + subrow offset
         ; @in   ix  pointer to metatileRef in map
         ;===
-        _outputMetatileAlongRow:
+        _writeMetatileAlongRow:
             ; Lookup metatileDef
             ld h, (ix + 0)              ; load metatileRef into L
             scroll.metatiles._lookupH   ; set HL to relative address
             add hl, de                  ; add offset (base addr + subrow offset)
 
-            ; Output tiles
+            ; Write tiles to VRAM
             .repeat scroll.metatiles.COLS_PER_METATILE
                 outi
                 outi
@@ -422,7 +422,7 @@
 
             ; Keep outputting metatiles along the row
             inc ix
-            jp _outputMetatileAlongRow
+            jp _writeMetatileAlongRow
 .ends
 
 ;====
