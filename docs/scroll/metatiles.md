@@ -145,6 +145,6 @@ Optional bounds checking can be enabled to ensure the map doesn't scroll beyond 
 Depending on your engine and map designs you might not need these additional checks, for example if the edges of the maps have space around them that the player can't actually move beyond.
 
 ```
-.define scroll.metatiles.ENFORCE_BOUNDS
+.define scroll.metatiles.ENFORCE_BOUNDS ; enable bounds checking
 .include "scroll/metatiles.asm"
 ```
