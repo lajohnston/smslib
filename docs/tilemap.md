@@ -4,7 +4,7 @@ Manages the tilemap, which places patterns/tiles in a grid to create the backgro
 
 ## Define tile data
 
-Each tile in the map is 2 bytes - the first is a pattern index reference  (see [patterns](./patterns.md)) and the second contains various attributes. The following attributes can be ORed together to create a byte containing all the attributes (i.e. tilemap.FLIP_X|tilemap.PRIORITY).
+Each tile in the map is 2 bytes. The first is a pattern index reference (see [patterns](./patterns.md)) and the second contains various attributes. The following attributes can be ORed together to create a byte containing all the attributes (i.e. tilemap.FLIP_X | tilemap.PRIORITY).
 
 ```
 tilemap.HIGH_BIT        ; 9th bit for the pattern ref, allows pattern refs 256+
@@ -60,10 +60,25 @@ tilemap.setColRow 5, 10         ; column 5, row 10
 tilemap.writeBytes message 5    ; write first 5 bytes of message ('Hello')
 
 ; Write 12 bytes, all flipped horizontally and vertically
-tilemap.writeBytes message 12, (tilemap.FLIP_X|tilemap.FLIP_Y)
+tilemap.writeBytes message 12, (tilemap.FLIP_X | tilemap.FLIP_Y)
 ```
 
 ## Write tiles
+
+### tilemap.writeTile
+
+Write a tile to the current position in the tilemap.
+
+```
+; Pattern 0 with default attributes
+tilemap.writeTile 0
+
+; Pattern 20 flipped horizontally and using the sprite palette
+tilemap.writeTile 20, (tilemap.FLIP_X | tilemap.SPRITE_PALETTE)
+
+; Pattern 500 flipped vertically (tilemap.HIGH_BIT attribute set automatically)
+tilemap.writeTile 500, tilemap.FLIP_Y
+```
 
 ### tilemap.writeRow
 

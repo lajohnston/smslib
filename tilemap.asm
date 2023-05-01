@@ -156,12 +156,38 @@
         .define attributes $00
     .endif
 
+    ; Set high bit attribute if pattern index is above 255
     .ifgr patternIndex 255
         .redefine attributes attributes | tilemap.HIGH_BIT
     .endif
 
     .db <(patternIndex) ; low byte of patternIndex
     .db attributes
+.endm
+
+;====
+; Write a tile to the current position in the tilemap
+;
+; @in   patternIndex    the pattern index (0-511)
+; @in   attributes      (optional) the tile attributes (see Tile attributes section).
+;                       Note, if patternRef is greater than 255, tilemap.HIGH_BIT
+;                       is set automatically
+;====
+.macro "tilemap.writeTile" args patternIndex attributes
+    .ifndef attributes
+        .define attributes $00
+    .endif
+
+    ; Set high bit attribute if pattern index is above 255
+    .ifgr patternIndex 255
+        .redefine attributes attributes | tilemap.HIGH_BIT
+    .endif
+
+    ld a, <(patternIndex)           ; load A with low-byte of pattern index
+    out (tilemap.VDP_DATA_PORT), a  ; write pattern ref
+
+    ld a, attributes
+    out (tilemap.VDP_DATA_PORT), a  ; write tile attributes
 .endm
 
 ;====
