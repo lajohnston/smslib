@@ -13,7 +13,7 @@ tilemap.FLIP_Y          ; Flip vertically
 tilemap.FLIP_XY         ; Flip horizontally and vertically
 tilemap.SPRITE_PALETTE  ; Use the sprite palette for the tile
 
-; Place tile in front of sprites. Color 0 acts as transparent
+; Render tile in front of sprites, apart from color 0/transparent which is drawn behind
 tilemap.PRIORITY
 
 ; Spare bits - unused by the VDP but some games use them to hold custom attributes
@@ -25,7 +25,7 @@ tilemap.CUSTOM_3
 
 ### tilemap.tile
 
-Define an individual tile.
+Define an individual tile in ROM, ready to be drawn later.
 
 ```
 tilemap.tile 0                  ; pattern 0
