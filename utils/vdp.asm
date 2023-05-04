@@ -25,6 +25,10 @@
 .define utils.vdp.SCROLL_Y_REGISTER 9
 .define utils.vdp.LINE_COUNTER_REGISTER 10
 
+; Commands
+.define utils.vdp.commands.READ     %00111111   ; AND mask
+.define utils.vdp.commands.WRITE    %01000000   ; OR mask
+
 ;====
 ; Prepares the VDP to write to the given VRAM write address
 ;
@@ -43,9 +47,8 @@
 
     out (utils.vdp.VDP_COMMAND_PORT), a
 
-    ; Output high byte to VDP
-    ; OR with $40 (%01000000) to set 6th bit and issue write command
-    ld a, >address | %01000000
+    ; Output high byte to VDP with write command set
+    ld a, >address | utils.vdp.commands.WRITE
     out (utils.vdp.VDP_COMMAND_PORT), a
 
     ; Port to write to
@@ -59,21 +62,37 @@
 .endm
 
 ;====
-; Prepare a VRAM write to the address stored in HL
+; Prepare a VRAM read or write to the address stored in HL
 ;
 ; @in   hl                  VRAM address
-; @out  VRAM write address  VRAM address with write command
+; @in   [command]           utils.vdp.command.READ or utils.vdp.command.WRITE
+;                           if not present, H should already have the correct
+;                           command bits (6th and 7th) set or reset.
+;                           (00 = read; 01 = write)
+; @out  VRAM write address  VRAM address with command bits set
 ; @out  c                   VDP data port
 ;====
-.macro "utils.vdp.prepWriteHL"
+.macro "utils.vdp.prepCommandHL" args command
     ; Output low byte to VDP
     ld a, l
     out (utils.vdp.VDP_COMMAND_PORT), a ; output low address byte
 
-    ; Output high byte to VDP with 6th bit set (write command)
+    ; Output high byte to VDP with write command
     ld a, h
-    or %01000000                        ; set 6th bit (%01------ = write)
-    out (utils.vdp.VDP_COMMAND_PORT), a ; output high address byte + command
+
+    ; If command given, set command bits
+    .ifdef command
+        .if command == utils.vdp.commands.READ
+            ; Reset high bits
+            and utils.vdp.commands.READ
+        .elif command == utils.vdp.commands.WRITE
+            ; Set bit 6; assumes bit 7 is already 0
+            or utils.vdp.commands.WRITE
+        .endif
+    .endif
+
+    ; Output high address byte + command
+    out (utils.vdp.VDP_COMMAND_PORT), a
 
     ; Port to write to
     ld c, utils.vdp.VDP_DATA_PORT
