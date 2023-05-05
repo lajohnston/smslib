@@ -144,6 +144,25 @@
 .endm
 
 ;====
+; Set HL to the write address for the given row and column
+;
+; @in   hl  row * 32 + column (i.e. ------yy yyyxxxxx)
+;
+; @out  hl  the VRAM address with write command set
+; @out  c   the port to output data to (using out, outi etc)
+;====
+.macro "tilemap.loadHLWriteAddress"
+    ; Multiply by 2 (2 bytes per tile)
+    add hl, hl
+
+    ; Low byte of base address is 0, so we just need to manipulate high byte
+    ; Set A to high byte of base address with the write command set
+    ld a, >tilemap.vramAddress | utils.vdp.commands.WRITE
+    or h        ; combine bits with high byte of relative address
+    ld h, a     ; set HL to the full address
+.endm
+
+;====
 ; Define tile data
 ;
 ; @in   patternIndex    the pattern index (0-511)
