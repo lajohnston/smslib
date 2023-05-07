@@ -21,7 +21,7 @@
 ; Constants
 ;====
 .define patterns.ELEMENT_SIZE_BYTES 32
-.define patterns.MAX_PATTERN_INDEX 512
+.define patterns.MAX_PATTERN_INDEX 511
 
 ;====
 ; Dependencies
