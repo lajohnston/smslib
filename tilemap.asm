@@ -21,6 +21,10 @@
 ;====
 ; Dependencies
 ;====
+.ifndef utils.assert
+    .include "utils/assert.asm"
+.endif
+
 .ifndef utils.math
     .include "utils/math.asm"
 .endif
@@ -60,6 +64,7 @@
 .define tilemap.VDP_DATA_PORT $be
 .define tilemap.ROWS 28
 .define tilemap.COLS 32
+.define tilemap.MAX_PATTERN_INDEX 511
 
 ; Min and max number of rows visible on screen. If the Y scroll offset is a
 ; multiple of 8 it's the minimum, otherwise there is an extra row (the bottom
@@ -193,8 +198,12 @@
 ;                       is set automatically
 ;====
 .macro "tilemap.writeTile" args patternIndex attributes
+    utils.assert.range patternIndex, 0, tilemap.MAX_PATTERN_INDEX, "tilemap.asm \.: Invalid patternIndex argument"
+
     .ifndef attributes
         .define attributes $00
+    .else
+        utils.assert.range attributes, 0, 255, "tilemap.asm \.: Invalid attributes argument"
     .endif
 
     ; Set high bit attribute if pattern index is above 255
