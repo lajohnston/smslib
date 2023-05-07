@@ -21,10 +21,15 @@
 ; Constants
 ;====
 .define patterns.ELEMENT_SIZE_BYTES 32
+.define patterns.MAX_PATTERN_INDEX 512
 
 ;====
 ; Dependencies
 ;====
+.ifndef utils.assert
+    .include "utils/assert.asm"
+.endif
+
 .ifndef utils.vdp
     .include "utils/vdp.asm"
 .endif
@@ -36,29 +41,41 @@
 ;====
 ; Write patterns (tile graphics) into VRAM
 ;
-; @in  dataAddress   the address of the first byte of data
-; @in  count         the number of patterns to write (1-based)
-; @in  [offset=0]    the number of patterns to skip at the beginning of the data
+; @in  dataAddress  the address of the first byte of data
+; @in  count        the number of patterns to write (1-based)
+; @in  [offset=0]   the number of patterns to skip at the beginning of the data
 ;====
-.macro "patterns.writeSlice" args dataAddr count offset
+.macro "patterns.writeSlice" args dataAddress count offset
+    utils.assert.label dataAddress, "patterns.asm \.: Invalid dataAddress argument"
+    utils.assert.range count, 1, patterns.MAX_PATTERN_INDEX + 1, "patterns.asm \.: Invalid count argument"
+
     .ifndef offset
-        utils.outiBlock.writeSlice dataAddr patterns.ELEMENT_SIZE_BYTES count 0
+        utils.assert.equals NARGS, 2, "patterns.asm \. received the wrong number of arguments"
+        utils.outiBlock.writeSlice dataAddress, patterns.ELEMENT_SIZE_BYTES, count, 0
     .else
-        utils.outiBlock.writeSlice dataAddr patterns.ELEMENT_SIZE_BYTES count offset
+        utils.assert.equals NARGS, 3, "patterns.asm \. received the wrong number of arguments"
+        utils.assert.number offset, "patterns.asm \.: Invalid offset argument"
+
+        utils.outiBlock.writeSlice dataAddress, patterns.ELEMENT_SIZE_BYTES, count, offset
     .endif
 .endm
 
 ;====
 ; Write uncompressed patterns into VRAM
 ;
-; @in address   start address of the data
-; @in size      data size in bytes. Due to WLA-DX limitations this must be an immediate
-;               value, i.e. it can't be calculate from a size calculation like end - start
-;               It can be a size label (such as using .incbin "file.bin" fsize size)
-;               so long as this label is defined before this macro is called.
+; @in dataAddress   start address of the data
+; @in size          data size in bytes. Due to WLA-DX limitations this must be an
+;                   immediate value, i.e. it can't be calculated from a size
+;                   calculation like end - start. It can be a fsize label (such as
+;                   using .incbin "file.bin" fsize size) so long as this label is
+;                   defined before this macro is called.
 ;====
-.macro "patterns.writeBytes" args address size
-    ld hl, address
+.macro "patterns.writeBytes" args dataAddress size
+    utils.assert.equals NARGS, 2, "patterns.asm \. received the wrong number of arguments"
+    utils.assert.label dataAddress, "patterns.asm \.: Invalid dataAddress argument"
+    utils.assert.number size, "patterns.asm \.: Invalid size argument"
+
+    ld hl, dataAddress
     utils.outiBlock.write size
 .endm
 
@@ -68,5 +85,8 @@
 ; @in   index    the index number (0-512)
 ;====
 .macro "patterns.setIndex" args index
+    utils.assert.equals NARGS, 1, "patterns.asm \. received the wrong number of arguments"
+    utils.assert.range index, 0, patterns.MAX_PATTERN_INDEX, "patterns.asm \.: Invalid size argument"
+
     utils.vdp.prepWrite (patterns.address + (index * patterns.ELEMENT_SIZE_BYTES))
 .endm
