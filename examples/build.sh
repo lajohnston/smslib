@@ -26,7 +26,7 @@ for EXAMPLE in "${EXAMPLES[@]}"
 do
     cd $EXAMPLES_DIRECTORY/$EXAMPLE
 
-    printf "\nBuilding example ${EXAMPLE}:\n\n"
+    printf "\nBuilding example ${EXAMPLE}"
 
     # Create simple linkfile
     LINKFILE=$TEMP_DIR/linkfile
@@ -38,8 +38,8 @@ do
 
     # Link objects
     cd $TEMP_DIR
-    wlalink -d -v -S -A linkfile $EXAMPLE.sms
-    cd - # return to former directory
+    wlalink -d -S -A linkfile $EXAMPLE.sms
+    cd - > /dev/null # return to former directory
 
     # Place output in build directory
     mv $TEMP_DIR/$EXAMPLE.sms $BUILD_DIR
@@ -47,3 +47,5 @@ do
 
     cd $EXAMPLES_DIRECTORY
 done
+
+echo \n
