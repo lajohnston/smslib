@@ -22,7 +22,7 @@
 
 ; Variables
 .ramsection "input.ram" slot utils.ramSlot
-    input.ram.value: db
+    input.ram.activePort.current: db
 .ends
 
 ;====
@@ -30,7 +30,7 @@
 ;====
 .macro "input.init"
     xor a
-    ld (input.ram.value), a
+    ld (input.ram.activePort.current), a
 .endm
 
 ;====
@@ -49,7 +49,7 @@
 ;====
 .macro "input.readPort1"
     in a, input.PORT_1
-    ld (input.ram.value), a
+    ld (input.ram.activePort.current), a
 .endm
 
 ; Reads the input from controller port 2 into the ram buffer
@@ -69,7 +69,7 @@
     rlca
 
     ; Store in ram buffer
-    ld (input.ram.value), a
+    ld (input.ram.activePort.current), a
 .endm
 
 ;====
@@ -80,7 +80,7 @@
 ;
 ; @out  f       z if the given button is pressed
 .macro "input.isPressed" args button
-    ld a, (input.ram.value)
+    ld a, (input.ram.activePort.current)
     bit button, a
 .endm
 
@@ -111,7 +111,8 @@
         .redefine multiplier 1
     .endif
 
-    ld a, (input.ram.value)     ; read input data
+    ; Read current input data
+    ld a, (input.ram.activePort.current)
 
     ; Check if left is being pressed
     bit input.LEFT, a
@@ -151,7 +152,8 @@
         .redefine multiplier 1
     .endif
 
-    ld a, (input.ram.value)     ; read input data
+    ; Read current input data
+    ld a, (input.ram.activePort.current)
 
     ; Check if up is being pressed
     bit input.UP, a
