@@ -26,7 +26,7 @@ for EXAMPLE in "${EXAMPLES[@]}"
 do
     cd $EXAMPLES_DIRECTORY/$EXAMPLE
 
-    printf "\nBuilding example ${EXAMPLE}"
+    echo "Building example ${EXAMPLE}"
 
     # Create simple linkfile
     LINKFILE=$TEMP_DIR/linkfile
@@ -47,5 +47,3 @@ do
 
     cd $EXAMPLES_DIRECTORY
 done
-
-echo \n
