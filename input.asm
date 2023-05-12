@@ -20,17 +20,33 @@
 .define input.PORT_1    $dc
 .define input.PORT_2    $dd
 
-; Variables
-.ramsection "input.ram" slot utils.ramSlot
-    input.ram.activePort.current: db
+;====
+; RAM section storing the last port that was read with either input.readPort1
+; or input.readPort2
+;====
+.ramsection "input.ram.activePort" slot utils.ramSlot
+    input.ram.activePort.current:   db
+    input.ram.activePort.previous:  db
+.ends
+
+;====
+; RAM section to store the previous input values for each port
+;====
+.ramsection "input.ram.previous" slot utils.ramSlot
+    input.ram.previous.port1:    db
+    input.ram.previous.port2:    db
 .ends
 
 ;====
 ; Initialises the input handler in RAM
 ;====
 .macro "input.init"
-    xor a
+    ; Initialise all buttons to released ($ff) (0 = pressed and 1 = released)
+    ld a, $ff
     ld (input.ram.activePort.current), a
+    ld (input.ram.activePort.previous), a
+    ld (input.ram.previous.port1), a
+    ld (input.ram.previous.port2), a
 .endm
 
 ;====
@@ -48,28 +64,44 @@
 ;       ** junk
 ;====
 .macro "input.readPort1"
-    in a, input.PORT_1
-    ld (input.ram.activePort.current), a
+    ; Copy previous value of port 1 to activePort.previous
+    ld a, (input.ram.previous.port1)        ; load previous.port1
+    ld (input.ram.activePort.previous), a   ; store in activePort.previous
+
+    ; Load current port 1 input and store in activePort.current
+    in a, input.PORT_1                      ; load input
+    ld (input.ram.activePort.current), a    ; store in activePort.current
+    ld (input.ram.previous.port1), a        ; store in previous.port1 for next time
 .endm
 
-; Reads the input from controller port 2 into the ram buffer
+;====
+; Reads the input from controller port 2 into the RAM buffer
 ; See input.readPort1 documentation for details
+;====
 .macro "input.readPort2"
-    ; Retrieve up and down buttons, which are stored within input1 byte
-    in a, input.PORT_1
-    and %11000000       ; mask out port A buttons
-    ld b, a             ; store in b
+    ; Copy previous value of port 2 to activePort.previous
+    ld a, (input.ram.previous.port2)        ; load previous.port1
+    ld (input.ram.activePort.previous), a   ; store in activePort.previous
 
-    in a, input.PORT_2  ; read remaining buttons
-    and %00001111       ; mask out misc. buttons
-    or b                ; combine both masks
+    ; Retrieve up and down buttons, which are stored within the PORT_1 byte
+    in a, input.PORT_1
+    and %11000000                           ; clear port 1 buttons
+    ld b, a                                 ; store in B (DU------)
+
+    ; Read remaining buttons from PORT_2
+    in a, input.PORT_2
+    and %00001111                           ; reset misc. bits (----21RL)
+
+    ; Combine into 1 byte (DU--21RL)
+    or b
 
     ; Rotate left twice to match port 1 format
-    rlca
-    rlca
+    rlca    ; rotate DU--21RL to U--21RLD
+    rlca    ; rotate U--21RLD to --21RLDU
 
     ; Store in ram buffer
     ld (input.ram.activePort.current), a
+    ld (input.ram.previous.port2), a        ; store in previous.port2 for next time
 .endm
 
 ;====
