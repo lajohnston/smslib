@@ -182,6 +182,36 @@
 .endm
 
 ;====
+; Detects if either left or right have been pressed for this frame and the
+; previous frame, and jumps to the relevant label if one has.
+;
+; @in   left    the label to continue to if LEFT is held
+; @in   right   the label to jp to if RIGHT is held
+; @in   else    the label to jp to if neither LEFT nor RIGHT are held
+;====
+.macro "input.ifXDirHeld" args left right else
+    utils.assert.equals NARGS 3 "input.asm \.: Invalid number of arguments given"
+    utils.assert.label left "input.asm \.: Invalid 'left' argument"
+    utils.assert.label right "input.asm \.: Invalid 'right' argument"
+    utils.assert.label else "input.asm \.: Invalid 'else' argument"
+
+    ; Load current into L and previous into H
+    ld hl, (input.ram.activePort.current)
+    ld a, l             ; load current into A
+    and h               ; AND with previous
+
+    ; Check if RIGHT is held
+    bit input.RIGHT, a  ; check RIGHT bit
+    jp nz, right        ; jump to 'right' label if right is held
+
+    ; Check if LEFT is held
+    bit input.LEFT, a   ; check LEFT bit
+    jp z, else          ; jump to 'else' label if left is not held
+
+    ; otherwise LEFT was held, so continue to left label
+.endm
+
+;====
 ; Detects if either left or right have just been pressed this frame, i.e. the
 ; button was released last frame but is now pressed. Jumps to the relevant
 ; label if it has.
@@ -234,6 +264,36 @@
     jp z, else              ; jp to 'else' label if UP is not pressed
 
     ; ...continue to 'up' label
+.endm
+
+;====
+; Detects if either up or down have been pressed for this frame and the
+; previous frame, and jumps to the relevant label if one has.
+;
+; @in   up      the label to continue to if UP is held
+; @in   down    the label to jp to if DOWN is held
+; @in   else    the label to jp to if neither UP nor DOWN are held
+;====
+.macro "input.ifYDirHeld" args up down else
+    utils.assert.equals NARGS 3 "input.asm \.: Invalid number of arguments given"
+    utils.assert.label up "input.asm \.: Invalid 'up' argument"
+    utils.assert.label down "input.asm \.: Invalid 'down' argument"
+    utils.assert.label else "input.asm \.: Invalid 'else' argument"
+
+    ; Load current into L and previous into H
+    ld hl, (input.ram.activePort.current)
+    ld a, l             ; load current into A
+    and h               ; AND with previous
+
+    ; Check if DOWN is held
+    bit input.DOWN, a   ; check DOWN bit
+    jp nz, down         ; jump to 'down' label if down is held
+
+    ; Check if UP is held
+    bit input.UP, a     ; check UP bit
+    jp z, else          ; jump to 'else' label if UP is not held
+
+    ; otherwise UP was held, so continue to up label
 .endm
 
 ;====
