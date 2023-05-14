@@ -35,6 +35,16 @@ input.BUTTON_1
 input.BUTTON_2
 ```
 
+## input.ifHeld
+
+Detects if a button has been pressed for both this frame and the previous frame.
+
+```
+input.ifHeld, input.BUTTON_1, +
+    ; BUTTON_1 has been pressed for both frames
++:
+```
+
 ## input.ifPressed
 
 Detects if a button was pressed this frame.

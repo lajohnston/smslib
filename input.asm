@@ -125,6 +125,30 @@
 .endm
 
 ;====
+; Check if a given button has been pressed in both this frame and the previous
+; frame
+;
+; @in   button  the button to check (input.UP, input.BUTTON_1 etc)
+; @in   else    the address to jump to if the button has not been held
+;====
+.macro "input.ifHeld" args button else
+    utils.assert.equals NARGS, 2, "input.asm \.: Unexpected number of arguments"
+    utils.assert.range button, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
+    utils.assert.label else, "input.asm \.: Invalid label argument"
+
+    ; Load current input into L and previous into H
+    ld hl, (input.ram.activePort.current)
+    ld a, l     ; load current into A
+    and h       ; AND with previous
+
+    ; Check button
+    bit button, a
+
+    ; jp to else label if button was not pressed in both this and previous frame
+    jp z, else
+.endm
+
+;====
 ; Sets A with the input difference between this frame and last frame
 ;
 ; @out  a   the changed state for each button (--21RLDU)
