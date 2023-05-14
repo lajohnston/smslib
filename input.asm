@@ -113,25 +113,14 @@
 .endm
 
 ;====
-; Checks whether a button is currently being held down
-;
-; @in  button   the button to check, either input.UP, input.DOWN, input.LEFT,
-;               input.RIGHT, input.BUTTON_1 or input.BUTTON_2
-;
-; @out  f       nz if the given button is pressed
-.macro "input.isHeld" args button
-    ld a, (input.ram.activePort.current)
-    bit button, a
-.endm
-
-;====
 ; Check if a given button has been pressed
 ;
 ; @in   button  the button to check (input.UP, input.BUTTON_1 etc)
 ; @in   else    the address to jump to if the button is not pressed
 ;====
 .macro "input.if" args button else
-    input.isHeld button
+    ld a, (input.ram.activePort.current)
+    bit button, a
     jp z, else
 .endm
 
