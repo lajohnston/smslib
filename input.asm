@@ -41,8 +41,8 @@
 ; Initialises the input handler in RAM
 ;====
 .macro "input.init"
-    ; Initialise all buttons to released ($ff) (0 = pressed and 1 = released)
-    ld a, $ff
+    ; Initialise all buttons to released
+    xor a
     ld (input.ram.activePort.current), a
     ld (input.ram.activePort.previous), a
     ld (input.ram.previous.port1), a
@@ -70,6 +70,7 @@
 
     ; Load current port 1 input and store in activePort.current
     in a, input.PORT_1                      ; load input
+    xor $ff                                 ; invert so 1 = pressed and 0 = released
     ld (input.ram.activePort.current), a    ; store in activePort.current
     ld (input.ram.previous.port1), a        ; store in previous.port1 for next time
 .endm
@@ -99,6 +100,9 @@
     rlca    ; rotate DU--21RL to U--21RLD
     rlca    ; rotate U--21RLD to --21RLDU
 
+    ; Invert so 1 = pressed and 0 = released
+    xor $ff
+
     ; Store in ram buffer
     ld (input.ram.activePort.current), a
     ld (input.ram.previous.port2), a        ; store in previous.port2 for next time
@@ -110,7 +114,7 @@
 ; @in  button   the button to check, either input.UP, input.DOWN, input.LEFT,
 ;               input.RIGHT, input.BUTTON_1 or input.BUTTON_2
 ;
-; @out  f       z if the given button is pressed
+; @out  f       nz if the given button is pressed
 .macro "input.isHeld" args button
     ld a, (input.ram.activePort.current)
     bit button, a
@@ -124,7 +128,7 @@
 ;===
 .macro "input.if" args button else
     input.isHeld button
-    jp nz, else
+    jp z, else
 .endm
 
 ;====
@@ -148,7 +152,7 @@
 
     ; Check if left is being pressed
     bit input.LEFT, a
-    jp nz, +
+    jp z, +
         ; Left is pressed
         ld a, -1 * multiplier
         jp \.\@end
@@ -156,7 +160,7 @@
 
     ; Check if right is being pressed
     bit input.RIGHT, a
-    jp nz, +
+    jp z, +
         ; Right is pressed
         ld a, 1 * multiplier
         jp \.\@end
@@ -189,7 +193,7 @@
 
     ; Check if up is being pressed
     bit input.UP, a
-    jp nz, +
+    jp z, +
         ; Up is pressed
         ld a, -1 * multiplier
         jp \.\@end
@@ -197,7 +201,7 @@
 
     ; Check if down is being pressed
     bit input.DOWN, a
-    jp nz, +
+    jp z, +
         ; Down is pressed
         ld a, 1 * multiplier
         jp \.\@end
