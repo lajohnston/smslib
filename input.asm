@@ -170,6 +170,29 @@
 .endm
 
 ;====
+; Jumps to the relevant label if either left or right are currently pressed
+;
+; @in   left    the label to continue to if LEFT is currently pressed
+; @in   right   the label to jp to if RIGHT is currently pressed
+; @in   else    the label to jp to if neither LEFT nor RIGHT are currently pressed
+;====
+.macro "input.ifXDir" args left right else
+    utils.assert.equals NARGS 3 "input.asm \.: Invalid number of arguments given"
+    utils.assert.label left "input.asm \.: Invalid 'left' argument"
+    utils.assert.label right "input.asm \.: Invalid 'right' argument"
+    utils.assert.label else "input.asm \.: Invalid 'else' argument"
+
+    ld a, (input.ram.activePort.current)
+    bit input.RIGHT, a      ; check RIGHT bit
+    jp nz, right            ; jp to 'right' label if RIGHT is pressed
+
+    bit input.LEFT, a       ; check LEFT bit
+    jp z, else              ; jp to 'else' label if LEFT not pressed
+
+    ; ...continue to 'left' label
+.endm
+
+;====
 ; Detects if either left or right have just been pressed this frame, i.e. the
 ; button was released last frame but is now pressed. Jumps to the relevant
 ; label if it has.
@@ -199,6 +222,29 @@
     jp z, else          ; jump to 'else' label if left is not pressed
 
     ; otherwise LEFT was pressed, so continue to left label
+.endm
+
+;====
+; Jumps to the relevant label if either up or down are currently pressed
+;
+; @in   up      the label to continue to if UP is currently pressed
+; @in   down    the label to jp to if DOWN is currently pressed
+; @in   else    the label to jp to if neither UP nor DOWN are currently pressed
+;====
+.macro "input.ifYDir" args up down else
+    utils.assert.equals NARGS 3 "input.asm \.: Invalid number of arguments given"
+    utils.assert.label up "input.asm \.: Invalid 'up' argument"
+    utils.assert.label down "input.asm \.: Invalid 'down' argument"
+    utils.assert.label else "input.asm \.: Invalid 'else' argument"
+
+    ld a, (input.ram.activePort.current)
+    bit input.DOWN, a       ; check DOWN bit
+    jp nz, down             ; jp to 'down' label if DOWN is pressed
+
+    bit input.UP, a         ; check UP bit
+    jp z, else              ; jp to 'else' label if UP is not pressed
+
+    ; ...continue to 'up' label
 .endm
 
 ;====

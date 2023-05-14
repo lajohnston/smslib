@@ -45,9 +45,35 @@ input.ifPressed, input.BUTTON_1, +
 +:
 ```
 
+## input.ifXDir / input.ifYDir
+
+These detect if a direction on the given axis is currently pressed and jumps to the relevant label if it has.
+
+This is more efficient that checking each button on the axis individually as the input only needs to be read from the buffer once, and if one is confirmed to be pressed the other check can be skipped.
+
+```
+input.ifXDir left, right, +
+    left:
+        ; Left is currently pressed
+        jp +    ; skip right label
+    right:
+        ; Right is currently pressed
++:
+
+input.ifYDir up, down, +
+    up:
+        ; Up is currently pressed
+        jp +    ; skip down label
+    down:
+        ; Down is currently pressed
++:
+```
+
 ## input.ifXDirPressed / input.ifYDirPressed
 
-Detects if a direction on the given axis has just been pressed this frame, i.e. the button was released last frame but is now pressed. Jumps to the relevant label if it has.
+These detect if a direction on the given axis has just been pressed this frame, i.e. the button was released last frame but is now pressed. Jumps to the relevant label if it has.
+
+This is more efficient that checking each button on the axis individually as the input only needs to be read from the buffer once, and if one is confirmed to be pressed the other check can be skipped.
 
 ```
 input.ifXDirPressed, left, right, +
