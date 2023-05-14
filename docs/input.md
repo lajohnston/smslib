@@ -6,6 +6,8 @@ Interprets input from the controller pads.
 
 Use `input.readPort1` or `input.readPort2` to capture the input from joypad 1 and joypad 2 respectively. The comparison functions will work based on the last of these to have been called.
 
+Note: Each of these should only be called once per frame.
+
 ### input.if
 
 Allows an if-like syntax for detecting when certain buttons have been pressed. If the given button has been pressed, the code inside the 'block' will run, otherwise it will be skipped.
@@ -31,6 +33,16 @@ input.LEFT
 input.RIGHT
 input.BUTTON_1
 input.BUTTON_2
+```
+
+## input.ifPressed
+
+Detects if a button was pressed this frame.
+
+```
+input.ifPressed, input.BUTTON_1, +
+    ; BUTTON_1 was just pressed this frame
++:
 ```
 
 ## input.ifXDirPressed / input.ifYDirPressed

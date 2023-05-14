@@ -148,6 +148,28 @@
 .endm
 
 ;====
+; Check if a given button has just been pressed this frame
+;
+; @in   button  the button to check (input.UP, input.BUTTON_1 etc)
+; @in   else    the address to jump to if the button is either not pressed, or
+;               if it was already pressed last frame
+;====
+.macro "input.ifPressed" args button else
+    utils.assert.equals NARGS, 2, "input.asm \.: Unexpected number of arguments"
+    utils.assert.range button, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
+    utils.assert.label else, "input.asm \.: Invalid label argument"
+
+    ; Load input difference between this frame and last frame
+    input.loadADiff
+
+    ; AND with current input; Set bits have changed AND are currently pressed
+    and l
+
+    bit button, a   ; check button bit
+    jp z, else      ; jp to else if the bit was not set
+.endm
+
+;====
 ; Detects if either left or right have just been pressed this frame, i.e. the
 ; button was released last frame but is now pressed. Jumps to the relevant
 ; label if it has.
