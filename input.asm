@@ -7,6 +7,10 @@
 .define input.ENABLED 1
 
 ; Dependencies
+.ifndef utils.assert
+    .include "./utils/assert.asm"
+.endif
+
 .include "./utils/ramSlot.asm"
 
 ; Constants
@@ -120,15 +124,91 @@
     bit button, a
 .endm
 
-;===
+;====
 ; Check if a given button has been pressed
 ;
 ; @in   button  the button to check (input.UP, input.BUTTON_1 etc)
 ; @in   else    the address to jump to if the button is not pressed
-;===
+;====
 .macro "input.if" args button else
     input.isHeld button
     jp z, else
+.endm
+
+;====
+; Sets A with the input difference between this frame and last frame
+;
+; @out  a   the changed state for each button (--21RLDU)
+;====
+.macro "input.loadADiff"
+    ; Load L with current input value and H with previous
+    ld hl, (input.ram.activePort.current)
+    ld a, l ; load current into A
+    xor h   ; XOR with previous. The set bits are now buttons that have changed
+.endm
+
+;====
+; Detects if either left or right have just been pressed this frame, i.e. the
+; button was released last frame but is now pressed. Jumps to the relevant
+; label if it has.
+;
+; @in   left    the label to continue to if LEFT has just been pressed
+; @in   right   the label to jp to if RIGHT had just been pressed
+; @in   else    the label to jp to if neither LEFT nor RIGHT have just been pressed
+;====
+.macro "input.ifXDirPressed" args left right else
+    utils.assert.equals NARGS 3 "input.asm \.: Invalid number of arguments given"
+    utils.assert.label left "input.asm \.: Invalid 'left' argument"
+    utils.assert.label right "input.asm \.: Invalid 'right' argument"
+    utils.assert.label else "input.asm \.: Invalid 'else' argument"
+
+    ; Load input difference between this frame and last frame
+    input.loadADiff
+
+    ; AND with current input; Set bits have changed AND are currently pressed
+    and l
+
+    ; Check if RIGHT has just been pressed
+    bit input.RIGHT, a  ; check RIGHT bit
+    jp nz, right        ; jump to 'right' label if right is pressed
+
+    ; Check if LEFT has just been pressed
+    bit input.LEFT, a   ; check LEFT bit
+    jp z, else          ; jump to 'else' label if left is not pressed
+
+    ; otherwise LEFT was pressed, so continue to left label
+.endm
+
+;====
+; Detects if either up or down have just been pressed this frame, i.e. the
+; button was released last frame but is now pressed. Jumps to the relevant
+; label if it has.
+;
+; @in   up      the label to continue to if UP has just been pressed
+; @in   down    the label to jp to if DOWN had just been pressed
+; @in   else    the label to jp to if neither UP or DOWN have just been pressed
+;====
+.macro "input.ifYDirPressed" args up down else
+    utils.assert.equals NARGS 3 "input.asm \.: Invalid number of arguments given"
+    utils.assert.label up "input.asm \.: Invalid 'up' argument"
+    utils.assert.label down "input.asm \.: Invalid 'down' argument"
+    utils.assert.label else "input.asm \.: Invalid 'else' argument"
+
+    ; Load input difference between this frame and last frame
+    input.loadADiff
+
+    ; AND with current input; Set bits have changed AND are currently pressed
+    and l
+
+    ; Detect whether UP or DOWN have just been pressed (A = --21RLDU)
+    bit input.DOWN, a   ; check DOWN bit
+    jp nz, down         ; jump to 'down' label if DOWN is pressed
+
+    ; Check if UP has just been pressed
+    bit input.UP, a     ; check UP bit
+    jp z, else          ; jump to 'else' label if UP is not pressed
+
+    ; otherwise UP was pressed, so continue to up label
 .endm
 
 ;====

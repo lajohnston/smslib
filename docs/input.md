@@ -33,6 +33,28 @@ input.BUTTON_1
 input.BUTTON_2
 ```
 
+## input.ifXDirPressed / input.ifYDirPressed
+
+Detects if a direction on the given axis has just been pressed this frame, i.e. the button was released last frame but is now pressed. Jumps to the relevant label if it has.
+
+```
+input.ifXDirPressed, left, right, +
+    left:
+        ; Left has just been pressed
+        jp +    ; (remember to skip over right label)
+    right:
+        ; Right has just been pressed
++:
+
+input.ifYDirPressed, up, down, +
+    up:
+        ; Up has just been pressed
+        jp +    ; (remember to skip over down label)
+    down:
+        ; Down has just been pressed
++:
+```
+
 ### input.loadADirX
 
 Loads register A with the directional x-axis: -1 = left, 1 = right, none = 0. An optional multiplier multiplies this result at assemble time.
