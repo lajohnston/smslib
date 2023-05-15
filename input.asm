@@ -14,12 +14,19 @@
 .include "./utils/ramSlot.asm"
 
 ; Constants
-.define input.UP        0
-.define input.DOWN      1
-.define input.LEFT      2
-.define input.RIGHT     3
-.define input.BUTTON_1  4
-.define input.BUTTON_2  5
+.define input.UP        %00000001
+.define input.DOWN      %00000010
+.define input.LEFT      %00000100
+.define input.RIGHT     %00001000
+.define input.BUTTON_1  %00010000
+.define input.BUTTON_2  %00100000
+
+.define input.UP_BIT        0
+.define input.DOWN_BIT      1
+.define input.LEFT_BIT      2
+.define input.RIGHT_BIT     3
+.define input.BUTTON_1_BIT  4
+.define input.BUTTON_2_BIT  5
 
 .define input.PORT_1    $dc
 .define input.PORT_2    $dd
@@ -120,7 +127,7 @@
 ;====
 .macro "input.if" args button else
     ld a, (input.ram.activePort.current)
-    bit button, a
+    and button
     jp z, else
 .endm
 
@@ -142,7 +149,7 @@
     and h       ; AND with previous
 
     ; Check button
-    bit button, a
+    and button
 
     ; jp to else label if button was not pressed in both this and previous frame
     jp z, else
@@ -178,7 +185,7 @@
     ; AND with current input; Set bits have changed AND are currently pressed
     and l
 
-    bit button, a   ; check button bit
+    and button      ; check button bit
     jp z, else      ; jp to else if the bit was not set
 .endm
 
@@ -196,10 +203,10 @@
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
     ld a, (input.ram.activePort.current)
-    bit input.RIGHT, a      ; check RIGHT bit
+    bit input.RIGHT_BIT, a  ; check RIGHT bit
     jp nz, right            ; jp to 'right' label if RIGHT is pressed
 
-    bit input.LEFT, a       ; check LEFT bit
+    bit input.LEFT_BIT, a   ; check LEFT bit
     jp z, else              ; jp to 'else' label if LEFT not pressed
 
     ; ...continue to 'left' label
@@ -225,12 +232,12 @@
     and h               ; AND with previous
 
     ; Check if RIGHT is held
-    bit input.RIGHT, a  ; check RIGHT bit
-    jp nz, right        ; jump to 'right' label if right is held
+    bit input.RIGHT_BIT, a  ; check RIGHT bit
+    jp nz, right            ; jump to 'right' label if right is held
 
     ; Check if LEFT is held
-    bit input.LEFT, a   ; check LEFT bit
-    jp z, else          ; jump to 'else' label if left is not held
+    bit input.LEFT_BIT, a   ; check LEFT bit
+    jp z, else              ; jump to 'else' label if left is not held
 
     ; otherwise LEFT was held, so continue to left label
 .endm
@@ -257,12 +264,12 @@
     and l
 
     ; Check if RIGHT has just been pressed
-    bit input.RIGHT, a  ; check RIGHT bit
-    jp nz, right        ; jump to 'right' label if right is pressed
+    bit input.RIGHT_BIT, a  ; check RIGHT bit
+    jp nz, right            ; jump to 'right' label if right is pressed
 
     ; Check if LEFT has just been pressed
-    bit input.LEFT, a   ; check LEFT bit
-    jp z, else          ; jump to 'else' label if left is not pressed
+    bit input.LEFT_BIT, a   ; check LEFT bit
+    jp z, else              ; jump to 'else' label if left is not pressed
 
     ; otherwise LEFT was pressed, so continue to left label
 .endm
@@ -281,10 +288,10 @@
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
     ld a, (input.ram.activePort.current)
-    bit input.DOWN, a       ; check DOWN bit
+    bit input.DOWN_BIT, a   ; check DOWN bit
     jp nz, down             ; jp to 'down' label if DOWN is pressed
 
-    bit input.UP, a         ; check UP bit
+    bit input.UP_BIT, a     ; check UP bit
     jp z, else              ; jp to 'else' label if UP is not pressed
 
     ; ...continue to 'up' label
@@ -310,12 +317,12 @@
     and h               ; AND with previous
 
     ; Check if DOWN is held
-    bit input.DOWN, a   ; check DOWN bit
-    jp nz, down         ; jump to 'down' label if down is held
+    bit input.DOWN_BIT, a   ; check DOWN bit
+    jp nz, down             ; jump to 'down' label if down is held
 
     ; Check if UP is held
-    bit input.UP, a     ; check UP bit
-    jp z, else          ; jump to 'else' label if UP is not held
+    bit input.UP_BIT, a     ; check UP bit
+    jp z, else              ; jump to 'else' label if UP is not held
 
     ; otherwise UP was held, so continue to up label
 .endm
@@ -342,12 +349,12 @@
     and l
 
     ; Detect whether UP or DOWN have just been pressed (A = --21RLDU)
-    bit input.DOWN, a   ; check DOWN bit
-    jp nz, down         ; jump to 'down' label if DOWN is pressed
+    bit input.DOWN_BIT, a   ; check DOWN bit
+    jp nz, down             ; jump to 'down' label if DOWN is pressed
 
     ; Check if UP has just been pressed
-    bit input.UP, a     ; check UP bit
-    jp z, else          ; jump to 'else' label if UP is not pressed
+    bit input.UP_BIT, a     ; check UP bit
+    jp z, else              ; jump to 'else' label if UP is not pressed
 
     ; otherwise UP was pressed, so continue to up label
 .endm
@@ -372,7 +379,7 @@
     ld a, (input.ram.activePort.current)
 
     ; Check if left is being pressed
-    bit input.LEFT, a
+    bit input.LEFT_BIT, a
     jp z, +
         ; Left is pressed
         ld a, -1 * multiplier
@@ -380,7 +387,7 @@
     +:
 
     ; Check if right is being pressed
-    bit input.RIGHT, a
+    bit input.RIGHT_BIT, a
     jp z, +
         ; Right is pressed
         ld a, 1 * multiplier
@@ -413,7 +420,7 @@
     ld a, (input.ram.activePort.current)
 
     ; Check if up is being pressed
-    bit input.UP, a
+    bit input.UP_BIT, a
     jp z, +
         ; Up is pressed
         ld a, -1 * multiplier
@@ -421,7 +428,7 @@
     +:
 
     ; Check if down is being pressed
-    bit input.DOWN, a
+    bit input.DOWN_BIT, a
     jp z, +
         ; Down is pressed
         ld a, 1 * multiplier
