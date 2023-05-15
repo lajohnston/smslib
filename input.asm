@@ -133,6 +133,19 @@
 .endm
 
 ;====
+; Sets A with buttons that were released last frame but are now pressed
+;
+; @out  a   the just-pressed buttons (--21RLDU)
+;====
+.macro "input.loadAPressed"
+    ; Load L with current input value and H with previous
+    ld hl, (input.ram.activePort.current)
+    ld a, l ; load current into A
+    xor h   ; XOR with previous. The set bits are now buttons that have changed
+    and l   ; AND with current; Set bits have changed AND are currently pressed
+.endm
+
+;====
 ; Check if a given button has been pressed
 ;
 ; @in   button  the button to check (input.UP, input.BUTTON_1 etc)
@@ -164,18 +177,6 @@
 .endm
 
 ;====
-; Sets A with the input difference between this frame and last frame
-;
-; @out  a   the changed state for each button (--21RLDU)
-;====
-.macro "input.loadADiff"
-    ; Load L with current input value and H with previous
-    ld hl, (input.ram.activePort.current)
-    ld a, l ; load current into A
-    xor h   ; XOR with previous. The set bits are now buttons that have changed
-.endm
-
-;====
 ; Check if a given button has just been pressed this frame
 ;
 ; @in   button  the button to check (input.UP, input.BUTTON_1 etc)
@@ -187,11 +188,8 @@
     utils.assert.range button, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
     utils.assert.label else, "input.asm \.: Invalid label argument"
 
-    ; Load input difference between this frame and last frame
-    input.loadADiff
-
-    ; AND with current input; Set bits have changed AND are currently pressed
-    and l
+    ; Load input that was released last frame but is now pressed
+    input.loadAPressed
 
     and button      ; check button bit
     jp z, else      ; jp to else if the bit was not set
@@ -262,11 +260,8 @@
     utils.assert.label right "input.asm \.: Invalid 'right' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
-    ; Load input difference between this frame and last frame
-    input.loadADiff
-
-    ; AND with current input; Set bits have changed AND are currently pressed
-    and l
+    ; Load input that was released last frame but is now pressed
+    input.loadAPressed
 
     ; Check if RIGHT has just been pressed
     bit input.RIGHT_BIT, a  ; check RIGHT bit
@@ -344,11 +339,8 @@
     utils.assert.label down "input.asm \.: Invalid 'down' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
-    ; Load input difference between this frame and last frame
-    input.loadADiff
-
-    ; AND with current input; Set bits have changed AND are currently pressed
-    and l
+    ; Load input that was released last frame but is now pressed
+    input.loadAPressed
 
     ; Detect whether UP or DOWN have just been pressed (A = --21RLDU)
     bit input.DOWN_BIT, a   ; check DOWN bit
