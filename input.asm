@@ -120,6 +120,19 @@
 .endm
 
 ;====
+; Load A with buttons that are pressed down this frame and were pressed down
+; in the last frame
+;
+; @out  a   held buttons (--21RLDU)
+;====
+.macro "input.loadAHeld"
+    ; Load current input into L and previous into H
+    ld hl, (input.ram.activePort.current)
+    ld a, l     ; load current into A
+    and h       ; AND with previous
+.endm
+
+;====
 ; Check if a given button has been pressed
 ;
 ; @in   button  the button to check (input.UP, input.BUTTON_1 etc)
@@ -143,13 +156,8 @@
     utils.assert.range button, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
     utils.assert.label else, "input.asm \.: Invalid label argument"
 
-    ; Load current input into L and previous into H
-    ld hl, (input.ram.activePort.current)
-    ld a, l     ; load current into A
-    and h       ; AND with previous
-
-    ; Check button
-    and button
+    input.loadAHeld     ; load A with held buttons
+    and button          ; check the given button
 
     ; jp to else label if button was not pressed in both this and previous frame
     jp z, else
@@ -226,10 +234,7 @@
     utils.assert.label right "input.asm \.: Invalid 'right' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
-    ; Load current into L and previous into H
-    ld hl, (input.ram.activePort.current)
-    ld a, l             ; load current into A
-    and h               ; AND with previous
+    input.loadAHeld         ; load A with held buttons
 
     ; Check if RIGHT is held
     bit input.RIGHT_BIT, a  ; check RIGHT bit
@@ -311,10 +316,7 @@
     utils.assert.label down "input.asm \.: Invalid 'down' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
-    ; Load current into L and previous into H
-    ld hl, (input.ram.activePort.current)
-    ld a, l             ; load current into A
-    and h               ; AND with previous
+    input.loadAHeld         ; load A with held buttons
 
     ; Check if DOWN is held
     bit input.DOWN_BIT, a   ; check DOWN bit
