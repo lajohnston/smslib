@@ -196,6 +196,30 @@
 .endm
 
 ;====
+; Checks if either direction on an axis is pressed and jumps to the relevant
+; label. If the negative direction (left or up) on the axis is pressed, it
+; will continue the code flow without jumping
+;
+; @in   a               input value to check (--21RLDU)
+;
+; @in   negativeDir     negative direction on the axis (input.LEFT or input.UP)
+; @in   positiveDir     positive direction on the axis (input.RIGHT or input.DOWN)
+; @in   negativeLabel   will continue to this label if the negative direction is
+;                       pressed
+; @in   positiveLabel   label to jump to if the positive direction is pressed
+; @in   else            label to jump to if neither direction is pressed
+;====
+.macro "input._jpIfDirection" args negativeDir positiveDir negativeLabel positiveLabel elseLabel
+    and negativeDir | positiveDir   ; check if either direction is pressed
+    jp z, elseLabel                 ; jump to else label if neither are pressed
+
+    and positiveDir                 ; check positive direction
+    jp nz, positiveLabel            ; jump if positive direction pressed
+
+    ; ...continue to the negativeLabel handler
+.endm
+
+;====
 ; Jumps to the relevant label if either left or right are currently pressed
 ;
 ; @in   left    the label to continue to if LEFT is currently pressed
@@ -208,14 +232,9 @@
     utils.assert.label right "input.asm \.: Invalid 'right' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
+    ; Load currently pressed input and jump to relevant label
     ld a, (input.ram.activePort.current)
-    bit input.RIGHT_BIT, a  ; check RIGHT bit
-    jp nz, right            ; jp to 'right' label if RIGHT is pressed
-
-    bit input.LEFT_BIT, a   ; check LEFT bit
-    jp z, else              ; jp to 'else' label if LEFT not pressed
-
-    ; ...continue to 'left' label
+    input._jpIfDirection input.LEFT input.RIGHT left right else
 .endm
 
 ;====
@@ -232,17 +251,9 @@
     utils.assert.label right "input.asm \.: Invalid 'right' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
-    input.loadAHeld         ; load A with held buttons
-
-    ; Check if RIGHT is held
-    bit input.RIGHT_BIT, a  ; check RIGHT bit
-    jp nz, right            ; jump to 'right' label if right is held
-
-    ; Check if LEFT is held
-    bit input.LEFT_BIT, a   ; check LEFT bit
-    jp z, else              ; jump to 'else' label if left is not held
-
-    ; otherwise LEFT was held, so continue to left label
+    ; Load held input and jump to relevant label
+    input.loadAHeld
+    input._jpIfDirection input.LEFT input.RIGHT left right else
 .endm
 
 ;====
@@ -263,15 +274,8 @@
     ; Load input that was released last frame but is now pressed
     input.loadAPressed
 
-    ; Check if RIGHT has just been pressed
-    bit input.RIGHT_BIT, a  ; check RIGHT bit
-    jp nz, right            ; jump to 'right' label if right is pressed
-
-    ; Check if LEFT has just been pressed
-    bit input.LEFT_BIT, a   ; check LEFT bit
-    jp z, else              ; jump to 'else' label if left is not pressed
-
-    ; otherwise LEFT was pressed, so continue to left label
+    ; Jump to the relevant label
+    input._jpIfDirection input.LEFT input.RIGHT left right else
 .endm
 
 ;====
@@ -287,14 +291,9 @@
     utils.assert.label down "input.asm \.: Invalid 'down' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
+    ; Load currently pressed direction and jump to the relevant label
     ld a, (input.ram.activePort.current)
-    bit input.DOWN_BIT, a   ; check DOWN bit
-    jp nz, down             ; jp to 'down' label if DOWN is pressed
-
-    bit input.UP_BIT, a     ; check UP bit
-    jp z, else              ; jp to 'else' label if UP is not pressed
-
-    ; ...continue to 'up' label
+    input._jpIfDirection input.UP input.DOWN up down else
 .endm
 
 ;====
@@ -311,17 +310,9 @@
     utils.assert.label down "input.asm \.: Invalid 'down' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
-    input.loadAHeld         ; load A with held buttons
-
-    ; Check if DOWN is held
-    bit input.DOWN_BIT, a   ; check DOWN bit
-    jp nz, down             ; jump to 'down' label if down is held
-
-    ; Check if UP is held
-    bit input.UP_BIT, a     ; check UP bit
-    jp z, else              ; jump to 'else' label if UP is not held
-
-    ; otherwise UP was held, so continue to up label
+    ; Load held buttons and jump to the relevant label
+    input.loadAHeld
+    input._jpIfDirection input.UP input.DOWN up down else
 .endm
 
 ;====
@@ -342,15 +333,8 @@
     ; Load input that was released last frame but is now pressed
     input.loadAPressed
 
-    ; Detect whether UP or DOWN have just been pressed (A = --21RLDU)
-    bit input.DOWN_BIT, a   ; check DOWN bit
-    jp nz, down             ; jump to 'down' label if DOWN is pressed
-
-    ; Check if UP has just been pressed
-    bit input.UP_BIT, a     ; check UP bit
-    jp z, else              ; jump to 'else' label if UP is not pressed
-
-    ; otherwise UP was pressed, so continue to up label
+    ; Jump to the relevant label
+    input._jpIfDirection input.UP input.DOWN up down else
 .endm
 
 ;====
