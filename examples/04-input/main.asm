@@ -40,6 +40,8 @@
         .asc "                                "
         .asc " Button 1 ( )     ( )     ( )   "
         .asc " Button 2 ( )     ( )     ( )   "
+        .asc "                                "
+        .asc " Up and 1 ( )     ( )     ( )   "
         .db $ff ; terminator
 
     ; We'll add an asterisk in between the brackets in the template string,
@@ -49,7 +51,7 @@
 .ends
 
 ; The starting row the render the table from
-.define TABLE_ROW_OFFSET = 7
+.define TABLE_ROW_OFFSET = 6
 
 ; The indicator tile columns for each condition (Pressed, Current, Held)
 .define PRESSED_INDICATOR_COLUMN = 11
@@ -63,6 +65,7 @@
 .define RIGHT_ROW = TABLE_ROW_OFFSET + 5
 .define BUTTON_1_ROW = TABLE_ROW_OFFSET + 7
 .define BUTTON_2_ROW = TABLE_ROW_OFFSET + 8
+.define COMBO_ROW = TABLE_ROW_OFFSET + 10
 
 ;====
 ; Initialise the example
@@ -164,6 +167,11 @@
         ; Check if BUTTON 2 has just been pressed
         input.ifPressed input.BUTTON_2, +
             writeAsterisk PRESSED_INDICATOR_COLUMN, BUTTON_2_ROW
+        +:
+
+        ; Check if both UP and BUTTON 1 have been pressed
+        input.ifPressed input.UP, input.BUTTON_1, +
+            writeAsterisk PRESSED_INDICATOR_COLUMN, COMBO_ROW
         +:
 
         ret

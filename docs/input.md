@@ -47,11 +47,23 @@ input.ifHeld, input.BUTTON_1, +
 
 ## input.ifPressed
 
-Detects if a button was pressed this frame.
+Detects if a button was pressed this frame. This will only occur once every time the button is pressed.
 
 ```
 input.ifPressed, input.BUTTON_1, +
     ; BUTTON_1 was just pressed this frame
++:
+```
+
+You can provide multiple buttons to detect when all are pressed. This will occur on the first frame in which all buttons are pressed, then not again until any of the buttons are released and pressed again. Note: the buttons don't all have to be pressed on the exact same frame.
+
+```
+input.ifPressed, input.BUTTON_1, input.BUTTON_2, +
+    ; Both buttons have been pressed
++:
+
+input.ifPressed, input.UP, input.BUTTON_1, input.BUTTON_2, +
+    ; UP and both buttons have been pressed
 +:
 ```
 

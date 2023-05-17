@@ -179,20 +179,54 @@
 ;====
 ; Check if a given button has just been pressed this frame
 ;
-; @in   button  the button to check (input.UP, input.BUTTON_1 etc)
-; @in   else    the address to jump to if the button is either not pressed, or
-;               if it was already pressed last frame
+; @in   ...buttons  one or more button(s) to check (input.UP, input.BUTTON_1 etc)
+; @in   else        the address to jump to if the button(s) are either not
+;                   pressed, or were already pressed last frame
 ;====
-.macro "input.ifPressed" args button else
-    utils.assert.equals NARGS, 2, "input.asm \.: Unexpected number of arguments"
-    utils.assert.range button, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
-    utils.assert.label else, "input.asm \.: Invalid label argument"
+.macro "input.ifPressed"
+    .if NARGS == 2
+        utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
+        utils.assert.label \2, "input.asm \.: Invalid label argument"
 
-    ; Load input that was released last frame but is now pressed
-    input.loadAPressed
+        ; Load input that was released last frame but is now pressed
+        input.loadAPressed
+        and \1      ; check button bit
+        jp z, \2    ; jp to else if the bit was not set
+    .else
+        ;===
+        ; Check if all buttons are pressed, and that not all of them were pressed
+        ; last frame. This is a little more complex so the buttons don't all
+        ; have to have been pressed down in a single frame
+        ;===
 
-    and button      ; check button bit
-    jp z, else      ; jp to else if the bit was not set
+        ; OR button masks together to create a single mask
+        .define mask\.\@ 0
+
+        .repeat NARGS - 1
+            utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
+            .redefine mask\.\@ mask\.\@ | \1
+            .shift  ; shift arguments so \2 becomes \1
+        .endr
+
+        ; Assert remaining \1 argument is the else label
+        utils.assert.label \1, "input.asm \.: Expected last argument to be a label"
+
+        ; Load H with previous and L with current
+        ld hl, (input.ram.activePort.current)
+
+        ; If all given buttons are currently pressed
+        ld a, l         ; load current into A
+        ld l, mask\.\@  ; load buttons mask into L
+        and l           ; filter out other buttons
+        cp l            ; check if all given buttons currently set
+        jp nz, \1       ; jump if all given buttons aren't currently pressed
+
+        ; All given buttons are pressed; Check if they were pressed last frame
+        ld a, h         ; load previous input
+        and l           ; filter out other buttons
+        cp l            ; check if all given buttons currently set
+        jp z, \1        ; all were already pressed last frame, so jp to else
+    .endif
 .endm
 
 ;====
