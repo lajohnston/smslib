@@ -258,5 +258,10 @@
             writeAsterisk HELD_INDICATOR_COLUMN, BUTTON_2_ROW
         +:
 
+        ; Check if both UP and BUTTON 1 have been held since the previous frame
+        input.ifHeld input.UP, input.BUTTON_1, +
+            writeAsterisk HELD_INDICATOR_COLUMN, COMBO_ROW
+        +:
+
         ret
 .ends

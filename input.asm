@@ -184,22 +184,39 @@
 .endm
 
 ;====
-; Check if a given button has been pressed in both this frame and the previous
-; frame
+; Check if one or more buttons have been pressed in both this frame and the
+; previous frame
 ;
-; @in   button  the button to check (input.UP, input.BUTTON_1 etc)
-; @in   else    the address to jump to if the button has not been held
+; @in   ...buttons  the button(s) to check (input.UP, input.BUTTON_1 etc)
+; @in   else        the address to jump to if the button has not been held
 ;====
-.macro "input.ifHeld" args button else
-    utils.assert.equals NARGS, 2, "input.asm \.: Unexpected number of arguments"
-    utils.assert.range button, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
-    utils.assert.label else, "input.asm \.: Invalid label argument"
+.macro "input.ifHeld"
+    .if NARGS == 2
+        utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
+        utils.assert.label \2, "input.asm \.: Invalid else argument"
 
-    input.loadAHeld     ; load A with held buttons
-    and button          ; check the given button
+        input.loadAHeld ; load A with held buttons
+        and \1          ; check button bit
+        jp z, \2        ; jp to else if the bit was not set
+    .else
+        ;===
+        ; Check if multiple buttons are pressed
+        ;===
 
-    ; jp to else label if button was not pressed in both this and previous frame
-    jp z, else
+        ; OR button masks together to create a single mask
+        .define mask\.\@ 0
+
+        .repeat NARGS - 1
+            utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
+            .redefine mask\.\@ mask\.\@ | \1
+            .shift  ; shift arguments so \2 becomes \1
+        .endr
+
+        input.loadAHeld ; load A with held buttons
+        and mask\.\@    ; clear other buttons
+        cp mask\.\@     ; compare result with mask
+        jp nz, \1       ; jp to else if not all buttons are held
+    .endif
 .endm
 
 ;====

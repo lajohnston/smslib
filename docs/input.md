@@ -57,6 +57,18 @@ input.ifHeld, input.BUTTON_1, +
 +:
 ```
 
+You can also pass multiple buttons to check if all have been held since the previous frame.
+
+```
+input.ifHeld input.BUTTON_1, input.BUTTON_2, +
+    ; Both button 1 and button 2 are held
++:
+
+input.ifHeld input.UP, input.BUTTON_1, input.BUTTON_2, +
+    ; Up, button 1 and button 2 are all held
++:
+```
+
 ## input.ifPressed
 
 Detects if a button was pressed this frame. This will only occur once every time the button is pressed.
