@@ -35,6 +35,18 @@ input.BUTTON_1
 input.BUTTON_2
 ```
 
+You can also pass multiple buttons to check if all are currently pressed.
+
+```
+input.if input.BUTTON_1, input.BUTTON_2, +
+    ; Both button 1 and button 2 are pressed
++:
+
+input.if input.UP, input.BUTTON_1, input.BUTTON_2, +
+    ; Up, button 1 and button 2 are all pressed
++:
+```
+
 ## input.ifHeld
 
 Detects if a button has been pressed for both this frame and the previous frame.

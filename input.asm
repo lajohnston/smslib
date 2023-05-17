@@ -146,15 +146,41 @@
 .endm
 
 ;====
-; Check if a given button has been pressed
+; Check if one or more buttons are currently pressed
 ;
-; @in   button  the button to check (input.UP, input.BUTTON_1 etc)
-; @in   else    the address to jump to if the button is not pressed
+; @in   ...buttons  the button(s) to check (input.UP, input.BUTTON_1 etc)
+; @in   else        the address to jump to if the button(s) are not pressed
 ;====
-.macro "input.if" args button else
-    ld a, (input.ram.activePort.current)
-    and button
-    jp z, else
+.macro "input.if"
+    .if NARGS == 2
+        utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
+        utils.assert.label \2, "input.asm \.: Invalid else argument"
+
+        ld a, (input.ram.activePort.current)
+        and \1      ; check button bit
+        jp z, \2    ; jp to else if the bit was not set
+    .else
+        ;===
+        ; Check if multiple buttons are pressed
+        ;===
+
+        ; OR button masks together to create a single mask
+        .define mask\.\@ 0
+
+        .repeat NARGS - 1
+            utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
+            .redefine mask\.\@ mask\.\@ | \1
+            .shift  ; shift arguments so \2 becomes \1
+        .endr
+
+        ; Assert remaining \1 argument is the else label
+        utils.assert.label \1, "input.asm \.: Expected last argument to be a label"
+
+        ld a, (input.ram.activePort.current)
+        and mask\.\@    ; clear other buttons
+        cp mask\.\@     ; compare result with mask
+        jp nz, \1       ; jp to else if not all buttons are pressed
+    .endif
 .endm
 
 ;====

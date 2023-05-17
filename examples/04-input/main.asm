@@ -212,6 +212,11 @@
             writeAsterisk CURRENT_INDICATOR_COLUMN, BUTTON_2_ROW
         +:
 
+        ; Check if both UP and BUTTON 1 have been pressed
+        input.if input.UP, input.BUTTON_1, +
+            writeAsterisk CURRENT_INDICATOR_COLUMN, COMBO_ROW
+        +:
+
         ret
 .ends
 
