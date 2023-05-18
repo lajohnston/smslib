@@ -379,8 +379,8 @@
 .endm
 
 ;====
-; Detects if either left or right have been pressed for this frame and the
-; previous frame, and jumps to the relevant label if one has.
+; Jumps to the relevant label if either left or right have been pressed for
+; both this frame and the previous frame
 ;
 ; @in   left    the label to continue to if LEFT is held
 ; @in   right   the label to jp to if RIGHT is held
@@ -398,9 +398,8 @@
 .endm
 
 ;====
-; Detects if either left or right have just been pressed this frame, i.e. the
-; button was released last frame but is now pressed. Jumps to the relevant
-; label if it has.
+; Jumps to the relevant label if either left or right have just been pressed
+; this frame
 ;
 ; @in   left    the label to continue to if LEFT has just been pressed
 ; @in   right   the label to jp to if RIGHT had just been pressed
@@ -438,8 +437,8 @@
 .endm
 
 ;====
-; Detects if either up or down have been pressed for this frame and the
-; previous frame, and jumps to the relevant label if one has.
+; Jumps to the relevant label if either up or down have been pressed for this
+; frame and the previous frame
 ;
 ; @in   up      the label to continue to if UP is held
 ; @in   down    the label to jp to if DOWN is held
@@ -457,9 +456,8 @@
 .endm
 
 ;====
-; Detects if either up or down have just been pressed this frame, i.e. the
-; button was released last frame but is now pressed. Jumps to the relevant
-; label if it has.
+; Jumps to the relevant label if either up or down have just been pressed this
+; frame.
 ;
 ; @in   up      the label to continue to if UP has just been pressed
 ; @in   down    the label to jp to if DOWN had just been pressed
