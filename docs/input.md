@@ -185,6 +185,28 @@ input.ifYDirPressed, up, down, +
 +:
 ```
 
+## input.ifXDirReleased / input.ifYDirReleased
+
+These detect if a direction on the given axis has just been released this frame, and jump to the relevant label if it has. This is more efficient that checking each button on the axis individually as the input only needs to be read from the buffer once.
+
+```
+input.ifXDirReleased, left, right, +
+    left:
+        ; Left has just been released
+        jp +    ; (remember to skip over right label)
+    right:
+        ; Right has just been released
++:
+
+input.ifYDirReleased, up, down, +
+    up:
+        ; Up has just been released
+        jp +    ; (remember to skip over down label)
+    down:
+        ; Down has just been released
++:
+```
+
 ### input.loadADirX
 
 Loads register A with the directional x-axis: -1 = left, 1 = right, none = 0. An optional multiplier multiplies this result at assemble time.

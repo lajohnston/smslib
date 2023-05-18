@@ -419,6 +419,27 @@
 .endm
 
 ;====
+; Jumps to the relevant label if either left or right were pressed but have
+; just been released
+;
+; @in   left    the label to continue to if LEFT has just been released
+; @in   right   the label to jp to if RIGHT had just been released
+; @in   else    the label to jp to if neither LEFT nor RIGHT have just been released
+;====
+.macro "input.ifXDirReleased" args left right else
+    utils.assert.equals NARGS 3 "input.asm \.: Invalid number of arguments given"
+    utils.assert.label left "input.asm \.: Invalid 'left' argument"
+    utils.assert.label right "input.asm \.: Invalid 'right' argument"
+    utils.assert.label else "input.asm \.: Invalid 'else' argument"
+
+    ; Load input that was pressed last frame but has just been released
+    input.loadAReleased
+
+    ; Jump to the relevant label
+    input._jpIfDirection input.LEFT input.RIGHT left right else
+.endm
+
+;====
 ; Jumps to the relevant label if either up or down are currently pressed
 ;
 ; @in   up      the label to continue to if UP is currently pressed
@@ -471,6 +492,27 @@
 
     ; Load input that was released last frame but is now pressed
     input.loadAPressed
+
+    ; Jump to the relevant label
+    input._jpIfDirection input.UP input.DOWN up down else
+.endm
+
+;====
+; Jumps to the relevant label if either up or down were pressed last frame but
+; have now been released
+;
+; @in   up      the label to continue to if UP has just been released
+; @in   down    the label to jp to if DOWN had just been released
+; @in   else    the label to jp to if neither UP or DOWN have just been released
+;====
+.macro "input.ifYDirReleased" args up down else
+    utils.assert.equals NARGS 3 "input.asm \.: Invalid number of arguments given"
+    utils.assert.label up "input.asm \.: Invalid 'up' argument"
+    utils.assert.label down "input.asm \.: Invalid 'down' argument"
+    utils.assert.label else "input.asm \.: Invalid 'else' argument"
+
+    ; Load input that was pressed but has just been released
+    input.loadAReleased
 
     ; Jump to the relevant label
     input._jpIfDirection input.UP input.DOWN up down else
