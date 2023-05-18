@@ -96,6 +96,44 @@
 .endm
 
 ;====
+; Assert the given value is one of a given set of numbers
+;
+; @in   value       the actual value
+; @in   ...expected the expected (numeric) values
+; @in   message     the message to print if the expectation is not met
+;====
+.macro "utils.assert.oneOf"
+    .define value\.\@ \1
+    .define match\.\@ 0
+
+    ; Ensure each value in the set is a number
+    .repeat NARGS - 2
+        ; Assert the value to check against is a number
+        utils.assert.number \2 "utils.assert \. expects a set of numbers"
+    .endr
+
+    ; Only check possibilities if value is a number
+    .if \?1 == ARG_NUMBER
+        ; Check each expected value
+        .repeat NARGS - 2
+            ; Check if value matches
+            .if value\.\@ == \2
+                ; Match found
+                .redefine match\.\@ 1
+            .endif
+
+            .shift  ; shift arguments so /3 becomes /2
+        .endr
+    .endif
+
+    .if match\.\@ != 1
+        ; No match was found
+        ; /2 is the last argument (failure message)
+        utils.assert.fail \2 value\.\@
+    .endif
+.endm
+
+;====
 ; Assert the given value is a number within the given range, otherwise fail
 ;
 ; @in   value       the actual value
