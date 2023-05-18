@@ -91,6 +91,28 @@ input.ifPressed, input.UP, input.BUTTON_1, input.BUTTON_2, +
 +:
 ```
 
+## input.ifReleased
+
+Detects if a button was pressed last frame but is now released. This will only occur once every time the button is released.
+
+```
+input.ifReleased, input.BUTTON_1, +
+    ; BUTTON_1 was pressed but was just released this frame
++:
+```
+
+You can provide multiple buttons to detect when multiple buttons were pressed down last time, but now not all of them are. This will occur for one frame.
+
+```
+input.ifReleased, input.BUTTON_1, input.BUTTON_2, +
+    ; Both buttons were pressed last frame, but now one or both aren't
++:
+
+input.ifPressed, input.UP, input.BUTTON_1, input.BUTTON_2, +
+    ; UP and both buttons were pressed last frame, but now one or more are released
++:
+```
+
 ## input.ifXDir / input.ifYDir
 
 These detect if a direction on the given axis is currently pressed and jumps to the relevant label if it has.

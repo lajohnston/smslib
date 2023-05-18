@@ -146,6 +146,19 @@
 .endm
 
 ;====
+; Load A with buttons that were pressed in the previous frame but are now released
+;
+; @out  a   released buttons (--21RLDU)
+;====
+.macro "input.loadAReleased"
+    ; Load L with current input value and H with previous
+    ld hl, (input.ram.activePort.current)
+    ld a, l ; load current into A
+    xor h   ; XOR with previous. The set bits are now buttons that have changed
+    and h   ; AND with previous; Set bits have changed AND are not currently pressed
+.endm
+
+;====
 ; Check if one or more buttons are currently pressed
 ;
 ; @in   ...buttons  the button(s) to check (input.UP, input.BUTTON_1 etc)
@@ -220,7 +233,7 @@
 .endm
 
 ;====
-; Check if a given button has just been pressed this frame
+; Check if the given button(s) have just been pressed this frame
 ;
 ; @in   ...buttons  one or more button(s) to check (input.UP, input.BUTTON_1 etc)
 ; @in   else        the address to jump to if the button(s) are either not
@@ -261,14 +274,65 @@
         ld a, l         ; load current into A
         ld l, mask\.\@  ; load buttons mask into L
         and l           ; filter out other buttons
-        cp l            ; check if all given buttons currently set
+        cp l            ; check if all given buttons are currently pressed
         jp nz, \1       ; jump if all given buttons aren't currently pressed
 
         ; All given buttons are pressed; Check if they were pressed last frame
         ld a, h         ; load previous input
         and l           ; filter out other buttons
-        cp l            ; check if all given buttons currently set
-        jp z, \1        ; all were already pressed last frame, so jp to else
+        cp l            ; check if all given buttons are currently pressed
+        jp z, \1        ; jp to else if all were already pressed last frame
+    .endif
+.endm
+
+;====
+; Check if the given button(s) have just been released this frame
+;
+; @in   ...buttons  one or more button(s) to check (input.UP, input.BUTTON_1 etc)
+; @in   else        the address to jump to if the button(s) are either not
+;                   pressed, or were already pressed last frame
+;====
+.macro "input.ifReleased"
+    .if NARGS == 2
+        utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
+        utils.assert.label \2, "input.asm \.: Invalid label argument"
+
+        ; Load input that was released last frame but is now pressed
+        input.loadAReleased
+        and \1      ; check button bit
+        jp z, \2    ; jp to else if the bit was not set
+    .else
+        ; OR button masks together to create a single mask
+        .define mask\.\@ 0
+
+        .repeat NARGS - 1
+            utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
+            .redefine mask\.\@ mask\.\@ | \1
+            .shift  ; shift arguments so \2 becomes \1
+        .endr
+
+        ; Assert remaining \1 argument is the else label
+        utils.assert.label \1, "input.asm \.: Expected last argument to be a label"
+
+        ;===
+        ; Check if all buttons had been pressed last frame, but not all are now
+        ;===
+
+        ; Load H with previous and L with current
+        ld hl, (input.ram.activePort.current)
+
+        ; If all given buttons were pressed
+        ld a, h         ; load previous into A
+        ld h, mask\.\@  ; load buttons mask into H
+        and h           ; filter out other buttons
+        cp h            ; check if all given buttons were pressed
+        jp nz, \1       ; jump if all given buttons weren't pressed last frame
+
+        ; All given buttons were pressed; Check if any are now released
+        ld a, l         ; load current input
+        and h           ; filter out other buttons
+        cp h            ; check if all given buttons are currently pressed
+        jp z, \1        ; jp to else if all are still pressed
     .endif
 .endm
 
