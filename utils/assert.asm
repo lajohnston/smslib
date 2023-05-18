@@ -29,13 +29,15 @@
 ; Print an error message to the terminal and stop compilation
 ;
 ; @in   message     the main message to print
-; @in   expected    the value that was expected
 ; @in   received    the value that didn't match an expection
+; @in   [expected]  (optional) the value that was expected
 ;====
-.macro "utils.assert.fail" args message expected received
+.macro "utils.assert.fail" args message received expected
     .print message, "\n"
 
-    .print "    Expected: ", expected, "\n"
+    .ifdef expected
+        .print "    Expected: ", expected, "\n"
+    .endif
 
     .print "    Received: "
     utils.assert.printValue received
@@ -53,7 +55,7 @@
 ;====
 .macro "utils.assert.equals" args value, expected, message
     .if value != expected
-        utils.assert.fail message expected value
+        utils.assert.fail message value expected
     .endif
 .endm
 
@@ -65,10 +67,9 @@
 ;====
 .macro "utils.assert.immediate" args value message
     .if \?1 != ARG_IMMEDIATE
-        utils.assert.fail message "<immediate>" value
+        utils.assert.fail message value "<immediate>"
     .endif
 .endm
-
 
 ;====
 ; Assert the given value is a label, otherwise fail
@@ -78,7 +79,7 @@
 ;====
 .macro "utils.assert.label" args value message
     .if \?1 != ARG_LABEL
-        utils.assert.fail message "<label>" value
+        utils.assert.fail message value "<label>"
     .endif
 .endm
 
@@ -90,7 +91,7 @@
 ;====
 .macro "utils.assert.number" args value message
     .if \?1 != ARG_NUMBER
-        utils.assert.fail message "<number>" value
+        utils.assert.fail message value "<number>"
     .endif
 .endm
 
@@ -104,11 +105,11 @@
 ;====
 .macro "utils.assert.range" args value min max message
     .if \?1 != ARG_NUMBER
-        utils.assert.fail message "number between \2 to \3" value
+        utils.assert.fail message value "number between \2 to \3"
     .endif
 
     .if value < min || value > max
-        utils.assert.fail message "number between \2 to \3" value
+        utils.assert.fail message value "number between \2 to \3"
     .endif
 .endm
 
@@ -120,6 +121,6 @@
 ;====
 .macro "utils.assert.string" args value message
     .if \?1 != ARG_STRING
-        utils.assert.fail message "<string>" value
+        utils.assert.fail message value "<string>"
     .endif
 .endm
