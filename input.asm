@@ -225,6 +225,9 @@
             .shift  ; shift arguments so \2 becomes \1
         .endr
 
+        ; Assert remaining \1 argument is the else label
+        utils.assert.label \1, "input.asm \.: Expected last argument to be a label"
+
         input.loadAHeld ; load A with held buttons
         and mask\.\@    ; clear other buttons
         cp mask\.\@     ; compare result with mask
@@ -351,6 +354,15 @@
 ; @in   else            label to jump to if neither direction is pressed
 ;====
 .macro "input._jpIfDirection" args negativeDir positiveDir negativeLabel positiveLabel elseLabel
+    utils.assert.equals NARGS 5 "input.asm \.: Invalid number of arguments given"
+
+    utils.assert.oneOf negativeDir, input.LEFT, input.UP, "input.asm \.: Invalid 'negativeDir' argument"
+    utils.assert.oneOf positiveDir, input.RIGHT, input.DOWN, "input.asm \.: Invalid 'positiveDir' argument"
+
+    utils.assert.label negativeLabel "input.asm \.: Invalid 'negativeLabel' argument"
+    utils.assert.label positiveLabel "input.asm \.: Invalid 'positiveLabel' argument"
+    utils.assert.label elseLabel "input.asm \.: Invalid 'elseLabel' argument"
+
     and negativeDir | positiveDir   ; check if either direction is pressed
     jp z, elseLabel                 ; jump to else label if neither are pressed
 
@@ -534,6 +546,8 @@
         .redefine multiplier 1
     .endif
 
+    utils.assert.number multiplier, "input.asm \.: Expected multiplier to be a number"
+
     ; Read current input data
     ld a, (input.ram.activePort.current)
 
@@ -574,6 +588,8 @@
     .ifndef multiplier
         .redefine multiplier 1
     .endif
+
+    utils.assert.number multiplier, "input.asm \.: Expected multiplier to be a number"
 
     ; Read current input data
     ld a, (input.ram.activePort.current)
