@@ -31,17 +31,19 @@
 
     ; Table template. We'll update this each frame
     template:
-        .asc "          Pressed Current Held  "
+        .asc "       Pressed                  "
+        .asc "             Current            "
+        .asc "                    Held        "
+        .asc "                        Released"
+        .asc "Up       ( )   ( )   ( )   ( )  "
+        .asc "Down     ( )   ( )   ( )   ( )  "
+        .asc "Left     ( )   ( )   ( )   ( )  "
+        .asc "Right    ( )   ( )   ( )   ( )  "
         .asc "                                "
-        .asc " Up       ( )     ( )     ( )   "
-        .asc " Down     ( )     ( )     ( )   "
-        .asc " Left     ( )     ( )     ( )   "
-        .asc " Right    ( )     ( )     ( )   "
+        .asc "Button 1 ( )   ( )   ( )   ( )  "
+        .asc "Button 2 ( )   ( )   ( )   ( )  "
         .asc "                                "
-        .asc " Button 1 ( )     ( )     ( )   "
-        .asc " Button 2 ( )     ( )     ( )   "
-        .asc "                                "
-        .asc " Up and 1 ( )     ( )     ( )   "
+        .asc "Up and 1 ( )   ( )   ( )   ( )  "
         .db $ff ; terminator
 
     ; We'll add an asterisk in between the brackets in the template string,
@@ -51,21 +53,23 @@
 .ends
 
 ; The starting row the render the table from
-.define TABLE_ROW_OFFSET = 6
+.define TABLE_ROW_OFFSET = 5
 
 ; The indicator tile columns for each condition (Pressed, Current, Held)
-.define PRESSED_INDICATOR_COLUMN = 11
-.define CURRENT_INDICATOR_COLUMN = PRESSED_INDICATOR_COLUMN + 8
-.define HELD_INDICATOR_COLUMN = CURRENT_INDICATOR_COLUMN + 8
+.define PRESSED_INDICATOR_COLUMN = 10
+.define CURRENT_INDICATOR_COLUMN = PRESSED_INDICATOR_COLUMN + 6
+.define HELD_INDICATOR_COLUMN = CURRENT_INDICATOR_COLUMN + 6
+.define RELEASED_INDICATOR_COLUMN = HELD_INDICATOR_COLUMN + 6
 
 ; The row number for each button
-.define UP_ROW = TABLE_ROW_OFFSET + 2
-.define DOWN_ROW = TABLE_ROW_OFFSET + 3
-.define LEFT_ROW = TABLE_ROW_OFFSET + 4
-.define RIGHT_ROW = TABLE_ROW_OFFSET + 5
-.define BUTTON_1_ROW = TABLE_ROW_OFFSET + 7
-.define BUTTON_2_ROW = TABLE_ROW_OFFSET + 8
-.define COMBO_ROW = TABLE_ROW_OFFSET + 10
+.define TABLE_BODY_ROW = TABLE_ROW_OFFSET + 4
+.define UP_ROW = TABLE_BODY_ROW
+.define DOWN_ROW = TABLE_BODY_ROW + 1
+.define LEFT_ROW = TABLE_BODY_ROW + 2
+.define RIGHT_ROW = TABLE_BODY_ROW + 3
+.define BUTTON_1_ROW = TABLE_BODY_ROW + 5
+.define BUTTON_2_ROW = TABLE_BODY_ROW + 6
+.define COMBO_ROW = TABLE_BODY_ROW + 8
 
 ;====
 ; Initialise the example
@@ -111,6 +115,7 @@
         call detectPressed  ; indicate buttons that have just been pressed this frame
         call detectCurrent  ; indicate buttons that are currently pressed
         call detectHeld     ; indicate buttons that were pressed last frame and this frame
+        call detectReleased ; indicate buttons that were pressed last frame but have just been released
 
         ; End VBlank handler
         interrupts.endVBlank
@@ -261,6 +266,48 @@
         ; Check if both UP and BUTTON 1 have been held since the previous frame
         input.ifHeld input.UP, input.BUTTON_1, +
             writeAsterisk HELD_INDICATOR_COLUMN, COMBO_ROW
+        +:
+
+        ret
+.ends
+
+;====
+; Uses the if..released macros to detect when a button is has just been released,
+; and indicates this with a '*' character in the table
+;====
+.section "detectReleased" free
+    detectReleased:
+        ; Check if either UP or DOWN were released
+        input.ifYDirReleased _up, _down, +
+            _up:
+                writeAsterisk RELEASED_INDICATOR_COLUMN, UP_ROW
+                jp +
+            _down:
+                writeAsterisk RELEASED_INDICATOR_COLUMN, DOWN_ROW
+        +:
+
+        ; Check if either LEFT or RIGHT were released
+        input.ifXDirReleased _left, _right, +
+            _left:
+                writeAsterisk RELEASED_INDICATOR_COLUMN, LEFT_ROW
+                jp +
+            _right:
+                writeAsterisk RELEASED_INDICATOR_COLUMN, RIGHT_ROW
+        +:
+
+        ; Check if BUTTON_1 was released
+        input.ifReleased input.BUTTON_1, +
+            writeAsterisk RELEASED_INDICATOR_COLUMN, BUTTON_1_ROW
+        +:
+
+        ; Check if BUTTON_2 was released
+        input.ifReleased input.BUTTON_2, +
+            writeAsterisk RELEASED_INDICATOR_COLUMN, BUTTON_2_ROW
+        +:
+
+        ; Check if both UP and BUTTON 1 were released
+        input.ifReleased input.UP, input.BUTTON_1, +
+            writeAsterisk RELEASED_INDICATOR_COLUMN, COMBO_ROW
         +:
 
         ret
