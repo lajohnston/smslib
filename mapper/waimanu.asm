@@ -20,15 +20,15 @@
 ;====
 
 ; Define the number of pageable 16KB banks (default 6 = 128KB)
-.ifndef mapper.pageableBanks
-    .define mapper.pageableBanks 6
+.ifndef mapper.PAGEABLE_BANKS
+    .define mapper.PAGEABLE_BANKS 6
 .endif
 
-; Ensure enableCartridgeRam hasn't been enabled
-.ifdef mapper.enableCartridgeRam
-    .ifeq mapper.enableCartridgeRam 1
+; Ensure ENABLE_CARTRIDGE_RAM hasn't been enabled
+.ifdef mapper.ENABLE_CARTRIDGE_RAM
+    .ifeq mapper.ENABLE_CARTRIDGE_RAM 1
         ; Waimanu uses slot 2 for paging which is needed for on-cartridge RAM
-        .print "waimanu mapper doesn't support on-cartridge RAM. mapper.enableCartridgeRam must not be set to 1\n"
+        .print "waimanu mapper doesn't support on-cartridge RAM. mapper.ENABLE_CARTRIDGE_RAM must not be set to 1\n"
         .fail
     .endif
 .endif
@@ -65,7 +65,7 @@
 ; Banks
 ; These can be loaded into the slots at runtime
 .rombankmap
-    bankstotal mapper.pageableBanks + 2
+    bankstotal mapper.PAGEABLE_BANKS + 2
 
     banksize $7ff0 ; 32KB minus 16 bytes
     banks 1
@@ -74,7 +74,7 @@
     banks 1
 
     banksize $4000 ; 16KB
-    banks mapper.pageableBanks
+    banks mapper.PAGEABLE_BANKS
 .endro
 
 ;===

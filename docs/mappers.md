@@ -63,7 +63,7 @@ palette.writeSlice paletteData, 1   ; palette data now accessible
 You can customise some mappers with additional parameters. Check the relevant mapper asm file to see which settings are supported.
 
 ```
-.define mapper.pageableBanks 4
-.define mapper.enableCartridgeRam 1
+.define mapper.PAGEABLE_BANKS 4
+.define mapper.ENABLE_CARTRIDGE_RAM 1
 .include "smslib/mapper/sega.asm"
 ```

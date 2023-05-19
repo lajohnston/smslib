@@ -23,14 +23,14 @@
 ;====
 
 ; Define the number of pageable 16KB banks (default 6 = 128KB)
-.ifndef mapper.pageableBanks
-    .define mapper.pageableBanks 6
+.ifndef mapper.PAGEABLE_BANKS
+    .define mapper.PAGEABLE_BANKS 6
 .endif
 
 ; Some cartridges have an additional 8KB of RAM. If enabled this will be
 ; accessible in slot 2
-.ifndef mapper.enableCartridgeRam
-    .define mapper.enableCartridgeRam 0
+.ifndef mapper.ENABLE_CARTRIDGE_RAM
+    .define mapper.ENABLE_CARTRIDGE_RAM 0
 .endif
 
 ;====
@@ -55,17 +55,17 @@
 ; ROM Banks
 ; These can be loaded into the slots at runtime
 .rombankmap
-    bankstotal mapper.pageableBanks
+    bankstotal mapper.PAGEABLE_BANKS
     banksize $4000 ; 16KB
-    banks mapper.pageableBanks
+    banks mapper.PAGEABLE_BANKS
 .endro
 
 ;===
 ; Initialise the paging registers
 ;===
 .macro "mapper.init"
-    .ifeq mapper.enableCartridgeRam, 1
-        _mapper.enableCartridgeRam
+    .ifeq mapper.ENABLE_CARTRIDGE_RAM, 1
+        _mapper.ENABLE_CARTRIDGE_RAM
     .endif
 .endm
 

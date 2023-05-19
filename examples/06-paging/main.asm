@@ -11,7 +11,7 @@
 ; Import smslib
 ;====
 .define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
-.define mapper.enableCartridgeRam 1
+.define mapper.ENABLE_CARTRIDGE_RAM 1
 
 .incdir "../../"                ; point to smslib directory
 .include "mapper/sega.asm"      ; select Sega mapper. Note: if you swap this
