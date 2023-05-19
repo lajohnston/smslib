@@ -15,14 +15,18 @@
 ; Ensure this value is defined to enable the reading of port 2
 ;===
 
+;====
 ; Dependencies
+;====
 .ifndef utils.assert
     .include "./utils/assert.asm"
 .endif
 
 .include "./utils/ramSlot.asm"
 
+;====
 ; Constants
+;====
 .define input.UP        %00000001
 .define input.DOWN      %00000010
 .define input.LEFT      %00000100
