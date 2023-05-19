@@ -16,7 +16,7 @@
 ;====
 ; Default register values
 ;====
-.define vdp.register0Default    %00000110;  Mode control 1
+.define vdp.REGISTER_0_DEFAULT  %00000110;  Mode control 1
                                 ;|||||||`-  Sync enable; always 0
                                 ;||||||`--  Extra height enable/TMS9918 mode select; always 1
                                 ;|||||`---  Mode 4 enable; always 1
@@ -26,7 +26,7 @@
                                 ;|`-------  Horizontal scroll lock
                                 ;`--------  Vertical scroll lock
 
-.define vdp.register1Default    %10000000;  Mode control 2
+.define vdp.REGISTER_1_DEFAULT  %10000000;  Mode control 2
                                 ;|||||||`-  Zoomed sprites -> 16x16 pixels
                                 ;||||||`--  Tall sprites -> 2 tiles per sprite, 8x16
                                 ;|||||`---  Mega Drive mode 5 enable
@@ -36,18 +36,18 @@
                                 ;|`-------  Enable display
                                 ;`--------  Unused; always 1
 
-.define vdp.register2Default    %11111111;  Tilemap base address (default = $3800)
+.define vdp.REGISTER_2_DEFAULT  %11111111;  Tilemap base address (default = $3800)
                                 ;|||||||`-  Mask bit (SMS1)
                                 ;```````--  Name table base address
 
-.define vdp.register3Default    %11111111   ; Palette base address (always $ff for SMS1)
-.define vdp.register4Default    %00000111   ; Pattern base address (last 3 bits always set for SMS1)
-.define vdp.register5Default    %11111111   ; Sprite table base address (usually $ff)
-.define vdp.register6Default    %11111111   ; Sprite pattern generator base address (always $ff)
-.define vdp.register7Default    %00000000   ; Overscan/backdrop color index (bits 0-3)
-.define vdp.register8Default    %00000000   ; Background X scroll
-.define vdp.register9Default    %00000000   ; Background Y scroll
-.define vdp.register10Default   %11111111   ; Line interrupt counter
+.define vdp.REGISTER_3_DEFAULT  %11111111   ; Palette base address (always $ff for SMS1)
+.define vdp.REGISTER_4_DEFAULT  %00000111   ; Pattern base address (last 3 bits always set for SMS1)
+.define vdp.REGISTER_5_DEFAULT  %11111111   ; Sprite table base address (usually $ff)
+.define vdp.REGISTER_6_DEFAULT  %11111111   ; Sprite pattern generator base address (always $ff)
+.define vdp.REGISTER_7_DEFAULT  %00000000   ; Overscan/backdrop color index (bits 0-3)
+.define vdp.REGISTER_8_DEFAULT  %00000000   ; Background X scroll
+.define vdp.REGISTER_9_DEFAULT  %00000000   ; Background Y scroll
+.define vdp.REGISTER_10_DEFAULT %11111111   ; Line interrupt counter
 
 ;====
 ; Batch variables
@@ -84,17 +84,17 @@
 ;====
 .section "vdp.initData" free
     vdp.initData:
-        .db vdp.register0Default, $80
-        .db vdp.register1Default, $81
-        .db vdp.register2Default, $82
-        .db vdp.register3Default, $83
-        .db vdp.register4Default, $84
-        .db vdp.register5Default, $85
-        .db vdp.register6Default, $86
-        .db vdp.register7Default, $87
-        .db vdp.register8Default, $88
-        .db vdp.register9Default, $89
-        .db vdp.register10Default, $8a
+        .db vdp.REGISTER_0_DEFAULT, $80
+        .db vdp.REGISTER_1_DEFAULT, $81
+        .db vdp.REGISTER_2_DEFAULT, $82
+        .db vdp.REGISTER_3_DEFAULT, $83
+        .db vdp.REGISTER_4_DEFAULT, $84
+        .db vdp.REGISTER_5_DEFAULT, $85
+        .db vdp.REGISTER_6_DEFAULT, $86
+        .db vdp.REGISTER_7_DEFAULT, $87
+        .db vdp.REGISTER_8_DEFAULT, $88
+        .db vdp.REGISTER_9_DEFAULT, $89
+        .db vdp.REGISTER_10_DEFAULT, $8a
     vdp.initDataEnd:
 .ends
 
@@ -106,11 +106,11 @@
 
     ; Set register buffers
     ld de, vdp.ram.register0Buffer
-    ld a, vdp.register0Default
+    ld a, vdp.REGISTER_0_DEFAULT
     ld (de), a
 
     inc de  ; point to register1 buffer
-    ld a, vdp.register1Default
+    ld a, vdp.REGISTER_1_DEFAULT
     ld (de), a
 .endm
 
