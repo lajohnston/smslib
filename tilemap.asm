@@ -14,8 +14,8 @@
 ;====
 
 ; The tilemap address in VRAM (default $3800)
-.ifndef tilemap.vramAddress
-    .define tilemap.vramAddress $3800
+.ifndef tilemap.VRAM_ADDRESS
+    .define tilemap.VRAM_ADDRESS $3800
 .endif
 
 ;====
@@ -135,7 +135,7 @@
 ; @in   index   0 is top left tile
 ;====
 .macro "tilemap.setIndex" args index
-    utils.vdp.prepWrite (tilemap.vramAddress + (index * tilemap.TILE_SIZE_BYTES))
+    utils.vdp.prepWrite (tilemap.VRAM_ADDRESS + (index * tilemap.TILE_SIZE_BYTES))
 .endm
 
 ;====
@@ -162,7 +162,7 @@
 
     ; Low byte of base address is 0, so we just need to manipulate high byte
     ; Set A to high byte of base address with the write command set
-    ld a, >tilemap.vramAddress | utils.vdp.commands.WRITE
+    ld a, >tilemap.VRAM_ADDRESS | utils.vdp.commands.WRITE
     or h        ; combine bits with high byte of relative address
     ld h, a     ; set HL to the full address
 .endm
@@ -1091,7 +1091,7 @@
 
             ld b, a                 ; preserve in B
             and %00000111           ; mask y4,y3,y2
-            or %01000000 | >tilemap.vramAddress    ; set base address + write command
+            or %01000000 | >tilemap.VRAM_ADDRESS    ; set base address + write command
             ld h, a                 ; store in H
             ld a, b                 ; restore rotated Y (y1y0---y4y3y2)
             and %11000000           ; mask y1y0
@@ -1119,7 +1119,7 @@
             rrca                    ; rotate right again (y1y0---y4y3y2)
             ld b, a                 ; preserve in B
             and %00000111           ; mask y4,y3,y2
-            or %01000000 | >tilemap.vramAddress ; add base address + write command
+            or %01000000 | >tilemap.VRAM_ADDRESS    ; add base address + write command
             ld h, a                 ; store in H
             ld a, b                 ; restore rotated Y (y1y0---y4y3y2) into A
             and %11000000           ; mask y1y0
@@ -1174,7 +1174,7 @@
     tilemap._writeColumn:
         .repeat tilemap.ROWS index rowNumber
             ; Calculate write address for column 0
-            .redefine tilemap._writeColumn_writeAddress ($4000 | tilemap.vramAddress) + (rowNumber * tilemap.COLS * tilemap.TILE_SIZE_BYTES)
+            .redefine tilemap._writeColumn_writeAddress ($4000 | tilemap.VRAM_ADDRESS) + (rowNumber * tilemap.COLS * tilemap.TILE_SIZE_BYTES)
             .redefine tilemap._writeColumn_writeAddressHigh >tilemap._writeColumn_writeAddress
             .redefine tilemap._writeColumn_writeAddressLow <tilemap._writeColumn_writeAddress
 
