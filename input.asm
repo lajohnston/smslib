@@ -90,33 +90,43 @@
 ; Reads the input from controller port 2 into the RAM buffer
 ; See input.readPort1 documentation for details
 ;====
+.section "input._readPort2" free
+    input._readPort2:
+        ; Copy previous value of port 2 to activePort.previous
+        ld a, (input.ram.previous.port2)        ; load previous.port1
+        ld (input.ram.activePort.previous), a   ; store in activePort.previous
+
+        ; Retrieve up and down buttons, which are stored within the PORT_1 byte
+        in a, input.PORT_1
+        and %11000000                           ; clear port 1 buttons
+        ld b, a                                 ; store in B (DU------)
+
+        ; Read remaining buttons from PORT_2
+        in a, input.PORT_2
+        and %00001111                           ; reset misc. bits (----21RL)
+
+        ; Combine into 1 byte (DU--21RL)
+        or b
+
+        ; Rotate left twice to match port 1 format
+        rlca    ; rotate DU--21RL to U--21RLD
+        rlca    ; rotate U--21RLD to --21RLDU
+
+        ; Invert so 1 = pressed and 0 = released
+        xor $ff
+
+        ; Store in ram buffer
+        ld (input.ram.activePort.current), a
+        ld (input.ram.previous.port2), a        ; store in previous.port2 for next time
+
+        ret
+.ends
+
+;====
+; Alias for input._readPort2
+;====
 .macro "input.readPort2"
-    ; Copy previous value of port 2 to activePort.previous
-    ld a, (input.ram.previous.port2)        ; load previous.port1
-    ld (input.ram.activePort.previous), a   ; store in activePort.previous
-
-    ; Retrieve up and down buttons, which are stored within the PORT_1 byte
-    in a, input.PORT_1
-    and %11000000                           ; clear port 1 buttons
-    ld b, a                                 ; store in B (DU------)
-
-    ; Read remaining buttons from PORT_2
-    in a, input.PORT_2
-    and %00001111                           ; reset misc. bits (----21RL)
-
-    ; Combine into 1 byte (DU--21RL)
-    or b
-
-    ; Rotate left twice to match port 1 format
-    rlca    ; rotate DU--21RL to U--21RLD
-    rlca    ; rotate U--21RLD to --21RLDU
-
-    ; Invert so 1 = pressed and 0 = released
-    xor $ff
-
-    ; Store in ram buffer
-    ld (input.ram.activePort.current), a
-    ld (input.ram.previous.port2), a        ; store in previous.port2 for next time
+    call input._readPort2
 .endm
 
 ;====
