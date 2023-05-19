@@ -13,8 +13,8 @@
 ;====
 
 ; Pattern address in VRAM
-.ifndef patterns.address
-    .define patterns.address $0000
+.ifndef patterns.VRAM_ADDRESS
+    .define patterns.VRAM_ADDRESS $0000
 .endif
 
 ;====
@@ -88,5 +88,5 @@
     utils.assert.equals NARGS, 1, "patterns.asm \. received the wrong number of arguments"
     utils.assert.range index, 0, patterns.MAX_PATTERN_INDEX, "patterns.asm \.: Invalid size argument"
 
-    utils.vdp.prepWrite (patterns.address + (index * patterns.ELEMENT_SIZE_BYTES))
+    utils.vdp.prepWrite (patterns.VRAM_ADDRESS + (index * patterns.ELEMENT_SIZE_BYTES))
 .endm

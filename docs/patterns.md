@@ -67,6 +67,6 @@ If B was 1101 and the rest were 0000, the encoding would be:
 
 If you wish to change these defaults, use `.define` to define these value at some point before you import the library.
 
-### patterns.address
+### patterns.VRAM_ADDRESS
 
 The pattern address in VRAM. Defaults to $0000
