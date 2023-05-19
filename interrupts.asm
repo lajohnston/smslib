@@ -42,8 +42,8 @@
 ; that an interrupt doesn't occur at this point in the code (i.e. by using
 ; interrupts.waitForVBlank to ensure they don't clash)
 ;==
-.ifndef interrupts.useShadowRegisters
-    .define interrupts.useShadowRegisters 1
+.ifndef interrupts.USE_SHADOW_REGISTERS
+    .define interrupts.USE_SHADOW_REGISTERS 1
 .endif
 
 ;====
@@ -67,18 +67,18 @@
 ; Code
 ;====
 
-; Preserve AF depending on interrupts.useShadowRegisters setting
+; Preserve AF depending on interrupts.USE_SHADOW_REGISTERS setting
 .macro "interrupts._preserveAF"
-    .if interrupts.useShadowRegisters == 1
+    .if interrupts.USE_SHADOW_REGISTERS == 1
         ex af, af'
     .else
         push af
     .endif
 .endm
 
-; Preserve AF depending on interrupts.useShadowRegisters setting
+; Preserve AF depending on interrupts.USE_SHADOW_REGISTERS setting
 .macro "interrupts._restoreAF"
-    .if interrupts.useShadowRegisters == 1
+    .if interrupts.USE_SHADOW_REGISTERS == 1
         ex af, af'
     .else
         pop af
@@ -106,7 +106,7 @@
             jp p, interrupts.onHBlank   ; jp if 7th bit (VBlank) is reset
 
             ; VBlank
-            .if interrupts.useShadowRegisters == 1
+            .if interrupts.USE_SHADOW_REGISTERS == 1
                 exx
             .endif
 
@@ -114,7 +114,7 @@
         .else
             ; If only VBlank enabled, jump to that handler
             .if interrupts.HANDLE_VBLANK == 1
-                .if interrupts.useShadowRegisters == 1
+                .if interrupts.USE_SHADOW_REGISTERS == 1
                     exx
                 .endif
 
@@ -133,7 +133,7 @@
 ; Returns from a VBlank interrupt
 ;====
 .macro "interrupts.endVBlank"
-    .if interrupts.useShadowRegisters == 0
+    .if interrupts.USE_SHADOW_REGISTERS == 0
         push hl
     .endif
 
@@ -141,7 +141,7 @@
     ld hl, interrupts.ram.vBlankFlag
     inc (hl)
 
-    .if interrupts.useShadowRegisters == 0
+    .if interrupts.USE_SHADOW_REGISTERS == 0
         pop hl
     .endif
 
