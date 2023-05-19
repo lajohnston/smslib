@@ -11,19 +11,19 @@
 ;====
 
 ; The maximum screen y coordinate a sprite can be. Defaults to 192
-.ifndef sprites.maxYPos
-    .define sprites.maxYPos 192
+.ifndef sprites.MAX_Y_POSITION
+    .define sprites.MAX_Y_POSITION 192
 .endif
 
 ; The sprite table's address in VRAM. Defaults to $3f00
-.ifndef sprites.vramAddress
-    .define sprites.vramAddress $3f00
+.ifndef sprites.VRAM_ADDRESS
+    .define sprites.VRAM_ADDRESS $3f00
 .endif
 
 ; The high byte of the RAM address to place the sprite buffer. The low byte is
 ; always set to $3F to allow for optimisations
-.ifndef sprites.bufferAddressHigh
-    .define sprites.bufferAddressHigh $C0
+.ifndef sprites.HIGH_BUFFER_ADDRESS
+    .define sprites.HIGH_BUFFER_ADDRESS $C0
 .endif
 
 ;====
@@ -42,7 +42,7 @@
 ;====
 ; Constants and variables
 ;====
-.define sprites.BUFFER_ADDRESS (sprites.bufferAddressHigh * 256) + $3F
+.define sprites.BUFFER_ADDRESS (sprites.HIGH_BUFFER_ADDRESS * 256) + $3F
 .define sprites.TABLE_OFFSET $40
 .define sprites.GROUP_TERMINATOR 255  ; terminates list of sprites.Sprite instances
 .define sprites.Y_TERMINATOR $D0
@@ -252,7 +252,7 @@
 .section "sprites.copyToVram"
     sprites.copyToVram:
         ; Set VDP write address to y positions
-        utils.vdp.prepWrite sprites.vramAddress
+        utils.vdp.prepWrite sprites.VRAM_ADDRESS
 
         ; Load number of sprites set
         ld hl, sprites.ram.buffer.nextIndex
@@ -275,7 +275,7 @@
         +:
 
         ; Point to x positions in VRAM and buffer
-        utils.vdp.prepWrite (sprites.vramAddress + 128) 0   ; vram
+        utils.vdp.prepWrite (sprites.VRAM_ADDRESS + 128) 0  ; vram
         ld l, <(sprites.ram.buffer.xPosAndPattern)          ; buffer
 
         ; Copy x positions and patterns from buffer to VRAM
@@ -354,7 +354,7 @@
         inc hl              ; point to relY
         ld a, (hl)          ; load relY
         add a, c            ; relY + anchorY
-        cp sprites.maxYPos  ; compare with max y allowed
+        cp sprites.MAX_Y_POSITION   ; compare with max y allowed
         jp nc, _yOffScreen  ; off screen; next sprite
 
         ; Output sprite to sprite buffer
