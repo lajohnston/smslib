@@ -30,12 +30,12 @@
     .include "utils/assert.asm"
 .endif
 
-.ifndef utils.vdp
-    .include "utils/vdp.asm"
-.endif
-
 .ifndef utils.outiBlock
     .include "utils/outiBlock.asm"
+.endif
+
+.ifndef utils.vdp
+    .include "utils/vdp.asm"
 .endif
 
 ;====

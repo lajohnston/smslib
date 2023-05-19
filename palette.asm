@@ -8,24 +8,27 @@
 ; last 16 (16-31). Sprites can only use the last 16 (16-31).
 ;====
 
-.define palette.VRAM_ADDR $c000
-.define palette.ELEMENT_SIZE_BYTES 1
-.define palette.SPRITE_PALETTE 16
-
 ;====
 ; Dependencies
 ;====
-.ifndef utils.vdp
-    .include "utils/vdp.asm"
+.ifndef utils.assert
+    .include "utils/assert.asm"
 .endif
 
 .ifndef utils.outiBlock
     .include "utils/outiBlock.asm"
 .endif
 
-.ifndef utils.assert
-    .include "utils/assert.asm"
+.ifndef utils.vdp
+    .include "utils/vdp.asm"
 .endif
+
+;====
+; Constants
+;====
+.define palette.ELEMENT_SIZE_BYTES 1
+.define palette.SPRITE_PALETTE 16
+.define palette.VRAM_ADDR $c000
 
 ;====
 ; Procedures
