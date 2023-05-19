@@ -4,9 +4,15 @@ Interprets input from the controller pads.
 
 ## Read input
 
-Use `input.readPort1` or `input.readPort2` to capture the input from joypad 1 and joypad 2 respectively. The comparison functions will work based on the last of these to have been called.
+Use `input.readPort1` or `input.readPort2` to capture the input from joypad 1 and joypad 2 respectively. The comparison functions will work based on the last of these to have been called. Each of these should only be called once per frame, otherwise they will overwrite the previous input state and break the `pressed` and `held` detection.
 
-Note: Each of these should only be called once per frame.
+In order to use `input.readPort2` you will need to enable the `input.ENABLE_PORT_2` setting.
+
+```
+.define input.ENABLE_PORT_2
+; ... .include smslib or this module
+```
+
 
 ### input.if
 

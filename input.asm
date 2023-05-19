@@ -6,6 +6,15 @@
 
 .define input.ENABLED 1
 
+;====
+; Settings
+;====
+
+;===
+; input.ENABLE_PORT_2
+; Ensure this value is defined to enable the reading of port 2
+;===
+
 ; Dependencies
 .ifndef utils.assert
     .include "./utils/assert.asm"
@@ -56,8 +65,11 @@
     xor a
     ld (input.ram.activePort.current), a
     ld (input.ram.activePort.previous), a
-    ld (input.ram.previous.port1), a
-    ld (input.ram.previous.port2), a
+
+    .ifdef input.ENABLE_PORT_2
+        ld (input.ram.previous.port1), a
+        ld (input.ram.previous.port2), a
+    .endif
 .endm
 
 ;====
@@ -75,15 +87,27 @@
 ;       ** junk
 ;====
 .macro "input.readPort1"
-    ; Copy previous value of port 1 to activePort.previous
-    ld a, (input.ram.previous.port1)        ; load previous.port1
-    ld (input.ram.activePort.previous), a   ; store in activePort.previous
+    .ifdef input.ENABLE_PORT_2
+        ; Copy previous value of port 1 to activePort.previous
+        ld a, (input.ram.previous.port1)        ; load previous.port1
+        ld (input.ram.activePort.previous), a   ; store in activePort.previous
 
-    ; Load current port 1 input and store in activePort.current
-    in a, input.PORT_1                      ; load input
-    xor $ff                                 ; invert so 1 = pressed and 0 = released
-    ld (input.ram.activePort.current), a    ; store in activePort.current
-    ld (input.ram.previous.port1), a        ; store in previous.port1 for next time
+        ; Load current port 1 input and store in activePort.current
+        in a, input.PORT_1                      ; load input
+        xor $ff                                 ; invert so 1 = pressed and 0 = released
+        ld (input.ram.activePort.current), a    ; store in activePort.current
+        ld (input.ram.previous.port1), a        ; store in previous.port1 for next time
+    .else
+        ld a, (input.ram.activePort.current)    ; load previous input
+        ld h, a                                 ; store in H as previous value
+
+        in a, input.PORT_1                      ; load input
+        xor $ff                                 ; invert so 1 = pressed and 0 = released
+        ld l, a                                 ; set to L
+
+        ; Set activePort current to L and previous to H
+        ld (input.ram.activePort.current), hl
+    .endif
 .endm
 
 ;====
@@ -126,6 +150,11 @@
 ; Alias for input._readPort2
 ;====
 .macro "input.readPort2"
+    .ifndef input.ENABLE_PORT_2
+        .print "input.asm \.: input.ENABLE_PORT_2 setting is not defined\n"
+        .fail
+    .endif
+
     call input._readPort2
 .endm
 
