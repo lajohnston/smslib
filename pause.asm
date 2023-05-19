@@ -9,6 +9,10 @@
 ;====
 .include "./utils/ramSlot.asm"
 
+.ifndef utils.assert
+    .include "utils/assert.asm"
+.endif
+
 ;====
 ; RAM
 ;
@@ -71,27 +75,30 @@
 ;           be set
 ;====
 .macro "pause.checkPause"
-    ld hl, pause.ram.pauseFlag
-    ld a, (hl)
+    ld a, (pause.ram.pauseFlag)
     or a         ; analyse a
 .endm
 
 ;====
 ; Jumps to the given address if the pause button has been pressed
 ;
-; @in   addr    address to jump to
+; @in   address     address to jump to
 ;====
-.macro "pause.jpIfPaused" args addr
+.macro "pause.jpIfPaused" args address
+    utils.assert.label address "pause.asm \.: Invalid address argument"
+
     pause.checkPause
-    jp nz, addr
+    jp nz, address
 .endm
 
 ;====
 ; Calls the given address if the pause button has been pressed
 ;
-; @in   addr    address to call
+; @in   address    address to call
 ;====
-.macro "pause.callIfPaused" args addr
+.macro "pause.callIfPaused" args address
+    utils.assert.label address "pause.asm \.: Invalid address argument"
+
     pause.checkPause
-    call nz, addr
+    call nz, address
 .endm
