@@ -12,7 +12,7 @@
 ; This occurs 50 times a second for PAL and 60 times per second for NTSC and can
 ; be used to regulate the logic speed
 ;====
-.define interrupts.handleVBlank 1
+.define interrupts.HANDLE_VBLANK 1
 
 ; Import smslib
 .incdir "../../"            ; back to smslib directory

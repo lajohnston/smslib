@@ -10,7 +10,7 @@
 ;====
 ; Import smslib
 ;====
-.define interrupts.handleVBlank 1   ; enable VBlanks
+.define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
 .define mapper.enableCartridgeRam 1
 
 .incdir "../../"                ; point to smslib directory

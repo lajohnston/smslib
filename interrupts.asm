@@ -22,13 +22,13 @@
 ;====
 
 ; If 1, VBlanks will jump to an interrupts.onVBlank label defined in your code
-.ifndef interrupts.handleVBlank
-    .define interrupts.handleVBlank 0
+.ifndef interrupts.HANDLE_VBLANK
+    .define interrupts.HANDLE_VBLANK 0
 .endif
 
 ; If 1, HBlanks will jump to an interrupts.onHBlank label defined in your code
-.ifndef interrupts.handleHBlank
-    .define interrupts.handleHBlank 0
+.ifndef interrupts.HANDLE_HBLANK
+    .define interrupts.HANDLE_HBLANK 0
 .endif
 
 ;==
@@ -92,14 +92,14 @@
 .bank 0 slot 0
 .orga $38
 .section "interrupts.handler" force
-    .if interrupts.handleVBlank + interrupts.handleHBlank == 0
+    .if interrupts.HANDLE_VBLANK + interrupts.HANDLE_HBLANK == 0
         ret ; No handling necessary
     .else
         interrupts._preserveAF
         in a, (interrupts.VDP_PORT)     ; satisfy interrupt
 
         ; If VBlank and HBlank are both enabled
-        .if interrupts.handleVBlank + interrupts.handleHBlank == 2
+        .if interrupts.HANDLE_VBLANK + interrupts.HANDLE_HBLANK == 2
             or a                        ; analyse vdp status in 'a'
 
             ; HBlank
@@ -113,7 +113,7 @@
             jp interrupts.onVBlank
         .else
             ; If only VBlank enabled, jump to that handler
-            .if interrupts.handleVBlank == 1
+            .if interrupts.HANDLE_VBLANK == 1
                 .if interrupts.useShadowRegisters == 1
                     exx
                 .endif
@@ -122,7 +122,7 @@
             .endif
 
             ; If only HBlank enabled, jump to that handler
-            .if interrupts.handleHBlank == 1
+            .if interrupts.HANDLE_HBLANK == 1
                 jp interrupts.onHBlank
             .endif
         .endif

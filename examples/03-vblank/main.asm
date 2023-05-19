@@ -20,7 +20,7 @@
 .sdsctag 1.10, "smslib vblank", "smslib vblank tutorial", "lajohnston"
 
 ; Import smslib
-.define interrupts.handleVBlank 1   ; enable VBlank handling in interrupts.asm
+.define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
 .incdir "../../"                    ; back to smslib directory
 .include "smslib.asm"               ; base library
 .incdir "."                         ; return to current directory

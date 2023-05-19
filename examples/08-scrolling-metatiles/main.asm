@@ -15,7 +15,7 @@
 ; Import smslib
 ;====
 .incdir "../../"                        ; point to smslib directory
-    .define interrupts.handleVBlank 1   ; enable VBlanks (see VBlank example)
+    .define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
     .include "smslib.asm"
 
     ; Set the size of the metatiles. Each value can be 2, 4, 8 or 16

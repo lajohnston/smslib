@@ -7,7 +7,7 @@
 .sdsctag 1.10, "smslib input", "smslib input tutorial", "lajohnston"
 
 ; Import smslib
-.define interrupts.handleVBlank 1   ; enable VBlank handling in interrupts.asm
+.define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
 .define input.ENABLE_PORT_2         ; enable reading port 2
 .incdir "../../"                    ; point to smslib directory
 .include "smslib.asm"               ; base library

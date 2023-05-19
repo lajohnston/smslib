@@ -26,10 +26,10 @@ interrupts.enable
 
 VBlanks occur each time the VDP has finished drawing a frame (50 times a second in PAL, 60 times a second in NTSC). It's a small window of opportunity to blast data to the VDP before it starts drawing the next frame. Sending data to the VDP outside this window can result in missed writes and graphical corruption. The only other safe time to write to the VDP is when the display is off.
 
-Enable the VBlank handler by defining `interrupts.handleVBlanks` setting before including `interrupts.asm`:
+Enable the VBlank handler by defining `interrupts.HANDLE_VBLANK` setting before including `interrupts.asm`:
 
 ```
-.define interrupts.handleVBlanks 1
+.define interrupts.HANDLE_VBLANK 1
 .include "interrupts.asm"
 ```
 
@@ -54,11 +54,11 @@ gameLoop:
 
 HBlanks occur when the line counter in the VDP falls below zero. This counter is set to the value stored in VDP Register 10 before the frame is drawn and each time a line is drawn (from top to bottom) it is decremented. Further documentation on this can be found in Richard Talbot-Watkins documentation on [VDP Register 10](https://www.smspower.org/uploads/Development/richard.txt).
 
-Enable the HBlank handler by defining `interrupts.handleHBlanks` setting before including `interrupts.asm`:
+Enable the HBlank handler by defining `interrupts.HANDLE_HBLANK` setting before including `interrupts.asm`:
 
 ```
-; Note: you can also enable interrupts.handleVBlanks alongside this if you wish
-.define interrupts.handleHBlanks 1
+; Note: you can also enable interrupts.HANDLE_VBLANK alongside this if you wish
+.define interrupts.HANDLE_HBLANK 1
 .include "interrupts.asm"
 ```
 
