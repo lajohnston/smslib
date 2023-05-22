@@ -756,7 +756,8 @@
 ;====
 .macro "tilemap._setRowScrollIndex"
     ld hl, (tilemap.ram.vramRowWrite)
-    utils.vdp.prepCommandHL utils.vdp.commands.WRITE
+    utils.vdp.setCommandHL utils.vdp.commands.WRITE
+    ld c, utils.vdp.VDP_DATA_PORT
 .endm
 
 ;====

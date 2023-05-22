@@ -84,7 +84,8 @@
 .endm
 
 ;====
-; Prepare a VRAM read or write to the address stored in HL
+; Prepare a VRAM read or write to the address stored in HL. Port C must be set
+; to utils.vdp.DATA_PORT before you can read or write the data
 ;
 ; @in   hl                  VRAM address ($0000 - $3FFF)
 ; @in   [command]           utils.vdp.command.READ or utils.vdp.command.WRITE
@@ -92,9 +93,8 @@
 ;                           command bits (6th and 7th) set or reset.
 ;                           (%00 = read; %01 = write)
 ; @out  VRAM write address  VRAM address with command bits set
-; @out  c                   VDP data port
 ;====
-.macro "utils.vdp.prepCommandHL" args command
+.macro "utils.vdp.setCommandHL" args command
     .ifdef command
         utils.assert.oneOf command, utils.vdp.commands.READ, utils.vdp.commands.WRITE, "utils/vdp.asm \.: Invalid command argument"
     .endif
@@ -112,13 +112,11 @@
 
     ; Output high address byte + command
     out (utils.vdp.VDP_COMMAND_PORT), a
-
-    ; Port to write to
-    ld c, utils.vdp.VDP_DATA_PORT
 .endm
 
 ;====
-; Prepare a VRAM read or write to the address stored in DE
+; Prepare a VRAM read or write to the address stored in DE. Port C must be set
+; to utils.vdp.DATA_PORT before you can read or write the data
 ;
 ; @in   de                  VRAM address ($0000 - $3FFF)
 ; @in   [command]           utils.vdp.command.READ or utils.vdp.command.WRITE
@@ -126,9 +124,8 @@
 ;                           command bits (6th and 7th) set or reset.
 ;                           (%00 = read; %01 = write)
 ; @out  VRAM write address  VRAM address with command bits set
-; @out  c                   VDP data port
 ;====
-.macro "utils.vdp.prepCommandDE" args command
+.macro "utils.vdp.setCommandDE" args command
     .ifdef command
         utils.assert.oneOf command, utils.vdp.commands.READ, utils.vdp.commands.WRITE, "utils/vdp.asm \.: Invalid command argument"
     .endif
@@ -146,9 +143,6 @@
 
     ; Output high address byte + command
     out (utils.vdp.VDP_COMMAND_PORT), a
-
-    ; Port to write to
-    ld c, utils.vdp.VDP_DATA_PORT
 .endm
 
 ;====
