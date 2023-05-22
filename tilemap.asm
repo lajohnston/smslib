@@ -757,7 +757,7 @@
 .macro "tilemap._setRowScrollIndex"
     ld hl, (tilemap.ram.vramRowWrite)
     utils.vdp.setCommandHL utils.vdp.commands.WRITE
-    ld c, utils.vdp.VDP_DATA_PORT
+    ld c, utils.vdp.DATA_PORT
 .endm
 
 ;====
@@ -1195,11 +1195,11 @@
             .endif
 
             ; Set VRAM low byte write address
-            out (utils.vdp.VDP_COMMAND_PORT), a
+            out (utils.vdp.COMMAND_PORT), a
 
             ; Set VRAM high byte write address
             ld a,  tilemap._writeColumn_writeAddressHigh; set A to high address
-            out (utils.vdp.VDP_COMMAND_PORT), a         ; send to VDP
+            out (utils.vdp.COMMAND_PORT), a             ; send to VDP
 
             ; Write tile
             outi    ; pattern ref

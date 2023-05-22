@@ -20,8 +20,8 @@
 ;====
 
 ; VDP ports
-.define utils.vdp.VDP_COMMAND_PORT $bf
-.define utils.vdp.VDP_DATA_PORT $be
+.define utils.vdp.COMMAND_PORT $bf
+.define utils.vdp.DATA_PORT $be
 
 ; Registers
 .define utils.vdp.BORDER_COLOR_REGISTER 7
@@ -49,11 +49,11 @@
         ld a, <address
     .endif
 
-    out (utils.vdp.VDP_COMMAND_PORT), a
+    out (utils.vdp.COMMAND_PORT), a
 
     ; Output high byte to VDP with write command set
     ld a, >address | utils.vdp.commands.WRITE
-    out (utils.vdp.VDP_COMMAND_PORT), a
+    out (utils.vdp.COMMAND_PORT), a
 
     ; Port to write to
     .ifndef setPort
@@ -61,7 +61,7 @@
     .endif
 
     .if setPort == 1
-        ld c, utils.vdp.VDP_DATA_PORT
+        ld c, utils.vdp.DATA_PORT
     .endif
 .endm
 
@@ -101,7 +101,7 @@
 
     ; Output low byte to VDP
     ld a, l
-    out (utils.vdp.VDP_COMMAND_PORT), a ; output low address byte
+    out (utils.vdp.COMMAND_PORT), a ; output low address byte
 
     ; Load high byte into A
     ld a, h
@@ -111,7 +111,7 @@
     .endif
 
     ; Output high address byte + command
-    out (utils.vdp.VDP_COMMAND_PORT), a
+    out (utils.vdp.COMMAND_PORT), a
 .endm
 
 ;====
@@ -132,7 +132,7 @@
 
     ; Output low byte to VDP
     ld a, e
-    out (utils.vdp.VDP_COMMAND_PORT), a ; output low address byte
+    out (utils.vdp.COMMAND_PORT), a ; output low address byte
 
     ; Load high byte into A
     ld a, d
@@ -142,7 +142,7 @@
     .endif
 
     ; Output high address byte + command
-    out (utils.vdp.VDP_COMMAND_PORT), a
+    out (utils.vdp.COMMAND_PORT), a
 .endm
 
 ;====
@@ -157,7 +157,7 @@
         ld bc, $4000     ; Counter for 16KB of VRAM
         -:
             xor a
-            out (utils.vdp.VDP_DATA_PORT), a ; Output to VRAM address, which is auto-incremented after each write
+            out (utils.vdp.DATA_PORT), a ; output + increment VRAM address
             dec bc
             ld a, b
             or c
@@ -181,7 +181,7 @@
         ld a, registerValue             ; load A with value if one is given
     .endif
 
-    out (utils.vdp.VDP_COMMAND_PORT), a ; send the register value first
+    out (utils.vdp.COMMAND_PORT), a     ; send the register value first
     ld a, %10000000 | registerNumber    ; load write command with register number
-    out (utils.vdp.VDP_COMMAND_PORT), a ; send the register write command
+    out (utils.vdp.COMMAND_PORT), a     ; send the register write command
 .endm
