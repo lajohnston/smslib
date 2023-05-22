@@ -61,7 +61,6 @@
 ;====
 ; Constants
 ;====
-.define tilemap.VDP_DATA_PORT $be
 .define tilemap.ROWS 28
 .define tilemap.COLS 32
 .define tilemap.MAX_PATTERN_INDEX 511
@@ -212,10 +211,10 @@
     .endif
 
     ld a, <(patternIndex)           ; load A with low-byte of pattern index
-    out (tilemap.VDP_DATA_PORT), a  ; write pattern ref
+    out (utils.vdp.DATA_PORT), a    ; write pattern ref
 
     ld a, attributes
-    out (tilemap.VDP_DATA_PORT), a  ; write tile attributes
+    out (utils.vdp.DATA_PORT), a    ; write tile attributes
 .endm
 
 ;====
@@ -232,9 +231,9 @@
         ld a, (hl)                      ; read byte
         cp d                            ; compare value with terminator
         ret z                           ; return if terminator byte found
-        out (tilemap.VDP_DATA_PORT), a  ; write pattern ref
+        out (utils.vdp.DATA_PORT), a    ; write pattern ref
         ld a, b                         ; load attributes
-        out (tilemap.VDP_DATA_PORT), a  ; write attributes
+        out (utils.vdp.DATA_PORT), a    ; write attributes
         inc hl                          ; next char
         jp tilemap.writeBytesUntil      ; repeat
 .ends
@@ -274,9 +273,9 @@
 
     tilemap.writeBytes:
         ld a, (hl)                      ; read byte
-        out (tilemap.VDP_DATA_PORT), a  ; write pattern ref
+        out (utils.vdp.DATA_PORT), a    ; write pattern ref
         ld a, c                         ; load attributes
-        out (tilemap.VDP_DATA_PORT), a  ; write attributes
+        out (utils.vdp.DATA_PORT), a    ; write attributes
         djnz _nextByte                  ; repeat until b = 0
         ret
 .ends
@@ -803,8 +802,8 @@
     or 128  ; OR A by 128 to combine bits
     ld d, a ; set D to value
 
-    ; Set B to bytes to write (tilemap.COL_SIZE_BYTES), and C to tilemap.VDP_DATA_PORT
-    ld bc, (tilemap.COL_SIZE_BYTES * 256) + tilemap.VDP_DATA_PORT
+    ; Set B to bytes to write (tilemap.COL_SIZE_BYTES), and C to utils.vdp.DATA_PORT
+    ld bc, (tilemap.COL_SIZE_BYTES * 256) + utils.vdp.DATA_PORT
 
     ; Set HL to the tile data to write
     .ifdef dataAddr
