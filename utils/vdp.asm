@@ -7,6 +7,10 @@
 ;====
 ; Dependencies
 ;====
+.ifndef utils.assert
+    .include "utils/assert.asm"
+.endif
+
 .ifndef utils.outiBlock
     .include "utils/outiBlock.asm"
 .endif
@@ -62,33 +66,82 @@
 .endm
 
 ;====
+; Sets the command bits on the high byte of the VRAM address
+;
+; @in   a   high byte of the VRAM address ($00 - $3F)
+; @in   a   high byte of the address with the command bits set
+;====
+.macro "utils.vdp._setCommand" args command
+    utils.assert.oneOf command, utils.vdp.commands.READ, utils.vdp.commands.WRITE, "utils/vdp.asm \.: Invalid command argument"
+
+    .if command == utils.vdp.commands.READ
+        ; Reset high bits
+        and utils.vdp.commands.READ
+    .elif command == utils.vdp.commands.WRITE
+        ; Set bit 6; if address is correct bit 7 should already by reset
+        or utils.vdp.commands.WRITE
+    .endif
+.endm
+
+;====
 ; Prepare a VRAM read or write to the address stored in HL
 ;
-; @in   hl                  VRAM address
+; @in   hl                  VRAM address ($0000 - $3FFF)
 ; @in   [command]           utils.vdp.command.READ or utils.vdp.command.WRITE
 ;                           if not present, H should already have the correct
 ;                           command bits (6th and 7th) set or reset.
-;                           (00 = read; 01 = write)
+;                           (%00 = read; %01 = write)
 ; @out  VRAM write address  VRAM address with command bits set
 ; @out  c                   VDP data port
 ;====
 .macro "utils.vdp.prepCommandHL" args command
+    .ifdef command
+        utils.assert.oneOf command, utils.vdp.commands.READ, utils.vdp.commands.WRITE, "utils/vdp.asm \.: Invalid command argument"
+    .endif
+
     ; Output low byte to VDP
     ld a, l
     out (utils.vdp.VDP_COMMAND_PORT), a ; output low address byte
 
-    ; Output high byte to VDP with write command
+    ; Load high byte into A
     ld a, h
 
-    ; If command given, set command bits
     .ifdef command
-        .if command == utils.vdp.commands.READ
-            ; Reset high bits
-            and utils.vdp.commands.READ
-        .elif command == utils.vdp.commands.WRITE
-            ; Set bit 6; assumes bit 7 is already 0
-            or utils.vdp.commands.WRITE
-        .endif
+        utils.vdp._setCommand command
+    .endif
+
+    ; Output high address byte + command
+    out (utils.vdp.VDP_COMMAND_PORT), a
+
+    ; Port to write to
+    ld c, utils.vdp.VDP_DATA_PORT
+.endm
+
+;====
+; Prepare a VRAM read or write to the address stored in DE
+;
+; @in   de                  VRAM address ($0000 - $3FFF)
+; @in   [command]           utils.vdp.command.READ or utils.vdp.command.WRITE
+;                           if not present, D should already have the correct
+;                           command bits (6th and 7th) set or reset.
+;                           (%00 = read; %01 = write)
+; @out  VRAM write address  VRAM address with command bits set
+; @out  c                   VDP data port
+;====
+.macro "utils.vdp.prepCommandDE" args command
+    .ifdef command
+        utils.assert.oneOf command, utils.vdp.commands.READ, utils.vdp.commands.WRITE, "utils/vdp.asm \.: Invalid command argument"
+    .endif
+
+    ; Output low byte to VDP
+    ld a, e
+    out (utils.vdp.VDP_COMMAND_PORT), a ; output low address byte
+
+    ; Load high byte into A
+    ld a, d
+
+    .ifdef command
+        utils.vdp._setCommand command
     .endif
 
     ; Output high address byte + command
