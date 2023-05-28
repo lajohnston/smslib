@@ -175,6 +175,9 @@
 ;                       is set automatically
 ;====
 .macro "tilemap.tile" args patternIndex attributes
+    utils.assert.range NARGS, 1, 2, "tilemap.asm \.: Invalid number of arguments"
+    utils.assert.range patternIndex, 0, tilemap.MAX_PATTERN_INDEX, "tilemap.asm \.: Invalid patternIndex argument"
+
     .ifndef attributes
         .define attributes $00
     .endif
