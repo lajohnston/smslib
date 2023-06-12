@@ -2,7 +2,7 @@
 ; SMSLib
 ;
 ; Includes the full suite of SMSLib modules. Each module can be included
-; inidividually if desired, but ensure you call their respective init macros
+; individually if desired, but ensure you call their respective init macros
 ; (if they exist). You can also use init.asm to do this for you.
 ;
 ; Usage:
