@@ -1,3 +1,5 @@
+.define utils.ram
+
 ;====
 ; Sets a utils.ram.SLOT value to either the user-defined smslib.RAM_SLOT value or
 ; the mapper-defined slot (mapper.RAM_SLOT). This allows modules to define RAM

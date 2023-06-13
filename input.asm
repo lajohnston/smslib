@@ -22,7 +22,9 @@
     .include "./utils/assert.asm"
 .endif
 
-.include "./utils/ram.asm"
+.ifndef utils.ram
+    .include "utils/ram.asm"
+.endif
 
 ;====
 ; Constants

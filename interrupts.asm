@@ -13,7 +13,9 @@
 ;====
 ; Dependencies
 ;====
-.include "./utils/ram.asm"
+.ifndef utils.ram
+    .include "utils/ram.asm"
+.endif
 
 ;====
 ; Settings

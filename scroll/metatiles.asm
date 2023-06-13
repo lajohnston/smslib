@@ -21,7 +21,9 @@
     .include "utils/math.asm"
 .endif
 
-.include "utils/ram.asm"
+.ifndef utils.ram
+    .include "utils/ram.asm"
+.endif
 
 ;===
 ; Settings

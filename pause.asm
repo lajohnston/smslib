@@ -7,7 +7,9 @@
 ;====
 ; Dependencies
 ;====
-.include "./utils/ram.asm"
+.ifndef utils.ram
+    .include "utils/ram.asm"
+.endif
 
 .ifndef utils.assert
     .include "utils/assert.asm"
