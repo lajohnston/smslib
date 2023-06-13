@@ -21,7 +21,7 @@
     .include "utils/math.asm"
 .endif
 
-.include "utils/ramSlot.asm"
+.include "utils/ram.asm"
 
 ;===
 ; Settings
@@ -172,7 +172,7 @@
 ;====
 ; RAM
 ;====
-.ramsection "scroll.metatiles.ram" slot utils.ramSlot
+.ramsection "scroll.metatiles.ram" slot utils.ram.SLOT
     ; Pointer to the top left tile of the on screen map
     scroll.metatiles.ram.topLeftTile:   instanceof scroll.metatiles.TilePointer
 
@@ -193,7 +193,7 @@
 .ends
 
 ; Col and row counters, to help with bounds checking
-.ramsection "scroll.metatiles.ram.bounds" slot utils.ramSlot
+.ramsection "scroll.metatiles.ram.bounds" slot utils.ram.SLOT
     scroll.metatiles.ram.bounds.maxTopMetatileRow:  db  ; 1-based (1 = row 0)
     scroll.metatiles.ram.bounds.topMetatileRow:     db  ; 1-based (1 = row 0)
     scroll.metatiles.ram.bounds.leftMetatileCol:    db  ; 1-based (1 = col 0)

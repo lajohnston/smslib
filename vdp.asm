@@ -7,7 +7,7 @@
 ;====
 ; Dependencies
 ;====
-.include "./utils/ramSlot.asm"
+.include "./utils/ram.asm"
 
 .ifndef utils.vdp
     .include "utils/vdp.asm"
@@ -74,7 +74,7 @@
 
 ; Buffer for setting the mode control registers, to allow settings to be changed
 ; without overwriting existing ones
-.ramsection "vdp.ram" slot utils.ramSlot
+.ramsection "vdp.ram" slot utils.ram.SLOT
     vdp.ram.register0Buffer: db
     vdp.ram.register1Buffer: db
 .ends

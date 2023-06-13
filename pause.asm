@@ -7,7 +7,7 @@
 ;====
 ; Dependencies
 ;====
-.include "./utils/ramSlot.asm"
+.include "./utils/ram.asm"
 
 .ifndef utils.assert
     .include "utils/assert.asm"
@@ -18,7 +18,7 @@
 ;
 ; Flag is set when the pause button has been pressed
 ;====
-.ramsection "pause.ram.pauseFlag" slot utils.ramSlot
+.ramsection "pause.ram.pauseFlag" slot utils.ram.SLOT
     pause.ram.pauseFlag: db
 .ends
 

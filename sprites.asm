@@ -29,7 +29,7 @@
 ;====
 ; Dependencies
 ;====
-.include "./utils/ramSlot.asm"
+.include "./utils/ram.asm"
 
 .ifndef utils.vdp
     .include "utils/vdp.asm"
@@ -72,7 +72,7 @@
 ; technique is described by user gvx32 in:
 ; https://www.smspower.org/forums/15794-AFewHintsOnCodingAMediumLargeSizedGameUsingWLADX
 ;====
-.ramsection "sprites.ram.buffer" bank 0 slot utils.ramSlot orga sprites.BUFFER_ADDRESS force
+.ramsection "sprites.ram.buffer" bank 0 slot utils.ram.SLOT orga sprites.BUFFER_ADDRESS force
     sprites.ram.buffer: instanceof sprites.Buffer
 .ends
 

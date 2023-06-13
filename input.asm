@@ -22,7 +22,7 @@
     .include "./utils/assert.asm"
 .endif
 
-.include "./utils/ramSlot.asm"
+.include "./utils/ram.asm"
 
 ;====
 ; Constants
@@ -48,7 +48,7 @@
 ; RAM section storing the last port that was read with either input.readPort1
 ; or input.readPort2
 ;====
-.ramsection "input.ram.activePort" slot utils.ramSlot
+.ramsection "input.ram.activePort" slot utils.ram.SLOT
     input.ram.activePort.current:   db
     input.ram.activePort.previous:  db
 .ends
@@ -56,7 +56,7 @@
 ;====
 ; RAM section to store the previous input values for each port
 ;====
-.ramsection "input.ram.previous" slot utils.ramSlot
+.ramsection "input.ram.previous" slot utils.ram.SLOT
     input.ram.previous.port1:    db
     input.ram.previous.port2:    db
 .ends
