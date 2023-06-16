@@ -33,7 +33,7 @@
 ; @in   [expected]  (optional) the value that was expected
 ;====
 .macro "utils.assert.fail" args message received expected
-    .print message, "\n"
+    .print message, "\n\n"
 
     .ifdef expected
         .print "    Expected: ", expected, "\n"
@@ -41,7 +41,7 @@
 
     .print "    Received: "
     utils.assert.printValue received
-    .print "\n"
+    .print "\n\n"
 
     .fail
 .endm
