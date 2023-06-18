@@ -40,6 +40,9 @@ See example programs in the `examples` directory. Build the examples using the `
 - [tilemap.asm](./docs/tilemap.md) - Background tilemap and scrolling
 - [vdp.asm](./docs/vdp.md) - Graphics chip register settings
 
+### Additional utils
+- [utils/ram.asm](./docs/utils/ram.md) - Utilities for setting values in RAM
+
 ## Design Principles
 
 ### Low level
