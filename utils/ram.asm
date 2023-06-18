@@ -17,22 +17,28 @@
 ; the mapper-defined slot (mapper.RAM_SLOT). This allows modules to define RAM
 ; sections using the correct slot without being coupled to the mapper or global
 ; variable
-;
-; @fail if value cannot be determined
 ;====
 .ifdef smslib.RAM_SLOT
-    .redefine utils.ram.SLOT smslib.RAM_SLOT
+    .define utils.ram.SLOT smslib.RAM_SLOT
 .else
     .ifdef mapper.RAM_SLOT
-        .redefine utils.ram.SLOT mapper.RAM_SLOT
-    .else
+        .define utils.ram.SLOT mapper.RAM_SLOT
+    .endif
+.endif
+
+;====
+; Asserts that the RAM slot was able to be determined and is set in
+; utils.ram.SLOT, otherwise fails with instructions
+;====
+.macro "utils.ram.assertRamSlot"
+    .ifndef utils.ram.SLOT
         .print "\.: Cannot determine which RAM slot to use:"
-        .print " Either .define an smslib.RAM_SLOT value or include an "
+        .print " Either .define an smslib.RAM_SLOT value or include an"
         .print " smslib mapper before including the other modules"
         .print "\n\n"
         .fail
     .endif
-.endif
+.endm
 
 ;====
 ; Fills a portion of RAM with the given value

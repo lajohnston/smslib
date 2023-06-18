@@ -35,6 +35,7 @@
 
 .ifndef utils.ram
     .include "utils/ram.asm"
+    utils.ram.assertRamSlot
 .endif
 
 .ifndef utils.vdp
