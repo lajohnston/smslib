@@ -236,8 +236,7 @@
 .macro "sprites.init"
     ; Set nextIndex to index 0
     ld a, <(sprites.ram.buffer) + sprites.Buffer.yPos   ; low byte of index 0
-    ld de, sprites.ram.buffer.nextIndex                 ; point to nextIndex
-    ld (de), a                                          ; store low byte
+    ld (sprites.ram.buffer.nextIndex), a                ; store in nextIndex
 .endm
 
 ;====
