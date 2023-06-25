@@ -108,13 +108,11 @@
     vdp.writeRegisters vdp.initData, vdp.initDataEnd
 
     ; Set register buffers
-    ld de, vdp.ram.register0Buffer
     ld a, vdp.REGISTER_0_DEFAULT
-    ld (de), a
+    ld (vdp.ram.register0Buffer), a
 
-    inc de  ; point to register1 buffer
     ld a, vdp.REGISTER_1_DEFAULT
-    ld (de), a
+    ld (vdp.ram.register1Buffer), a
 .endm
 
 ;====
