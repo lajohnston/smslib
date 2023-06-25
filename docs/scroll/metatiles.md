@@ -24,7 +24,7 @@ A 2x2 metatile combines 4 individual tiles together and refers to them in a sing
 
 The module isn't included by default so will need to be included. You can specify the size of each metatile in rows and columns (allowed value: 2, 4, 8, 16). They default to 2.
 
-```
+```asm
 .define scroll.metatiles.COLS_PER_METATILE 4
 .define scroll.metatiles.ROWS_PER_METATILE 4
 .include "scroll/metatiles.asm"
@@ -36,7 +36,7 @@ The module isn't included by default so will need to be included. You can specif
 
 The definitions contain the raw tile data stored sequentially (i.e. the top row of subtiles is stored from left to right, then the second row, etc.). See [tilemap.asm](../tilemap.md) for more information about the tile data format. The definitions should be aligned to the `scroll.metatiles.DEFS_ALIGN` value:
 
-```
+```asm
 .section "myMetatileDefs" free align scroll.metatiles.DEFS_ALIGN
     my2x2MetatileDefs:
         ;===
@@ -60,7 +60,7 @@ The definitions contain the raw tile data stored sequentially (i.e. the top row 
 
 You can define multiple sets of these and specify which to use with `scroll.metatiles.setDefs`:
 
-```
+```asm
 ld hl, my2x2MetatileDefs
 scroll.metatiles.setDefs
 ```
@@ -69,7 +69,7 @@ scroll.metatiles.setDefs
 
 The tilemap consists of 1-byte references that each point to one of the current 256 metatile definitions. Due to optimisations within the lookup code the metatile reference may not always match up with the order defined in the metatile definitions. You can use `scroll.metatiles.ref` to define a byte containing the correct reference number.
 
-```
+```asm
 scroll.metatiles.ref 0      ; the first metatile definition
 scroll.metatiles.ref 1      ; the second metatile definition
 scroll.metatiles.ref 255    ; the last metatile definition
@@ -79,7 +79,7 @@ The width of the tilemap is variable at runtime to allow a variety of level size
 
 You can change the RAM allocation by setting the `scroll.metatiles.MAX_MAP_BYTES` value before importing the module:
 
-```
+```asm
 ; 2048 bytes of RAM will be allocated to the map, restricting its maximum height
 .define scroll.metatiles.MAX_MAP_BYTES 2048
 .include "scroll/metatiles.asm"
@@ -87,7 +87,7 @@ You can change the RAM allocation by setting the `scroll.metatiles.MAX_MAP_BYTES
 
 An example 64x32 metatile map. 64*32 = 2048, so this will fit into 2048-bytes of RAM.
 
-```
+```asm
 ; 32 metatile rows (height)
 .repeat 32
     ; Each row contains 64 metatile columns (width)
@@ -103,7 +103,7 @@ An example 64x32 metatile map. 64*32 = 2048, so this will fit into 2048-bytes of
 
 Draw the initial view of the map when the display is off.
 
-```
+```asm
 ; Set the address of the metatile definitions
 ld hl, myMetatileDefs
 scroll.metatiles.setDefs
@@ -120,13 +120,13 @@ scroll.metatiles.init   ; draw map
 
 Adjust the x and y pixels by up to 8 pixels each per frame (-8 to +8 inclusive). This limit isn't enforced so ensure you stay within it for correct results.
 
-```
+```asm
 ; Negative x values move left, positive move right
 ld a, 1                         ; move right 1 pixel
 scroll.metatiles.adjustXPixels
 ```
 
-```
+```asm
 ; Negative y values move up, positive move down
 ld a, -2                        ; move up 2 pixels
 scroll.metatiles.adjustYPixels
@@ -144,7 +144,7 @@ Optional bounds checking can be enabled to ensure the map doesn't scroll beyond 
 
 Depending on your engine and map designs you might not need these additional checks, for example if the edges of the maps have space around them that the player can't actually move beyond.
 
-```
+```asm
 .define scroll.metatiles.ENFORCE_BOUNDS ; enable bounds checking
 .include "scroll/metatiles.asm"
 ```

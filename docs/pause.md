@@ -4,13 +4,13 @@ Provides a pause handler that toggles a flag in RAM whenever the pause button is
 
 Basic pause functionality can be provided by simply waiting until the pause button is pressed again:
 
-```
+```asm
 pause.waitIfPaused
 ```
 
 If you wish to jp or call a label based on the pause state, you can use the following:
 
-```
+```asm
 pause.jpIfPaused myPauseState
 pause.callIfPaused myPauseState
 

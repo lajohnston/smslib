@@ -6,7 +6,7 @@ General Z80 routines for manipulating RAM values.
 
 If you're including the whole smslib.asm library then this will probably already have been imported, otherwise you can safely import it as follows:
 
-```
+```asm
 .ifndef utils.ram
     .include "utils/ram.asm"
 .endif
@@ -16,7 +16,7 @@ If you're including the whole smslib.asm library then this will probably already
 
 Fills a portion of RAM with a value.
 
-```
+```asm
 ; Fill 20-bytes of RAM with the value of 0, starting from someAddress
 utils.ram.fill 20 someAddress 0
 

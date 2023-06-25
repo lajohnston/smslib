@@ -18,7 +18,7 @@ To get you started you can call `palette.rgb` with some RGB values to generate a
 
 Each color component can have the value of 0, 85, 170 or 255. Values inbetween these will be rounded to the closest factor.
 
-```
+```asm
 paletteData:
     palette.rgb 255, 0, 0   ; red
     palette.rgb 255, 170, 0 ; orange
@@ -35,7 +35,7 @@ You can then write these into the VDP VRAM the following macros.
 
 Set the color palette index ready to write to:
 
-```
+```asm
 palette.setIndex 0                          ; set the first color index
 palette.setIndex palette.SPRITE_PALETTE     ; first color in 'sprite' palette
 palette.setIndex palette.SPRITE_PALETTE + 1 ; second color in 'sprite' palette
@@ -44,7 +44,7 @@ palette.setIndex palette.SPRITE_PALETTE + 1 ; second color in 'sprite' palette
 
 Write bytes of raw data to the color RAM:
 
-```
+```asm
 myPaletteData:
   .incbin "myPalette.inc" fsize myPaletteDataSize
 
@@ -56,7 +56,7 @@ palette.writeBytes myPaletteData, myPaletteDataSize
 
 Write specific colors from the data.
 
-```
+```asm
 palette.setIndex 0                    ; point to first palette index
 palette.writeSlice paletteData, 3     ; write 3 colors from current index onwards (indices 0, 1, 2)
 palette.writeSlice otherPaletteData, 2; write 2 more colors (indices 3 and 4)
@@ -64,7 +64,7 @@ palette.writeSlice otherPaletteData, 2; write 2 more colors (indices 3 and 4)
 
 An optional third parameter lets you skip some colors in the data:
 
-```
+```asm
 ; Load 5 colors but skip the first 2
 palette.writeSlice paletteData, 5, 2
 ```
@@ -73,7 +73,7 @@ palette.writeSlice paletteData, 5, 2
 
 Loads an approximate RGB value into the current palette index. Each component is rounded to the nearest of the following values: 0, 85, 170, 255.
 
-```
+```asm
 palette.setIndex 0
 palette.writeRgb 255, 0, 0  ; a bright red
 ```

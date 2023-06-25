@@ -4,7 +4,7 @@ Low-level Sega Master System libs for the WLA-DX Z80 assembler (v10.3+). Its aim
 
 ## Quick Start
 
-```
+```asm
 .incdir "lib/smslib"    ; set the working directory to the smslib directory
 .include "smslib.asm"   ; include the libs
 

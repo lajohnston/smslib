@@ -6,7 +6,7 @@ Manages the tilemap, which places patterns/tiles in a grid to create the backgro
 
 Each tile in the map is 2 bytes. The first is a pattern index reference (see [patterns](./patterns.md)) and the second contains various attributes. The following attributes can be ORed together to create a byte containing all the attributes (i.e. tilemap.FLIP_X | tilemap.PRIORITY).
 
-```
+```asm
 tilemap.HIGH_BIT        ; 9th bit for the pattern ref, allows pattern refs 256+
 tilemap.FLIP_X          ; Flip horizontally
 tilemap.FLIP_Y          ; Flip vertically
@@ -27,7 +27,7 @@ tilemap.CUSTOM_3
 
 Define an individual tile in ROM, ready to be drawn later.
 
-```
+```asm
 tilemap.tile 0                  ; pattern 0
 tilemap.tile 0 tilemap.FLIP_X   ; pattern 0, flipped horizontally
 tilemap.tile 500                ; pattern 500 (tilemap.HIGH_BIT set automatically)
@@ -35,7 +35,7 @@ tilemap.tile 500                ; pattern 500 (tilemap.HIGH_BIT set automaticall
 
 ## Output ASCII data
 
-```
+```asm
 .asciitable
     map " " to "~" = 0
 .enda
@@ -52,7 +52,7 @@ tilemap.writeBytesUntil $ff message ; write from 'message' label until $ff reach
 
 Write bytes of data representing pattern refs. Each tile will contain the same [tile attributes](#tile-attributes). These attributes can be passed in as an optional 3rd parameter.
 
-```
+```asm
 message:
     .asc "Hello, world"
 
@@ -69,7 +69,7 @@ tilemap.writeBytes message 12, (tilemap.FLIP_X | tilemap.FLIP_Y)
 
 Write a tile to the current position in the tilemap.
 
-```
+```asm
 ; Pattern 0 with default attributes
 tilemap.writeTile 0
 
@@ -84,7 +84,7 @@ tilemap.writeTile 500, tilemap.FLIP_Y
 
 Write 32 uncompressed tiles.
 
-```
+```asm
 myRow:
     .repeat 32
         tilemap.tile 5
@@ -99,7 +99,7 @@ tilemap.writeRow        ; write data (32 tiles)
 
 Write multiple rows from an uncompressed tilemap. The visible tilemap is 32 tiles wide (columns) by 25 tiles high (rows) but the full map can be larger than the screen.
 
-```
+```asm
 .define MAP_ROWS 64
 .define MAP_COLS 64
 
@@ -138,7 +138,7 @@ A suggested workflow is to maintain a pointer to the top-left visible tile of yo
 
 Adjust the x and y axis by a maximum of 8 pixels each per frame (-8 to +8 inclusive). This limit is not enforced so ensure you stay within it.
 
-```
+```asm
 ; Initialise (beginning of level)
 tilemap.reset           ; initialise RAM and scroll registers
 
@@ -157,7 +157,7 @@ tilemap.calculateScroll ; calculate these changes
 
 You can detect if a new column needs processing using `tilemap.ifColScroll`.
 
-```
+```asm
 tilemap.ifColScroll +
     ; A new column has scrolled onto screen
 +:
@@ -165,7 +165,7 @@ tilemap.ifColScroll +
 
 You can pass three arguments to this to act like a switch statement for each direction.
 
-```
+```asm
 tilemap.ifColScroll left, right, +
     left:
         ; Scrolling left
@@ -177,7 +177,7 @@ tilemap.ifColScroll left, right, +
 
 A variation of this is `tilemap.ifColScrollElseRet`. This will execute a return instruction if no column scroll is required, otherwise it will jump/continue to the given left/right labels.
 
-```
+```asm
 tilemap.ifColScrollElseRet left, right
     left:
         ; Scrolling left
@@ -189,7 +189,7 @@ tilemap.ifColScrollElseRet left, right
 
 You can detect if a new row needs processing using `tilemap.ifRowScroll`.
 
-```
+```asm
 tilemap.ifRowScroll +
     ; A new row has scrolled onto screen
 +:
@@ -197,7 +197,7 @@ tilemap.ifRowScroll +
 
 You can pass three arguments to this to act like a switch statement for each direction.
 
-```
+```asm
 tilemap.ifRowScroll up, down, +
     up:
         ; Scrolling up
@@ -209,7 +209,7 @@ tilemap.ifRowScroll up, down, +
 
 A variation of this is `tilemap.ifRowScrollElseRet`. This will execute a return instruction if no row scroll is required, otherwise it will jump/continue to the given up/down labels.
 
-```
+```asm
 tilemap.ifRowScrollElseRet up, down
     up:
         ; Scrolling up
@@ -221,7 +221,7 @@ tilemap.ifRowScrollElseRet up, down
 
 If a column scroll is detected you can transfer the new column data to the column buffer in RAM.
 
-```
+```asm
 tilemap.loadDEColBuffer ; point DE to the column buffer
 
 tilemap.loadBColBytes   ; load B with the number of bytes to write to the buffer
@@ -234,7 +234,7 @@ You will need a routine to write sequential tile data for a column from top to b
 
 If a row scroll is detected you can transfer the new row data to the row buffer in RAM.
 
-```
+```asm
 tilemap.loadDERowBuffer ; point DE to the row buffer
 
 tilemap.loadBRowBytes   ; load B with the number of bytes to write to the buffer
@@ -247,7 +247,7 @@ You will need a routine that writes the row data to the buffer from left to righ
 
 During VBlank you can safely write the buffered data to VRAM. The easiest way to do this is to call `tilemap.writeScrollBuffers`. This will write the scroll registers, the column buffer and/or the row buffer when necessary.
 
-```
+```asm
 tilemap.writeScrollBuffers
 ```
 ### Bounds checking
@@ -256,7 +256,7 @@ If you detect a row or column scroll will take the tilemap out of bounds, you ca
 
 Note: these should be called before calling `tilemap.calculateScroll` so it takes the cancelling into account.
 
-```
+```asm
 tilemap.ifRowScroll _up, _down, +
     _up:
         ; ...logic that checks bounds
@@ -268,7 +268,7 @@ tilemap.ifRowScroll _up, _down, +
 +:
 ```
 
-```
+```asm
 tilemap.ifColScroll, _left, _right, +
     _left:
         ; ...logic that checks bounds

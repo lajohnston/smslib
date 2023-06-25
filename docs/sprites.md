@@ -8,13 +8,13 @@ The VDP holds a sprite table in VRAM containing the tile patterns and x and y po
 
 Reset the sprite buffer at the start of each game loop. This will set it back to the first index so you can start adding sprites to the beginning of the table.
 
-```
+```asm
 sprites.reset
 ```
 
 ## Adding Sprites
 
-```
+```asm
 ld a, 100           ; a = yPos
 ld b, 80            ; b = xPos
 ld c, 5             ; c = pattern number
@@ -25,7 +25,7 @@ sprites.add
 
 Sprite groups allow you to conveniently add multiple sprites with positions relative to a shared anchor point. The offsets must be positive numbers. If any sub-sprites fall off screen they will not be added:
 
-```
+```asm
 ; Define a sprite group of 2x2 sprites
 spriteGroup:
     sprites.startGroup
@@ -50,7 +50,7 @@ It is more efficient to add multiple sprites and/or sprite groups within a 'batc
 
 During a batch the next sprite index will be kept in `de` and incremented each time so be careful not to clobber this:
 
-```
+```asm
 sprites.startBatch
 ... ; add multiple sprites or sprite groups
 sprites.endBatch
@@ -60,6 +60,6 @@ sprites.endBatch
 
 Transfer buffer to VRAM when safe to do so, either when the display is off or during VBlank:
 
-```
+```asm
 sprites.copyToVram
 ```

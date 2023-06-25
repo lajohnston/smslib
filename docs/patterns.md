@@ -10,7 +10,7 @@ Writes uncompressed pattern data into VRAM.
 
 Due to WLA-DX limitations the size parameter must be an `immediate` value, so cannot be calculated using something like `endAddr - startAddr`. It can therefore either be a constant, or if using `fsize` to calculate the size of an included binary you just have to ensure this label is defined before this macro is called.
 
-```
+```asm
 uncompressedPatternData:
     .incbin "tiles.bin" fsize patternDataSize
 
@@ -23,7 +23,7 @@ patterns.writeBytes uncompressedPatternData, patternDataSize
 
 Lets you pick out certain tiles from the binary data and write them individually.
 
-```
+```asm
 myUncompressedPatternData:
     .incbin 'tiles.bin'
 
@@ -37,7 +37,7 @@ patterns.writeSlice myUncompressedPatternData, 1
 
 An optional third parameter lets you skip a certain number of patterns in the data:
 
-```
+```asm
 ; Write another pattern, skipping the first 9
 patterns.writeSlice otherPatternData, 1, 9
 ```

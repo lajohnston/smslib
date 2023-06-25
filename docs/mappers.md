@@ -8,7 +8,7 @@ Mappers define one or more fixed-sized 'slots' that can provide access to a smal
 
 SMSLib will default to using a basic 48KB mapper which is small enough to not require any paging. If you require a larger ROM than this then you can choose another one by including it before `smslib.asm`:
 
-```
+```asm
 .incdir "lib/smslib"        ; point to smslib directory
 .include "mapper/sega.asm"  ; use sega mapper
 .include "smslib.asm"       ; include rest of smslib
@@ -18,7 +18,7 @@ SMSLib will default to using a basic 48KB mapper which is small enough to not re
 
 Only one mapper can be used per project. All mappers expose `FIXED_SLOT`, `PAGE_SLOT_A`, `PAGE_SLOT_B` and `RAM_SLOT` constants. Using these constants should make it easier for you to swap out a mapper at a later stage of development if you decide to do so.
 
-```
+```asm
 ; Pageable slots are good for asset data that is only needed at certain times
 .slot mapper.PAGE_SLOT_A
 .include "assets.asm"       ; contents can now be paged into PAGE_SLOT_A
@@ -37,16 +37,16 @@ Only one mapper can be used per project. All mappers expose `FIXED_SLOT`, `PAGE_
 
 Before accessing data from the page slots (e.g. when loading an asset) remember to first tell the mapper to 'page' to the bank you want to access. You can use WLA-DX's colon prefix for a label to retrieve the bank number it has been placed in.
 
-```
+```asm
 mapper.pageBank :paletteData        ; ensure the bank containing paletteData is accessible
 palette.writeSlice paletteData, 1   ; you can now use paletteData
-``
+```
 
 ### Page Slot B
 
 Some mappers also provide a second pageable slot, `PAGE_SLOT_B`. It's generally simpler to stick to the one (`PAGE_SLOT_A`) but if you happened to have an asset over 16KB in size then both page slots could be used together to map the whole asset at once.
 
-```
+```asm
 ; Asset intended to be mapped into mapper.PAGE_SLOT_B
 .slot mapper.PAGE_SLOT_B
 paletteData:
@@ -62,7 +62,7 @@ palette.writeSlice paletteData, 1   ; palette data now accessible
 
 You can customise some mappers with additional parameters. Check the relevant mapper asm file to see which settings are supported.
 
-```
+```asm
 .define mapper.PAGEABLE_BANKS 4
 .define mapper.ENABLE_CARTRIDGE_RAM 1
 .include "smslib/mapper/sega.asm"

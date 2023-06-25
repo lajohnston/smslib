@@ -11,14 +11,14 @@ You will need to enable interrupts in both the VDP and Z80. After you initialise
 
 You can use [vdp.asm](./vdp.md) for this, taking care not to overwrite any other flags that are also stored within these registers (see `vdp.asm` file for documentation):
 
-```
+```asm
 vdp.enableHBlank
 vdp.enableVBlank
 ```
 
 You also need to enable interrupts within the Z80 CPU:
 
-```
+```asm
 interrupts.enable
 ```
 
@@ -28,14 +28,14 @@ VBlanks occur each time the VDP has finished drawing a frame (50 times a second 
 
 Enable the VBlank handler by defining `interrupts.HANDLE_VBLANK` setting before including `interrupts.asm`:
 
-```
+```asm
 .define interrupts.HANDLE_VBLANK 1
 .include "interrupts.asm"
 ```
 
 You will also need to define an `interrupts.onVBlank` label that the handler will jump to when a VBlank occurs. This handler must end with a macro call to `interrupts.endVBlank`:
 
-```
+```asm
 interrupts.onVBlank:
     ...                     ; write data to VRAM
     interrupts.endVBlank    ; return from VBlank
@@ -43,7 +43,7 @@ interrupts.onVBlank:
 
 VBlanks can also be used to regulate the speed of your game logic. Place `interrupts.waitForVBlank` in your game loop to ensure the logic doesn't update too quickly.
 
-```
+```asm
 gameLoop:
     interrupts.waitForVBlank
     ... update logic
@@ -56,7 +56,7 @@ HBlanks occur when the line counter in the VDP falls below zero. This counter is
 
 Enable the HBlank handler by defining `interrupts.HANDLE_HBLANK` setting before including `interrupts.asm`:
 
-```
+```asm
 ; Note: you can also enable interrupts.HANDLE_VBLANK alongside this if you wish
 .define interrupts.HANDLE_HBLANK 1
 .include "interrupts.asm"
@@ -64,7 +64,7 @@ Enable the HBlank handler by defining `interrupts.HANDLE_HBLANK` setting before 
 
 You will also need to define an `interrupts.onHBlank` label that the handler will jump to when an HBlank occurs. This handler must end with a macro call to `interrupts.endHBlank`:
 
-```
+```asm
 interrupts.onHBlank:
     ...
     interrupts.endHBlank    ; return from HBlank
@@ -72,14 +72,14 @@ interrupts.onHBlank:
 
 The HBlank won't trigger unless the line interval has been set. This takes a zero-based value:
 
-```
+```asm
 interrupts.setLineInterval 1    ; trigger HBlank every line (lines 0, 1, 2...)
 interrupts.setLineInterval 10   ; trigger every 10th line (lines 9, 19, 29...)
 ```
 
 This can also be set dynamically from `a` by omitting the argument. When using this method the value in `a` must be 0-based:
 
-```
+```asm
 ; Trigger every 20th line
 ld a, 19
 interrupts.setLineInterval
@@ -89,6 +89,6 @@ Please note that if you change the interval during active screen time, the new i
 
 You can read the current line being drawn. The value will be loaded into `a`
 
-```
+```asm
 interrupts.getLine
 ```
