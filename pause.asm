@@ -39,13 +39,11 @@
 .orga $66
 .section "pause.handler" force
     push af
-    push hl
-        ld hl, pause.ram.pauseFlag
-        ld a, (hl)  ; read flag
-        xor 1       ; toggle flag
-        ld (hl), a  ; store
-    pop hl
+        ld a, (pause.ram.pauseFlag) ; read flag
+        xor 1                       ; toggle flag
+        ld (pause.ram.pauseFlag), a ; store
     pop af
+
     retn
 .ends
 
