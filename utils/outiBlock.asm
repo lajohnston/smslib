@@ -43,6 +43,13 @@
 .endif
 
 ;====
+; Dependencies
+;====
+.ifndef utils.assert
+    .include "utils/assert.asm"
+.endif
+
+;====
 ; Constants
 ;====
 
@@ -85,6 +92,8 @@
 ; @in   hl      the source data address
 ;====
 .macro "utils.outiBlock.write" args bytes
+    utils.assert.range bytes 1 16384 "outiBlock.asm \.: Invalid bytes argument"
+
     ; Transfer chunks if data exceeds outi block size
     .rept bytes / utils.outiBlock.size
         call utils.outiBlock.block - utils.outiBlock.SIZE_BYTES
