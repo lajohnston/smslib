@@ -66,6 +66,7 @@
 ;====
 .define tilemap.ROWS 28
 .define tilemap.COLS 32
+.define tilemap.TILES tilemap.ROWS * tilemap.COLS
 .define tilemap.MAX_PATTERN_INDEX 511
 
 ; Min and max number of rows visible on screen. If the Y scroll offset is a
@@ -221,6 +222,19 @@
 
     ld a, attributes
     out (utils.vdp.DATA_PORT), a    ; write tile attributes
+.endm
+
+;====
+; Outputs the given number of tiles to the current position in the tilemap
+;
+; @in   hl      pointer to the tile data
+; @in   number  the number of tiles to write
+; @in   VRAM    pointer to destination address with write command
+;====
+.macro "tilemap.writeTiles" args number
+    utils.assert.range number, 1, tilemap.TILES, "tilemap.asm \.: Invalid number argument"
+
+    utils.outiBlock.write tilemap.TILE_SIZE_BYTES * number
 .endm
 
 ;====
