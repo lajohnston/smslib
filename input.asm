@@ -22,6 +22,10 @@
     .include "./utils/assert.asm"
 .endif
 
+.ifndef utils.port
+    .include "./utils/port.asm"
+.endif
+
 .ifndef utils.ram
     .include "utils/ram.asm"
     utils.ram.assertRamSlot
@@ -100,7 +104,7 @@
         ld (input.ram.activePort.previous), a   ; store in activePort.previous
 
         ; Load current port 1 input and store in activePort.current
-        in a, input.PORT_1                      ; load input
+        utils.port.read input.PORT_1            ; load input
         xor $ff                                 ; invert so 1 = pressed and 0 = released
         ld (input.ram.activePort.current), a    ; store in activePort.current
         ld (input.ram.previous.port1), a        ; store in previous.port1 for next time
@@ -108,7 +112,7 @@
         ld a, (input.ram.activePort.current)    ; load previous input
         ld h, a                                 ; store in H as previous value
 
-        in a, input.PORT_1                      ; load input
+        utils.port.read input.PORT_1            ; load input
         xor $ff                                 ; invert so 1 = pressed and 0 = released
         ld l, a                                 ; set to L
 
@@ -128,12 +132,12 @@
         ld (input.ram.activePort.previous), a   ; store in activePort.previous
 
         ; Retrieve up and down buttons, which are stored within the PORT_1 byte
-        in a, input.PORT_1
+        utils.port.read input.PORT_1
         and %11000000                           ; clear port 1 buttons
         ld b, a                                 ; store in B (DU------)
 
         ; Read remaining buttons from PORT_2
-        in a, input.PORT_2
+        utils.port.read input.PORT_2
         and %00001111                           ; reset misc. bits (----21RL)
 
         ; Combine into 1 byte (DU--21RL)
