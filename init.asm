@@ -56,45 +56,43 @@
 ;====
 ; Initialise any SMSLib modules that are activated
 ;====
+.macro "init.smslibModules"
+    ; initialise paging registers
+    .ifdef mapper.ENABLED
+        mapper.init
+    .endif
+
+    ; initialise vdp registers
+    .ifdef vdp.ENABLED
+        vdp.init
+    .endif
+
+    ; initialise pause handler
+    .ifdef pause.ENABLED
+        pause.init
+    .endif
+
+    ; initialise sprite buffer
+    .ifdef sprites.ENABLED
+        sprites.init
+    .endif
+
+    ; initialise input handler
+    .ifdef input.ENABLED
+        input.init
+    .endif
+
+    ; initialise interrupt handler
+    .ifdef interrupts.ENABLED
+        interrupts.init
+    .endif
+.endm
+
 .section "init.smslibModules" free
     init.smslibModules:
-        ; initialise paging registers
-        .ifdef mapper.ENABLED
-            mapper.init
-        .endif
-
-        ; initialise vdp registers
-        .ifdef vdp.ENABLED
-            vdp.init
-        .endif
-
-        ; initialise pause handler
-        .ifdef pause.ENABLED
-            pause.init
-        .endif
-
-        ; initialise sprite buffer
-        .ifdef sprites.ENABLED
-            sprites.init
-        .endif
-
-        ; initialise input handler
-        .ifdef input.ENABLED
-            input.init
-        .endif
-
-        ; initialise interrupt handler
-        .ifdef interrupts.ENABLED
-            interrupts.init
-        .endif
+        ; Initialise modules
+        init.smslibModules
 
         ; Zeroes VRAM, then returns
         jp utils.vdp.clearVram
 .ends
-
-;====
-; Alias to call init.smslibModules
-;====
-.macro "init.smslibModules"
-    call init.smslibModules
-.endm
