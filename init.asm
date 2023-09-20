@@ -8,6 +8,15 @@
 ;====
 
 ;====
+; Settings
+;====
+
+;===
+; init.DISABLE_HANDLER
+; If defined, disables the boot handler
+;===
+
+;====
 ; Dependencies
 ;====
 .ifndef utils.vdp
@@ -19,27 +28,36 @@
 ;====
 
 ;====
-; Boot sequence at ROM address 0
+; Boot sequence
 ;====
-.bank 0 slot 0
-.orga 0
-.section "main" force
+.macro "init"
     di              ; disable interrupts
     im 1            ; interrupt mode 1
     ld sp, $dff0    ; set stack pointer
 
     ; Initialise the system
-    call init.initSmslibModules
+    call init.smslibModules
 
     ; Jump to init label, defined by user
     jp init
-.ends
+.endm
+
+;====
+; Boot sequence at ROM address 0
+;====
+.ifndef init.DISABLE_HANDLER
+    .bank 0 slot 0
+    .orga 0
+    .section "init.bootHandler" force
+        init
+    .ends
+.endif
 
 ;====
 ; Initialise any SMSLib modules that are activated
 ;====
-.section "init.initSmslibModules" free
-    init.initSmslibModules:
+.section "init.smslibModules" free
+    init.smslibModules:
         ; initialise paging registers
         .ifdef mapper.ENABLED
             mapper.init
@@ -73,3 +91,10 @@
         ; Zeroes VRAM, then returns
         jp utils.vdp.clearVram
 .ends
+
+;====
+; Alias to call init.smslibModules
+;====
+.macro "init.smslibModules"
+    call init.smslibModules
+.endm
