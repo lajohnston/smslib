@@ -32,12 +32,9 @@
 ;====
 ; Pause handler
 ;
-; Toggles a flag in RAM whenever pause is pressed, which can be detected when
-; appropriate
+; Toggles a flag in RAM which can be detected when appropriate
 ;====
-.bank 0 slot 0
-.orga $66
-.section "pause.handler" force
+.macro "pause.handler"
     push af
         ld a, (pause.ram.pauseFlag) ; read flag
         xor 1                       ; toggle flag
@@ -45,7 +42,19 @@
     pop af
 
     retn
-.ends
+.endm
+
+;====
+; Pause handler sequence at ROM address $66. The SMS will jump to this location
+; when the pause button is pressed
+;====
+.ifndef pause.DISABLE_HANDLER
+    .bank 0 slot 0
+    .orga $66
+    .section "pause.handler" force
+        pause.handler
+    .ends
+.endif
 
 ;====
 ; Initialises the pause handler in RAM
