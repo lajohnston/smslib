@@ -92,9 +92,7 @@
 ; Handler for vertical (frame) and horizontal (line) interrupts. Assumes the use
 ; of interrupt mode 1 which jumps to address $38 when an interrupt occurs
 ;====
-.bank 0 slot 0
-.orga $38
-.section "interrupts.handler" force
+.macro "interrupts.handler"
     .if interrupts.HANDLE_VBLANK + interrupts.HANDLE_HBLANK == 0
         ret ; No handling necessary
     .else
@@ -130,7 +128,19 @@
             .endif
         .endif
     .endif
-.ends
+.endm
+
+;====
+; Places the interrupt handler at address $38. The SMS will jump to this
+; location when an HBlank (line) or VBlank (screen) interrupt occurs
+;====
+.ifndef interrupts.DISABLE_HANDLER
+    .bank 0 slot 0
+    .orga $38
+    .section "interrupts.handler" force
+        interrupts.handler
+    .ends
+.endif
 
 ;====
 ; Returns from a VBlank interrupt
