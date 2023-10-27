@@ -1,3 +1,4 @@
 [submodule "lib/zest"]
 	path = lib/zest
 	url = https://github.com/lajohnston/zest
+	branch = main
