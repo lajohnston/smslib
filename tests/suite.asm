@@ -1,7 +1,6 @@
 ; Include Zest library
-.incdir "../lib/zest"       ; point to zest directory
-    .include "zest.asm"     ; include the zest.asm library
-.incdir "."                 ; return to current directory
+.incdir "./zest"        ; point to zest directory
+.include "zest.asm"     ; include the zest.asm library
 
 ; Import smslib (via smslib-zest helper)
 .incdir ".."
