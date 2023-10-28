@@ -16,4 +16,5 @@
 .section "suite" appendto zest.suite
     .include "input/if.test.asm"
     .include "input/ifHeld.test.asm"
+    .include "input/ifPressed.test.asm"
 .ends
