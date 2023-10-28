@@ -13,8 +13,9 @@
 .include "input/_helpers.asm"
 
 ; Append test files to zest.suite
-.section "suite" appendto zest.suite
+.section "input tests (bank 1)" appendto zest.suite
     .include "input/if.test.asm"
     .include "input/ifHeld.test.asm"
     .include "input/ifPressed.test.asm"
+    .include "input/ifReleased.test.asm"
 .ends
