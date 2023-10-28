@@ -15,4 +15,5 @@
 ; Append test files to zest.suite
 .section "suite" appendto zest.suite
     .include "input/if.test.asm"
+    .include "input/ifHeld.test.asm"
 .ends

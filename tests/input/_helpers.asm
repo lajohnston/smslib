@@ -48,6 +48,7 @@
     .endif
 
     .redefine ALL_BUTTONS_EXCEPT_CURRENT FAKE_INPUT ~ $ff
+    .redefine ALL_BUTTONS %00111111
 .endm
 
 ;====
