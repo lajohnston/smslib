@@ -11,7 +11,7 @@ EXAMPLES_DIRECTORY=$(cd `dirname $0` && pwd)
 cd $EXAMPLES_DIRECTORY
 
 # Prep build directory
-BUILD_DIR=$(realpath build)
+BUILD_DIR=$(realpath dist)
 TEMP_DIR=$BUILD_DIR/tmp
 
 rm -rf $BUILD_DIR

@@ -23,7 +23,7 @@ Each module is decoupled from the others and can be imported individually. `smsl
 
 ## Examples
 
-See example programs in the `examples` directory. Build the examples using the `build.sh` script (Linux). `wlalink` and `wla-z80` should be in your system path. The compiled .sms ROM will appear in the `examples/build` directory ready to be run in an emulator.
+See example programs in the `examples` directory. Build the examples using the `build.sh` script (Linux). `wlalink` and `wla-z80` should be in your system path. The compiled .sms ROM will appear in the `examples/dist` directory ready to be run in an emulator.
 
 ## Docs
 
