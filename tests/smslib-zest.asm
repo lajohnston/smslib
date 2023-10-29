@@ -9,6 +9,7 @@
 
 ; Disable mapper, as Zest uses its own
 .define mapper.ENABLED 0
+.define mapper.RAM_SLOT zest.RAM_SLOT
 
 ; Use Zest's mapper's RAM SLOT
 .define smslib.RAM_SLOT zest.RAM_SLOT
