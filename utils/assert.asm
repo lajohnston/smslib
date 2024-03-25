@@ -146,6 +146,14 @@
         utils.assert.fail message value "number between \2 to \3"
     .endif
 
+    .if \?2 != ARG_NUMBER
+        utils.assert.fail message min "utils.assert.range min value to be an immediate numeric value"
+    .endif
+
+    .if \?3 != ARG_NUMBER
+        utils.assert.fail message max "utils.assert.range max value to be an immediate numeric value"
+    .endif
+
     .if value < min || value > max
         utils.assert.fail message value "number between \2 to \3"
     .endif
