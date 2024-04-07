@@ -30,7 +30,7 @@
     fontPatterns:
         .incbin "../assets/font.bin" fsize fontPatternsSize
 
-    ; Table template. We'll update this each frame
+    ; Table template
     template:
         .asc "       Pressed                  "
         .asc "             Current            "
@@ -47,6 +47,10 @@
         .asc "Up and 1 ( )   ( )   ( )   ( )  "
         .db $ff ; terminator
 
+    blankRow:
+        .asc "( )   ( )   ( )   ( )"
+        .db $ff ; terminator
+
     ; We'll add an asterisk in between the brackets in the template string,
     ; indicating which condition has been met
     asciiAsterisk:
@@ -57,7 +61,8 @@
 .define TABLE_ROW_OFFSET = 5
 
 ; The indicator tile columns for each condition (Pressed, Current, Held)
-.define PRESSED_INDICATOR_COLUMN = 10
+.define INDICATOR_COLUMN_START = 9
+.define PRESSED_INDICATOR_COLUMN = INDICATOR_COLUMN_START + 1
 .define CURRENT_INDICATOR_COLUMN = PRESSED_INDICATOR_COLUMN + 6
 .define HELD_INDICATOR_COLUMN = CURRENT_INDICATOR_COLUMN + 6
 .define RELEASED_INDICATOR_COLUMN = HELD_INDICATOR_COLUMN + 6
@@ -83,6 +88,8 @@
         patterns.setIndex 0
         patterns.writeBytes fontPatterns, fontPatternsSize
 
+        call drawTable
+
         vdp.startBatch
             vdp.enableDisplay
             vdp.enableVBlank
@@ -106,8 +113,8 @@
         ; You can also try this with input.readPort2
         input.readPort1
 
-        ; Redraw table with blank values
-        call drawBlankTable
+        ; Reset table with blank values
+        call resetTable
 
         ;===
         ; Update the columns to show which of the following condition(s)
@@ -133,10 +140,39 @@
 ;====
 ; Draws the blank table with none of the indicators populated
 ;====
-.section "drawBlankTable" free
-    drawBlankTable:
+.section "drawTable" free
+    drawTable:
         tilemap.setColRow 0, TABLE_ROW_OFFSET
         tilemap.writeBytesUntil $ff, template
+        ret
+.ends
+
+;====
+; Resets the indicators in the table
+;====
+.section "resetTable" free
+    resetTable:
+        tilemap.setColRow INDICATOR_COLUMN_START, UP_ROW
+        tilemap.writeBytesUntil $ff blankRow
+
+        tilemap.setColRow INDICATOR_COLUMN_START, DOWN_ROW
+        tilemap.writeBytesUntil $ff blankRow
+
+        tilemap.setColRow INDICATOR_COLUMN_START, LEFT_ROW
+        tilemap.writeBytesUntil $ff blankRow
+
+        tilemap.setColRow INDICATOR_COLUMN_START, RIGHT_ROW
+        tilemap.writeBytesUntil $ff blankRow
+
+        tilemap.setColRow INDICATOR_COLUMN_START, BUTTON_1_ROW
+        tilemap.writeBytesUntil $ff blankRow
+
+        tilemap.setColRow INDICATOR_COLUMN_START, BUTTON_2_ROW
+        tilemap.writeBytesUntil $ff blankRow
+
+        tilemap.setColRow INDICATOR_COLUMN_START, COMBO_ROW
+        tilemap.writeBytesUntil $ff blankRow
+
         ret
 .ends
 
