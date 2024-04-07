@@ -13,82 +13,15 @@
 .include "smslib.asm"               ; base library
 .incdir "."                         ; return to current directory
 
-;====
-; Assets
-;====
-
-; Map ASCII data to byte values so we can use .asc later (see wla-dx docs)
-.asciitable
-    map " " to "~" = 0
-.enda
-
-.section "assets" free
-    fontPalette:
-        palette.rgb 0, 0, 0
-        palette.rgb 170, 85, 170
-
-    fontPatterns:
-        .incbin "../assets/font.bin" fsize fontPatternsSize
-
-    ; Table template
-    template:
-        .asc "       Pressed                  "
-        .asc "             Current            "
-        .asc "                    Held        "
-        .asc "                        Released"
-        .asc "Up       ( )   ( )   ( )   ( )  "
-        .asc "Down     ( )   ( )   ( )   ( )  "
-        .asc "Left     ( )   ( )   ( )   ( )  "
-        .asc "Right    ( )   ( )   ( )   ( )  "
-        .asc "                                "
-        .asc "Button 1 ( )   ( )   ( )   ( )  "
-        .asc "Button 2 ( )   ( )   ( )   ( )  "
-        .asc "                                "
-        .asc "Up and 1 ( )   ( )   ( )   ( )  "
-        .db $ff ; terminator
-
-    blankRow:
-        .asc "( )   ( )   ( )   ( )"
-        .db $ff ; terminator
-
-    ; We'll add an asterisk in between the brackets in the template string,
-    ; indicating which condition has been met
-    asciiAsterisk:
-        .asc '*'
-.ends
-
-; The starting row the render the table from
-.define TABLE_ROW_OFFSET = 5
-
-; The indicator tile columns for each condition (Pressed, Current, Held)
-.define INDICATOR_COLUMN_START = 9
-.define PRESSED_INDICATOR_COLUMN = INDICATOR_COLUMN_START + 1
-.define CURRENT_INDICATOR_COLUMN = PRESSED_INDICATOR_COLUMN + 6
-.define HELD_INDICATOR_COLUMN = CURRENT_INDICATOR_COLUMN + 6
-.define RELEASED_INDICATOR_COLUMN = HELD_INDICATOR_COLUMN + 6
-
-; The row number for each button
-.define TABLE_BODY_ROW = TABLE_ROW_OFFSET + 4
-.define UP_ROW = TABLE_BODY_ROW
-.define DOWN_ROW = TABLE_BODY_ROW + 1
-.define LEFT_ROW = TABLE_BODY_ROW + 2
-.define RIGHT_ROW = TABLE_BODY_ROW + 3
-.define BUTTON_1_ROW = TABLE_BODY_ROW + 5
-.define BUTTON_2_ROW = TABLE_BODY_ROW + 6
-.define COMBO_ROW = TABLE_BODY_ROW + 8
+; Table
+.include "table.asm"
 
 ;====
 ; Initialise the example
 ;====
 .section "init" free
     init:
-        palette.setIndex 0
-        palette.writeBytes fontPalette 2
-
-        patterns.setIndex 0
-        patterns.writeBytes fontPatterns, fontPatternsSize
-
-        call drawTable
+        call table.draw
 
         vdp.startBatch
             vdp.enableDisplay
@@ -114,7 +47,7 @@
         input.readPort1
 
         ; Reset table with blank values
-        call resetTable
+        call table.reset
 
         ;===
         ; Update the columns to show which of the following condition(s)
@@ -130,53 +63,6 @@
 .ends
 
 ;====
-; Draws an ascii asterisk in the given column and row
-;====
-.macro "writeAsterisk" args column row
-    tilemap.setColRow column, row
-    tilemap.writeBytes asciiAsterisk 1
-.endm
-
-;====
-; Draws the blank table with none of the indicators populated
-;====
-.section "drawTable" free
-    drawTable:
-        tilemap.setColRow 0, TABLE_ROW_OFFSET
-        tilemap.writeBytesUntil $ff, template
-        ret
-.ends
-
-;====
-; Resets the indicators in the table
-;====
-.section "resetTable" free
-    resetTable:
-        tilemap.setColRow INDICATOR_COLUMN_START, UP_ROW
-        tilemap.writeBytesUntil $ff blankRow
-
-        tilemap.setColRow INDICATOR_COLUMN_START, DOWN_ROW
-        tilemap.writeBytesUntil $ff blankRow
-
-        tilemap.setColRow INDICATOR_COLUMN_START, LEFT_ROW
-        tilemap.writeBytesUntil $ff blankRow
-
-        tilemap.setColRow INDICATOR_COLUMN_START, RIGHT_ROW
-        tilemap.writeBytesUntil $ff blankRow
-
-        tilemap.setColRow INDICATOR_COLUMN_START, BUTTON_1_ROW
-        tilemap.writeBytesUntil $ff blankRow
-
-        tilemap.setColRow INDICATOR_COLUMN_START, BUTTON_2_ROW
-        tilemap.writeBytesUntil $ff blankRow
-
-        tilemap.setColRow INDICATOR_COLUMN_START, COMBO_ROW
-        tilemap.writeBytesUntil $ff blankRow
-
-        ret
-.ends
-
-;====
 ; Uses the if..pressed macros to detect when a button has just been pressed
 ; this frame, and indicate this with a '*' character. This only occurs for
 ; 1 frame so the indicator will flash once each time the button is pressed
@@ -186,34 +72,34 @@
         ; Check if either UP or DOWN have just been pressed
         input.ifYDirPressed _up, _down, +
             _up:
-                writeAsterisk PRESSED_INDICATOR_COLUMN, UP_ROW
+                table.drawIndicator PRESSED_INDICATOR_COLUMN, UP_ROW
                 jp +
             _down:
-                writeAsterisk PRESSED_INDICATOR_COLUMN, DOWN_ROW
+                table.drawIndicator PRESSED_INDICATOR_COLUMN, DOWN_ROW
         +:
 
         ; Check if either LEFT or RIGHT have just been pressed
         input.ifXDirPressed _left, _right, +
             _left:
-                writeAsterisk PRESSED_INDICATOR_COLUMN, LEFT_ROW
+                table.drawIndicator PRESSED_INDICATOR_COLUMN, LEFT_ROW
                 jp +
             _right:
-                writeAsterisk PRESSED_INDICATOR_COLUMN, RIGHT_ROW
+                table.drawIndicator PRESSED_INDICATOR_COLUMN, RIGHT_ROW
         +:
 
         ; Check if BUTTON 1 has just been pressed
         input.ifPressed input.BUTTON_1, +
-            writeAsterisk PRESSED_INDICATOR_COLUMN, BUTTON_1_ROW
+            table.drawIndicator PRESSED_INDICATOR_COLUMN, BUTTON_1_ROW
         +:
 
         ; Check if BUTTON 2 has just been pressed
         input.ifPressed input.BUTTON_2, +
-            writeAsterisk PRESSED_INDICATOR_COLUMN, BUTTON_2_ROW
+            table.drawIndicator PRESSED_INDICATOR_COLUMN, BUTTON_2_ROW
         +:
 
         ; Check if both UP and BUTTON 1 have been pressed
         input.ifPressed input.UP, input.BUTTON_1, +
-            writeAsterisk PRESSED_INDICATOR_COLUMN, COMBO_ROW
+            table.drawIndicator PRESSED_INDICATOR_COLUMN, COMBO_ROW
         +:
 
         ret
@@ -229,34 +115,34 @@
         ; Check if either UP or DOWN are currently pressed down
         input.ifYDir _up, _down, +
             _up:
-                writeAsterisk CURRENT_INDICATOR_COLUMN, UP_ROW
+                table.drawIndicator CURRENT_INDICATOR_COLUMN, UP_ROW
                 jp +
             _down:
-                writeAsterisk CURRENT_INDICATOR_COLUMN, DOWN_ROW
+                table.drawIndicator CURRENT_INDICATOR_COLUMN, DOWN_ROW
         +:
 
         ; Check if either LEFT or RIGHT are currently pressed down
         input.ifXDir _left, _right, +
             _left:
-                writeAsterisk CURRENT_INDICATOR_COLUMN, LEFT_ROW
+                table.drawIndicator CURRENT_INDICATOR_COLUMN, LEFT_ROW
                 jp +
             _right:
-                writeAsterisk CURRENT_INDICATOR_COLUMN, RIGHT_ROW
+                table.drawIndicator CURRENT_INDICATOR_COLUMN, RIGHT_ROW
         +:
 
         ; Check if BUTTON_1 is currently pressed down
         input.if input.BUTTON_1, +
-            writeAsterisk CURRENT_INDICATOR_COLUMN, BUTTON_1_ROW
+            table.drawIndicator CURRENT_INDICATOR_COLUMN, BUTTON_1_ROW
         +:
 
         ; Check if BUTTON_2 is currently pressed down
         input.if input.BUTTON_2, +
-            writeAsterisk CURRENT_INDICATOR_COLUMN, BUTTON_2_ROW
+            table.drawIndicator CURRENT_INDICATOR_COLUMN, BUTTON_2_ROW
         +:
 
         ; Check if both UP and BUTTON 1 have been pressed
         input.if input.UP, input.BUTTON_1, +
-            writeAsterisk CURRENT_INDICATOR_COLUMN, COMBO_ROW
+            table.drawIndicator CURRENT_INDICATOR_COLUMN, COMBO_ROW
         +:
 
         ret
@@ -275,34 +161,34 @@
         ; Check if either UP or DOWN are currently held
         input.ifYDirHeld _up, _down, +
             _up:
-                writeAsterisk HELD_INDICATOR_COLUMN, UP_ROW
+                table.drawIndicator HELD_INDICATOR_COLUMN, UP_ROW
                 jp +
             _down:
-                writeAsterisk HELD_INDICATOR_COLUMN, DOWN_ROW
+                table.drawIndicator HELD_INDICATOR_COLUMN, DOWN_ROW
         +:
 
         ; Check if either LEFT or RIGHT are currently held
         input.ifXDirHeld _left, _right, +
             _left:
-                writeAsterisk HELD_INDICATOR_COLUMN, LEFT_ROW
+                table.drawIndicator HELD_INDICATOR_COLUMN, LEFT_ROW
                 jp +
             _right:
-                writeAsterisk HELD_INDICATOR_COLUMN, RIGHT_ROW
+                table.drawIndicator HELD_INDICATOR_COLUMN, RIGHT_ROW
         +:
 
         ; Check if BUTTON_1 is currently held
         input.ifHeld input.BUTTON_1, +
-            writeAsterisk HELD_INDICATOR_COLUMN, BUTTON_1_ROW
+            table.drawIndicator HELD_INDICATOR_COLUMN, BUTTON_1_ROW
         +:
 
         ; Check if BUTTON_2 is currently held
         input.ifHeld input.BUTTON_2, +
-            writeAsterisk HELD_INDICATOR_COLUMN, BUTTON_2_ROW
+            table.drawIndicator HELD_INDICATOR_COLUMN, BUTTON_2_ROW
         +:
 
         ; Check if both UP and BUTTON 1 have been held since the previous frame
         input.ifHeld input.UP, input.BUTTON_1, +
-            writeAsterisk HELD_INDICATOR_COLUMN, COMBO_ROW
+            table.drawIndicator HELD_INDICATOR_COLUMN, COMBO_ROW
         +:
 
         ret
@@ -317,34 +203,34 @@
         ; Check if either UP or DOWN were released
         input.ifYDirReleased _up, _down, +
             _up:
-                writeAsterisk RELEASED_INDICATOR_COLUMN, UP_ROW
+                table.drawIndicator RELEASED_INDICATOR_COLUMN, UP_ROW
                 jp +
             _down:
-                writeAsterisk RELEASED_INDICATOR_COLUMN, DOWN_ROW
+                table.drawIndicator RELEASED_INDICATOR_COLUMN, DOWN_ROW
         +:
 
         ; Check if either LEFT or RIGHT were released
         input.ifXDirReleased _left, _right, +
             _left:
-                writeAsterisk RELEASED_INDICATOR_COLUMN, LEFT_ROW
+                table.drawIndicator RELEASED_INDICATOR_COLUMN, LEFT_ROW
                 jp +
             _right:
-                writeAsterisk RELEASED_INDICATOR_COLUMN, RIGHT_ROW
+                table.drawIndicator RELEASED_INDICATOR_COLUMN, RIGHT_ROW
         +:
 
         ; Check if BUTTON_1 was released
         input.ifReleased input.BUTTON_1, +
-            writeAsterisk RELEASED_INDICATOR_COLUMN, BUTTON_1_ROW
+            table.drawIndicator RELEASED_INDICATOR_COLUMN, BUTTON_1_ROW
         +:
 
         ; Check if BUTTON_2 was released
         input.ifReleased input.BUTTON_2, +
-            writeAsterisk RELEASED_INDICATOR_COLUMN, BUTTON_2_ROW
+            table.drawIndicator RELEASED_INDICATOR_COLUMN, BUTTON_2_ROW
         +:
 
         ; Check if both UP and BUTTON 1 were released
         input.ifReleased input.UP, input.BUTTON_1, +
-            writeAsterisk RELEASED_INDICATOR_COLUMN, COMBO_ROW
+            table.drawIndicator RELEASED_INDICATOR_COLUMN, COMBO_ROW
         +:
 
         ret
