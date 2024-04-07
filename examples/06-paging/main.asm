@@ -54,7 +54,7 @@
 
 .section "lots of 1s" superfree
     lotsOf1s:
-        .asc "          Lots of 1s            "
+        .asc "I'm a bank containing lots of 1s"
         .asc "                                "
 
         .rept $3800
@@ -64,7 +64,7 @@
 
 .section "lots of 2s" superfree
     lotsOf2s:
-        .asc "          Lots of 2s            "
+        .asc "I'm a bank containing lots of 2s"
         .asc "                                "
 
         .rept $3800
@@ -107,7 +107,9 @@
         interrupts.enable
 
         ; Infinite loop
-        -: jr -
+        -:
+            halt
+        jr -
 .ends
 
 ;====
