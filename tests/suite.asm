@@ -1,4 +1,5 @@
 ; Include Zest library
+.define zest.SUITE_BANKS 2
 .incdir "./zest"        ; point to zest directory
 .include "zest.asm"     ; include the zest.asm library
 
@@ -17,4 +18,29 @@
     .include "input/ifHeld.test.asm"
     .include "input/ifPressed.test.asm"
     .include "input/ifReleased.test.asm"
+.ends
+
+; Register preservation
+.section "registers.asm tests" appendto zest.suiteBank2
+    jp +
+        suite.setAllToA:
+            ld b, a
+            ld c, a
+            ld d, a
+            ld e, a
+            ld h, a
+            ld l, a
+            ld ixl, a
+            ld ixh, a
+            ld iyl, a
+            ld iyh, a
+            ld i, a
+            ret
+    +:
+
+    .include "registers/autoPreserve.test.asm"
+    .include "registers/iRegister.test.asm"
+    .include "registers/nestedPreserveScopes.test.asm"
+    .include "registers/registers.test.asm"
+    .include "registers/sequentialClobberScopes.test.asm"
 .ends

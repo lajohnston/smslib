@@ -34,6 +34,7 @@ See example programs in the `examples` directory. Build the examples using the `
 - [palette.asm](./docs/palette.md) - Color palettes
 - [patterns.asm](./docs/patterns.md) - Patterns (tile images)
 - [pause.asm](./docs/pause.md) - Pause button
+- [registers.asm](./docs/registers.md) - Efficiently preserve Z80 register states
 - [sprites.asm](./docs/sprites.md) - Manages a sprite table in a RAM and pushes to VRAM when required
 - [scroll/tiles.asm](./docs/scroll/tiles.md) - Scrollable tilemaps
 - [scroll/metatiles.asm](./docs/scroll/metatiles.md) - Scrollable maps of metatiles
@@ -41,6 +42,7 @@ See example programs in the `examples` directory. Build the examples using the `
 - [vdp.asm](./docs/vdp.md) - Graphics chip register settings
 
 ### Additional utils
+
 - [utils/ram.asm](./docs/utils/ram.md) - Utilities for setting values in RAM
 
 ## Design Principles
@@ -58,13 +60,15 @@ Over time the routines will be optimised for speed and size without one aspect a
 
 ### Unsafe Register Preservation
 
-As part of the speed priority the library routines will happily 'clobber' register values without preserving them onto the stack. This is because `push` and `pop` calls on multiple register pairs is expensive, and you may not even need some of them preserved.
+As part of the speed priority, by default the library routines will happily 'clobber' register values without preserving them onto the stack. This is because `push` and `pop` calls on multiple register pairs is expensive, and you may not even need some of them preserved.
 
-The register values before and after a call may therefore change. This shifts the responsibility of preservation to you, mainly for efficiency reasons; you know best what registers you actually care about, so only need to preserve those. The flipside of this is that it is a bit of a 'gotcha' to be aware of.
+The register values before and after a call may therefore change. This shifts the responsibility of preservation to the caller, mainly for efficiency reasons; the caller knows best what registers it actually cares about, so only needs to preserve those.
+
+The flipside of this is that it is a bit of a 'gotcha' to be aware of, so you can opt-out of this by enabling the `registers.AUTO_PRESERVE` setting to ensure all registers are preserved by default (see [registers.asm](./docs/registers.md)).
 
 ### Decoupled
 
-SMSLib modules for the most part are independent of one another so you can pick or choose only the ones you want. For convenience you can just include `smslib.asm` and this will pull the main ones in for you. In either case WLA-DX will only assemble the code you actually use.
+SMSLib modules for the most part are independent of one another so you can pick and choose only the ones you want. For convenience you can just include `smslib.asm` and this will pull the main ones in for you. In either case WLA-DX will only assemble the code you actually use so long as it's not executed with the `-k` (keep) option.
 
 ### Namespaced Prefixes
 
