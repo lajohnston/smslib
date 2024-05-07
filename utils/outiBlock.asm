@@ -49,6 +49,10 @@
     .include "utils/assert.asm"
 .endif
 
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
+.endif
+
 ;====
 ; Constants
 ;====
@@ -93,6 +97,7 @@
 ;====
 .macro "utils.outiBlock.write" args bytes
     utils.assert.range bytes 1 16384 "outiBlock.asm \.: Invalid bytes argument"
+    utils.clobbers "bc", "hl"
 
     ; Transfer chunks if data exceeds outi block size
     .rept bytes / utils.outiBlock.size
@@ -108,6 +113,8 @@
     .else
         call utils.outiBlock.block - (bytes # utils.outiBlock.size) * 2
     .endif
+
+    utils.clobbers.end
 .endm
 
 ;====
@@ -138,7 +145,9 @@
 ; Alias for utils.outiBlock.writeUpTo128Bytes
 ;====
 .macro "utils.outiBlock.writeUpTo128Bytes"
-    call utils.outiBlock.writeUpTo128Bytes
+    utils.clobbers "af", "bc", "hl", "iy"
+        call utils.outiBlock.writeUpTo128Bytes
+    utils.clobbers.end
 .endm
 
 ;====
@@ -150,6 +159,8 @@
 ; @in   offset      the first item in the array to copy (0-based)
 ;====
 .macro "utils.outiBlock.writeSlice" args dataAddress elementSize count offset
-    ld hl, dataAddress + (offset * elementSize)
-    utils.outiBlock.write (count * elementSize)
+    utils.clobbers "hl"
+        ld hl, dataAddress + (offset * elementSize)
+        utils.outiBlock.write (count * elementSize)
+    utils.clobbers.end
 .endm
