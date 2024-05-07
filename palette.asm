@@ -15,6 +15,10 @@
     .include "utils/assert.asm"
 .endif
 
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
+.endif
+
 .ifndef utils.outiBlock
     .include "utils/outiBlock.asm"
 .endif
@@ -60,6 +64,9 @@
 ; @in   red     red value
 ; @in   green   green value
 ; @in   blue    blue value
+;
+; @in   vram    the color ram address to write to
+; @in   c       the VDP data port
 ;====
 .macro "palette.writeRgb" args red, green, blue
     utils.assert.equals NARGS, 3, "palette.asm \. received the wrong number of arguments"
@@ -73,8 +80,10 @@
     .define \.\@blue = (blue + 42.5) / 85 & $ff
 
     ; Convert to --bbggrr
-    ld a, (\.\@blue * 16) + (\.\@green * 4) + \.\@red
-    out (c), a  ;   write color
+    utils.clobbers "af"
+        ld a, (\.\@blue * 16) + (\.\@green * 4) + \.\@red
+        out (c), a  ;   write color
+    utils.clobbers.end
 .endm
 
 ;====
@@ -91,8 +100,10 @@
     utils.assert.label address, "palette.asm \.: Invalid address argument"
     utils.assert.number size, "palette.asm \.: Invalid size argument"
 
-    ld hl, address
-    utils.outiBlock.write size
+    utils.clobbers "hl"
+        ld hl, address
+        utils.outiBlock.write size
+    utils.clobbers.end
 .endm
 
 ;====
