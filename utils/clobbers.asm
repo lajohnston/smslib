@@ -4,7 +4,7 @@
 ; isn't present a warning will be printed and the register preservation won't
 ; take effect
 ;====
-.define util.clobbers
+.define utils.clobbers
 
 ;====
 ; Settings
