@@ -68,7 +68,7 @@
 ; If pause activated, waits until pause button is pressed again before
 ; continuing
 ;====
-.macro "pause.waitIfPaused"
+.macro "pause.waitIfPaused" isolated
     -:
     ld a, (pause.ram.pauseFlag) ; read pauseFlag
     or a        ; analyse flag
