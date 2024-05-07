@@ -30,6 +30,10 @@
     .include "utils/assert.asm"
 .endif
 
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
+.endif
+
 .ifndef utils.outiBlock
     .include "utils/outiBlock.asm"
 .endif
@@ -75,8 +79,10 @@
     utils.assert.label dataAddress, "patterns.asm \.: Invalid dataAddress argument"
     utils.assert.number size, "patterns.asm \.: Invalid size argument"
 
-    ld hl, dataAddress
-    utils.outiBlock.write size
+    utils.clobbers "hl"
+        ld hl, dataAddress
+        utils.outiBlock.write size
+    utils.clobbers.end
 .endm
 
 ;====
