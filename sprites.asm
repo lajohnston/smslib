@@ -265,7 +265,7 @@
         ; Copy y positions to VRAM
         ld b, ixl                       ; load size into B
         inc l                           ; point to y positions in buffer
-        call utils.outiBlock.writeUpTo128Bytes  ; write data
+        utils.outiBlock.writeUpTo128Bytes   ; write data
 
         ; Output sprite terminator at end of y positions
         ld a, ixl                       ; load counter into A

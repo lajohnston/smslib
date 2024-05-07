@@ -135,6 +135,13 @@
 .ends
 
 ;====
+; Alias for utils.outiBlock.writeUpTo128Bytes
+;====
+.macro "utils.outiBlock.writeUpTo128Bytes"
+    call utils.outiBlock.writeUpTo128Bytes
+.endm
+
+;====
 ; Writes elements from an array of data to VRAM using OUTI instructions
 ;
 ; @in   dataAddress the address of the data to transfer

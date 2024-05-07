@@ -891,7 +891,7 @@
                 ld l, a
 
                 ; Copy bytes from buffer to VDP
-                call utils.outiBlock.writeUpTo128Bytes
+                utils.outiBlock.writeUpTo128Bytes
 
             ;===
             ; Second write
