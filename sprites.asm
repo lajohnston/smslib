@@ -229,8 +229,9 @@
 ;====
 .macro "sprites.startBatch"
     .ifeq sprites.batchInProgress 1
-        .print "Warning: sprites.startBatch called but batch already in progress."
-        .print " Ensure you also call sprites.endBatch\n\n"
+        .print "\. called but batch already in progress."
+        .print " Ensure you also call sprites.endBatch\n"
+        .fail
     .endif
 
     .redefine sprites.batchInProgress 1
@@ -242,7 +243,8 @@
 ;====
 .macro "sprites.endBatch"
     .ifeq sprites.batchInProgress 0
-        .print "Warning: sprites.endBatch called but no batch is in progress"
+        .print "\. called but no batch is in progress\n"
+        .fail
     .else
         .redefine sprites.batchInProgress 0
         sprites._storeNextIndex
