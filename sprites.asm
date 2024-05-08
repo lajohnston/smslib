@@ -20,12 +20,6 @@
     .define sprites.VRAM_ADDRESS $3f00
 .endif
 
-; The high byte of the RAM address to place the sprite buffer. The low byte is
-; always set to $3F to allow for optimisations
-.ifndef sprites.HIGH_BUFFER_ADDRESS
-    .define sprites.HIGH_BUFFER_ADDRESS $C0
-.endif
-
 ;====
 ; Dependencies
 ;====
@@ -48,7 +42,6 @@
 ;====
 ; Constants and variables
 ;====
-.define sprites.BUFFER_ADDRESS (sprites.HIGH_BUFFER_ADDRESS * 256) + $3F
 .define sprites.TABLE_OFFSET $40
 .define sprites.GROUP_TERMINATOR 255  ; terminates list of sprites.Sprite instances
 .define sprites.Y_TERMINATOR $D0
@@ -74,11 +67,12 @@
 ;====
 
 ;====
-; The offset of $40 is required to make use of performance optimisations. This
-; technique is described by user gvx32 in:
+; The sprite table buffer in RAM. The y coordinates are aligned to the table
+; offset $40 to make use of performance optimisations. This technique is
+; described by user gvx32 in:
 ; https://www.smspower.org/forums/15794-AFewHintsOnCodingAMediumLargeSizedGameUsingWLADX
 ;====
-.ramsection "sprites.ram.buffer" bank 0 slot utils.ram.SLOT orga sprites.BUFFER_ADDRESS force
+.ramsection "sprites.ram.buffer" slot utils.ram.SLOT align 256 offset sprites.TABLE_OFFSET - sprites.Buffer.yPos
     sprites.ram.buffer: instanceof sprites.Buffer
 .ends
 
