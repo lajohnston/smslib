@@ -33,12 +33,16 @@
     .include "utils/ram.asm"
 .endif
 
-.ifndef utils.vdp
-    .include "utils/vdp.asm"
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
 .endif
 
 .ifndef utils.outiBlock
     .include "utils/outiBlock.asm"
+.endif
+
+.ifndef utils.vdp
+    .include "utils/vdp.asm"
 .endif
 
 ;====
@@ -120,9 +124,11 @@
 ; @out  de  the address of the next available sprite index
 ;====
 .macro "sprites.getNextIndex"
-    ld de, sprites.ram.buffer.nextIndex
-    ld a, (de)
-    ld e, a
+    utils.clobbers "af"
+        ld de, sprites.ram.buffer.nextIndex
+        ld a, (de)
+        ld e, a
+    utils.clobbers.end
 .endm
 
 ;====
@@ -132,9 +138,11 @@
 ;====
 .macro "sprites._storeNextIndex"
     ; Store next index
-    ld a, e
-    ld de, sprites.ram.buffer.nextIndex
-    ld (de), a
+    utils.clobbers "af", "de"
+        ld a, e
+        ld de, sprites.ram.buffer.nextIndex
+        ld (de), a
+    utils.clobbers.end
 .endm
 
 ;====
@@ -147,6 +155,8 @@
     ; @in  a  screen yPos
     ; @in  b  screen xPos
     ; @in  c  pattern number
+    ;
+    ; @out de pointer to next available y slot in sprite buffer
     ;====
     sprites.addToNextIndex:
         ; Retrieve next slot
@@ -162,6 +172,8 @@
     ; @in  a  screen yPos
     ; @in  b  screen xPos
     ; @in  c  pattern number
+    ;
+    ; @out de pointer to next available y slot in sprite buffer
     ;====
     sprites.add:
         ; Set ypos
@@ -186,19 +198,26 @@
 ;====
 ; Add a sprite to the buffer
 ;
-; @in  a  screen yPos
-; @in  b  screen xPos
-; @in  c  pattern number
+; @in  a    screen yPos
+; @in  b    screen xPos
+; @in  c    pattern number
 ;
-; @in  de (optional)    pointer to next available index (yPos) in sprite buffer
-;                       Only required if a batch is in progress
+; @in  de   (optional) pointer to next available index (yPos) in sprite buffer
+;           Only required if a batch is in progress
+;
+; @out de   (if batch in progress) pointer to next available index (yPos) in
+;           sprite buffer
 ;====
 .macro "sprites.add"
     .if sprites.batchInProgress == 1
-        call sprites.add
+        utils.clobbers "af"
+            call sprites.add
+        utils.clobbers.end
     .else
-        call sprites.addToNextIndex
-        sprites._storeNextIndex
+        utils.clobbers "af", "iy"
+            call sprites.addToNextIndex
+            sprites._storeNextIndex
+        utils.clobbers
     .endif
 .endm
 
@@ -234,9 +253,11 @@
 ; Initialises a sprite buffer in RAM
 ;====
 .macro "sprites.init"
-    ; Set nextIndex to index 0
-    ld a, <(sprites.ram.buffer) + sprites.Buffer.yPos   ; low byte of index 0
-    ld (sprites.ram.buffer.nextIndex), a                ; store in nextIndex
+    utils.clobbers "af"
+        ; Set nextIndex to index 0
+        ld a, <(sprites.ram.buffer) + sprites.Buffer.yPos   ; low byte of index 0
+        ld (sprites.ram.buffer.nextIndex), a                ; store in nextIndex
+    utils.clobbers.end
 .endm
 
 ;====
@@ -296,7 +317,9 @@
 ; Alias for sprites.copyToVram
 ;====
 .macro "sprites.copyToVram"
-    call sprites.copyToVram
+    utils.clobbers "af", "bc", "hl", "ix"
+        call sprites.copyToVram
+    utils.clobbers.end
 .endm
 
 ;====
@@ -377,9 +400,13 @@
 ;====
 .macro "sprites.addGroup"
     .if sprites.batchInProgress == 1
-        call sprites.addGroup
+        utils.clobbers "af", "hl", "ix"
+            call sprites.addGroup
+        utils.clobbers.end
     .else
-        call sprites.addGroupFromNextIndex
-        sprites._storeNextIndex
+        utils.clobbers "af", "de", "hl", "ix"
+            call sprites.addGroupFromNextIndex
+            sprites._storeNextIndex
+        utils.clobbers.end
     .endif
 .endm
