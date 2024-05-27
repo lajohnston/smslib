@@ -60,5 +60,6 @@
 ; Sprite preservation
 .section "sprite.asm tests" appendto zest.suiteBank2
     .include "sprites/add.test.asm"
+    .include "sprites/addGroup.test.asm"
     .include "sprites/copyToVram.test.asm"
 .ends

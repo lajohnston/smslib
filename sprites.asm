@@ -394,6 +394,9 @@
 ; disappear, meaning the group cannot move smoothly off the left edge of the
 ; screen. This can be partially obscured by setting the VDP registers to hide
 ; the left column
+;
+; @in   hl  pointer to sprites.Sprite instances terminated by
+;           sprites.GROUP_TERMINATOR
 ;====
 .macro "sprites.addGroup"
     .if sprites.batchInProgress == 1
