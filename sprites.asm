@@ -264,11 +264,11 @@
 .endm
 
 ;====
-; Copies the sprite buffer from RAM to VRAM. This should be performed while the
+; (Private) Copies the sprite buffer from RAM to VRAM. This should be performed while the
 ; display is off or during VBlank
 ;====
-.section "sprites.copyToVram"
-    sprites.copyToVram:
+.section "sprites._copyToVram"
+    sprites._copyToVram:
         ; Set VDP write address to y positions
         utils.vdp.prepWrite sprites.VRAM_ADDRESS
 
@@ -310,11 +310,12 @@
 .ends
 
 ;====
-; Alias for sprites.copyToVram
+; Copies the sprite buffer from RAM to VRAM. This should be performed while the
+; display is off or during VBlank
 ;====
 .macro "sprites.copyToVram"
     utils.clobbers "af", "bc", "hl", "ix"
-        call sprites.copyToVram
+        call sprites._copyToVram
     utils.clobbers.end
 .endm
 
