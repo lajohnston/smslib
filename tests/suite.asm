@@ -56,3 +56,8 @@
     .include "registers/registers.test.asm"
     .include "registers/sequentialClobberScopes.test.asm"
 .ends
+
+; Sprite preservation
+.section "sprite.asm tests" appendto zest.suiteBank2
+    .include "sprites/sprites.test.asm"
+.ends

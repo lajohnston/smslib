@@ -118,7 +118,7 @@
 ; @out  de  the address of the next available sprite index
 ;====
 .macro "sprites.getNextIndex"
-    utils.clobbers "af"
+    utils.clobbers "af", "de"
         ld de, sprites.ram.buffer.nextIndex
         ld a, (de)
         ld e, a
@@ -209,10 +209,10 @@
             call sprites._add
         utils.clobbers.end
     .else
-        utils.clobbers "af", "iy"
+        utils.clobbers "af", "de", "iy"
             call sprites._addToNextIndex
             sprites._storeNextIndex
-        utils.clobbers
+        utils.clobbers.end
     .endif
 .endm
 
