@@ -18,3 +18,5 @@ describe "sprites.add"
 
             expect.all.toBeUnclobberedExcept "de"
         sprites.endBatch
+
+        sprites.reset

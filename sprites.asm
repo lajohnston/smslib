@@ -314,7 +314,7 @@
 ; display is off or during VBlank
 ;====
 .macro "sprites.copyToVram"
-    utils.clobbers "af", "bc", "hl", "ix"
+    utils.clobbers "af", "bc", "hl", "ix", "iy"
         call sprites._copyToVram
     utils.clobbers.end
 .endm
