@@ -140,9 +140,10 @@
 .endm
 
 ;====
-; Adds a sprite to the buffer
+; (Private) Adds a sprite to the buffer. See sprites.add macro for public
+; macro
 ;====
-.section "sprites.add" free
+.section "sprites._add" free
     ;====
     ; Add sprite to the next available index
     ;
@@ -152,7 +153,7 @@
     ;
     ; @out de pointer to next available y slot in sprite buffer
     ;====
-    sprites.addToNextIndex:
+    sprites._addToNextIndex:
         ; Retrieve next slot
         ld iyl, a               ; preserve yPos
         sprites.getNextIndex
@@ -169,7 +170,7 @@
     ;
     ; @out de pointer to next available y slot in sprite buffer
     ;====
-    sprites.add:
+    sprites._add:
         ; Set ypos
         ld (de), a
 
@@ -205,11 +206,11 @@
 .macro "sprites.add"
     .if sprites.batchInProgress == 1
         utils.clobbers "af"
-            call sprites.add
+            call sprites._add
         utils.clobbers.end
     .else
         utils.clobbers "af", "iy"
-            call sprites.addToNextIndex
+            call sprites._addToNextIndex
             sprites._storeNextIndex
         utils.clobbers
     .endif
