@@ -53,7 +53,7 @@
 
         ; It's more efficient (but optional) to add multiple sprites within a
         ; batch, so start a new batch
-        sprites.startBatch
+        ; sprites.startBatch
 
         ; Add a sprite to the buffer. See sprites.add documentation in sprite.asm
         ; for details about which parameters it expects in which registers
@@ -75,7 +75,7 @@
         sprites.addGroup    ; add group to buffer
 
         ; End the sprite batch
-        sprites.endBatch
+        ; sprites.endBatch
 
         ; Copy buffer to VRAM
         sprites.copyToVram

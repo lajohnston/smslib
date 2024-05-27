@@ -132,10 +132,9 @@
 ;====
 .macro "sprites._storeNextIndex"
     ; Store next index
-    utils.clobbers "af", "de"
+    utils.clobbers "af"
         ld a, e
-        ld de, sprites.ram.buffer.nextIndex
-        ld (de), a
+        ld (sprites.ram.buffer.nextIndex), a
     utils.clobbers.end
 .endm
 
