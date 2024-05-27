@@ -299,7 +299,7 @@
         ; Copy x positions and patterns from buffer to VRAM
         ld b, ixl                       ; restore sprite count
         rlc b                           ; double to get xPos + pattern
-        jp utils.outiBlock.writeUpTo128Bytes    ; write bytes, then ret
+        utils.outiBlock.writeUpTo128BytesThenReturn ; write bytes, then ret
 
     ; No sprites in buffer - cap table with sprite terminator then return
     ; VRAM address must be set

@@ -118,14 +118,14 @@
 .endm
 
 ;====
-; OUTI between 1-128 bytes
+; (Private) OUTI between 1-128 bytes
 ;
 ; @in   b   the number of bytes to write. Must be greater than 0 and <= 128
 ; @in   c   the port to output the data to
 ; @in   hl  the address of the source data
 ;====
-.section "utils.outiBlock.writeUpTo128Bytes" free
-    utils.outiBlock.writeUpTo128Bytes:
+.section "utils.outiBlock._writeUpTo128Bytes" free
+    utils.outiBlock._writeUpTo128Bytes:
         ; Address of last OUTI instruction
         ld iyh, >(utils.outiBlock.lastOuti) ; high-byte address of last outi
         ld a, <(utils.outiBlock.lastOuti)   ; load low-byte address of last outi
@@ -142,11 +142,25 @@
 .ends
 
 ;====
-; Alias for utils.outiBlock.writeUpTo128Bytes
+; OUTI between 1-128 bytes
+;
+; @in   b   the number of bytes to write. Must be greater than 0 and <= 128
+; @in   c   the port to output the data to
+; @in   hl  the address of the source data
 ;====
 .macro "utils.outiBlock.writeUpTo128Bytes"
     utils.clobbers "af", "bc", "hl", "iy"
-        call utils.outiBlock.writeUpTo128Bytes
+        call utils.outiBlock._writeUpTo128Bytes
+    utils.clobbers.end
+.endm
+
+;====
+; Like utils.outiBlock.writeUpTo128Bytes but 'jp's to the routine then returns
+; to the original caller
+;====
+.macro "utils.outiBlock.writeUpTo128BytesThenReturn"
+    utils.clobbers "af", "bc", "hl", "iy"
+        jp utils.outiBlock._writeUpTo128Bytes
     utils.clobbers.end
 .endm
 

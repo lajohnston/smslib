@@ -909,7 +909,7 @@
 
                 ; Write bytes then return to caller
                 ld b, a     ; set B to bytes to write
-                jp utils.outiBlock.writeUpTo128Bytes
+                utils.outiBlock.writeUpTo128BytesThenReturn
         +:
 
         ret
