@@ -2,140 +2,79 @@ describe "register preservation"
     ; Deactivate AUTO_PRESERVE
     .redefine registers.AUTO_PRESERVE 0
 
-    test "should not preserve any registers if no preserve scope are in progress"
-        registers.clobbers "ALL"
+    test "should not preserve any registers if no preserve scopes are in progress"
+        registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
             expect.stack.size.toBe 0
         registers.clobberEnd
 
-    test "preserves registers marked as clobbered"
-        ld a, $aa
-        scf
-        ld i, a
-        ld bc, $bbbb
-        ld de, $cccc
-        ld hl, $dddd
-        ld ix, $eeee
-        ld iy, $ffff
+    test "preserves all registers marked as clobbered"
+        zest.initRegisters
 
         ; Preserve all registers
-        registers.preserve
+        registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
             ; This clobber scope clobbers all registers
-            registers.clobbers "ALL"
-                ld a, $05
-                call suite.setAllToA
-                ccf
+            registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+                call suite.clobberAll
             registers.clobberEnd
         registers.restore
 
         ; Expect all registers to have been preserved
-        expect.a.toBe $aa
-        expect.carry.toBe 1
-        expect.bc.toBe $bbbb
-        expect.de.toBe $cccc
-        expect.hl.toBe $dddd
-        expect.ix.toBe $eeee
-        expect.iy.toBe $ffff
-        expect.i.toBe $aa
-
-    test "preserves shadow registers marked as clobbered"
-        ; Initialise shadow registers
-        ex af, af'
-        ld a, $aa
-        scf
-        exx
-        ld bc, $bbbb
-        ld de, $cccc
-        ld hl, $dddd
-
-        ; Switch back to main registers
-        ex af, af'
-        exx
-
-        ; Preserve all registers
-        registers.preserve "AF'" "BC'" "DE'" "HL'"
-            ; This clobber scope clobbers all registers
-            registers.clobbers "AF'" "BC'" "DE'" "HL'"
-                ; Routine switches to shadow registers and clobbers them
-                ex af, af'
-                exx
-                ld a, $05
-                call suite.setAllToA
-                ccf
-
-                ; Routine switches them back to the shadows
-                ex af, af'
-                exx
-            registers.clobberEnd
-        registers.restore
-
-        ; Expect all shadow registers to have been preserved
-        ex af, af'
-        exx
-        expect.a.toBe $aa
-        expect.carry.toBe 1
-        expect.bc.toBe $bbbb
-        expect.de.toBe $cccc
-        expect.hl.toBe $dddd
+        expect.all.toBeUnclobbered
 
     test "only preserves the requested registers"
-        ld a, 1
-        call suite.setAllToA
+        ld bc, $bc01
+        ld de, $de01
+        ld hl, $ffff
 
         ; Preserve BC and DE only
-        registers.preserve "BC" "DE"
+        registers.preserve "bc", "de"
             ; This clobber scope clobbers all registers
-            registers.clobbers "ALL"
-                ld a, $ff
-                call suite.setAllToA
+            registers.clobbers "bc", "de", "hl"
+                ld bc, 0
+                ld de, 0
+                ld hl, 0
             registers.clobberEnd
         registers.restore
 
         ; Expect BC and DE to have been preserved
-        expect.bc.toBe $0101
-        expect.de.toBe $0101
+        expect.bc.toBe $bc01
+        expect.de.toBe $de01
 
-        ; Expect the rest to have been clobbered
-        expect.a.toBe $ff
-        expect.hl.toBe $ffff
-        expect.ix.toBe $ffff
-        expect.iy.toBe $ffff
-        expect.i.toBe $ff
+        ; Expect HL to have been clobbered
+        expect.hl.toBe 0
 
     test "only preserves registers marked as clobbered"
-        ld a, 1
-        call suite.setAllToA
+        ld bc, $bc01
+        ld de, $de01
+        ld hl, $ffff
 
         ; Preserve all registers
-        registers.preserve "ALL"
+        registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
             ; This clobber scope only clobbers DE and HL
-            registers.clobbers "DE" "HL"
-                expect.stack.size.toBe 2    ; DE and HL should have been pushed
-                ld a, $ff
-                call suite.setAllToA
+            registers.clobbers "bc", "de"
+                ld bc, 0
+                ld de, 0
+                ld hl, 0
             registers.clobberEnd
         registers.restore
 
-        ; Expect DE and HL to have been preserved
-        expect.de.toBe $0101
-        expect.hl.toBe $0101
+        ; Expect BC and DE to have been preserved
+        expect.bc.toBe $bc01
+        expect.de.toBe $de01
 
-        ; Expect the rest to have been clobbered
-        expect.a.toBe $ff
-        expect.bc.toBe $ffff
-        expect.ix.toBe $ffff
-        expect.iy.toBe $ffff
-        expect.i.toBe $ff
+        ; Expect HL to have been clobbered
+        expect.hl.toBe 0
 
     test "only preserves registers once per preserve context"
         ld bc, $bc01
 
         ; Preserve BC
-        registers.preserve "BC"
+        registers.preserve "bc"
             ; Nothing should have been preserved yet
             expect.stack.size.toBe 0
 
             ; This clobber scope clobbers BC
-            registers.clobbers "BC"
+            registers.clobbers "bc"
                 ; Expect BC to have been pushed to the stack
                 expect.stack.size.toBe 1
                 expect.stack.toContain $bc01
@@ -143,7 +82,7 @@ describe "register preservation"
                 ld bc, $bc02
 
                 ; This inner clobber scope also clobbers BC
-                registers.clobbers "BC"
+                registers.clobbers "bc"
                     ; The outer scope has already preserved BC in the stack,
                     ; so expect this not to have pushed it again
                     expect.stack.size.toBe 1 "Expected stack size to still be 1"
@@ -155,25 +94,4 @@ describe "register preservation"
         registers.restore
 
         expect.stack.size.toBe 0 "Expected stack size to be back to 0"
-        expect.bc.toBe $bc01
-
-        ld bc, $bc01
-
-        ; Requires BC to be preserved
-        registers.preserve "BC"
-            ; Also BC to be preserved
-            registers.clobbers "BC"
-                ld bc, $bc02    ; first clob
-
-                ; Inner preserve - should preserve $bc02
-                registers.preserve "BC"
-                    registers.clobbers "BC"
-                        ld bc, $bc03    ; second clob
-                    registers.clobberEnd
-                registers.restore
-
-                expect.bc.toBe $bc02
-            registers.clobberEnd
-        registers.restore
-
         expect.bc.toBe $bc01

@@ -6,14 +6,14 @@ describe "register preservation: nested preserve scopes"
         ; Preserve all registers (containing $01)
         registers.preserve
             ; Clob all registers
-            registers.clobbers "ALL"
+            registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                 ld a, $02
                 call suite.setAllToA
 
                 ; Preserve all registers again (containing $02)
                 registers.preserve
                     ; Clob all registers with $03
-                    registers.clobbers "ALL"
+                    registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                         ld a, $03
                         call suite.setAllToA
                     registers.clobberEnd
@@ -45,16 +45,16 @@ describe "register preservation: nested preserve scopes"
         ld hl, $ff01
 
         ; Outer context requires BC to be preserved
-        registers.preserve "BC"
-            ; Outer context requires DE to be preserved
-            registers.preserve "DE"
+        registers.preserve "bc"
+            ; Middle context requires DE to be preserved
+            registers.preserve "de"
                 ; Nothing clobbered or preserved so far
                 expect.stack.size.toBe 0
 
                 ; Inner context preserves HL
-                registers.preserve "HL"
+                registers.preserve "hl"
                     ; This clobber scope clobbers all three pairs
-                    registers.clobbers "BC" "DE" "HL"
+                    registers.clobbers "bc" "de" "hl"
                         expect.stack.size.toBe 3
                         ld bc, $bc02
                         ld de, $de02
@@ -65,28 +65,28 @@ describe "register preservation: nested preserve scopes"
                 expect.hl.toBe $ff01    ; back to original
             registers.restore
 
-            expect.de.toBe $de01    ; back to original
+            expect.de.toBe $de01        ; back to original
         registers.restore
 
-        expect.bc.toBe $bc01
+        expect.bc.toBe $bc01            ; back to original
 
     test "does not preserve registers from ancestor scopes if they've already been preserved"
         ld bc, $bc01
         ld de, $de01
 
         ; Outer context requires BC to be preserved
-        registers.preserve "BC"
+        registers.preserve "bc"
             ; Clob scope clobbers BC
-            registers.clobbers "BC"
+            registers.clobbers "bc"
                 ; Expect BC to have been preserved by this point
                 expect.stack.size.toBe 1
                 expect.stack.toContain $bc01
                 ld bc, $bc02
 
                 ; Inner scope requires DE to be preserved
-                registers.preserve "DE"
+                registers.preserve "de"
                     ; This clobber scope clobbers both BC and DE
-                    registers.clobbers "BC" "DE"
+                    registers.clobbers "bc" "de"
                         ; DE shouldn't be preserved again as the outer clobberStart
                         ; has already done so
                         expect.stack.size.toBe 2
