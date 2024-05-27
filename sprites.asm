@@ -320,15 +320,9 @@
 .endm
 
 ;====
-; Adds a group of sprites relative to an anchor position. Sprites within the
-; group that fall off-screen are not added.
-;
-; Limitation: Once the anchorX position falls off screen the entire group will
-; disappear, meaning the group cannot move smoothly off the left edge of the
-; screen. This can be partially obscured by setting the VDP registers to hide
-; the left column
+; (Private) See sprites.addGroup
 ;====
-.section "sprites.addGroup"
+.section "sprites._addGroup" free
     ;====
     ; Gets the next free sprite index and adds a sprite group from there onwards
     ;
@@ -339,9 +333,9 @@
     ;
     ; @out  de  next free sprite index
     ;====
-    sprites.addGroupFromNextIndex:
+    sprites._addGroupFromNextIndex:
         sprites._getNextIndex
-        jp sprites.addGroup
+        jp sprites._addGroup
 
     ;====
     ; Add a group of sprites from the currently selected slot
@@ -361,14 +355,14 @@
     _nextSprite:
         inc hl  ; point to next item
 
-    sprites.addGroup:
+    sprites._addGroup:
         ld a, (hl)          ; load relX
         cp sprites.GROUP_TERMINATOR
         ret z               ; end of group
 
         ; Add relative x
         add a, b            ; relX + anchorX
-        jp c, _xOffScreen   ; off screen; next sprite
+        jr c, _xOffScreen   ; off screen; next sprite
         ld ixh, a           ; store result x for later
 
         ; Add relative y
@@ -376,7 +370,7 @@
         ld a, (hl)          ; load relY
         add a, c            ; relY + anchorY
         cp sprites.MAX_Y_POSITION   ; compare with max y allowed
-        jp nc, _yOffScreen  ; off screen; next sprite
+        jr nc, _yOffScreen  ; off screen; next sprite
 
         ; Output sprite to sprite buffer
         ld (de), a          ; set sprite y in buffer
@@ -393,16 +387,22 @@
 .ends
 
 ;====
-; Macro alias for sprites.addGroup
+; Adds a group of sprites relative to an anchor position. Sprites within the
+; group that fall off-screen are not added.
+;
+; Limitation: Once the anchorX position falls off screen the entire group will
+; disappear, meaning the group cannot move smoothly off the left edge of the
+; screen. This can be partially obscured by setting the VDP registers to hide
+; the left column
 ;====
 .macro "sprites.addGroup"
     .if sprites.batchInProgress == 1
         utils.clobbers "af", "hl", "ix"
-            call sprites.addGroup
+            call sprites._addGroup
         utils.clobbers.end
     .else
         utils.clobbers "af", "de", "hl", "ix"
-            call sprites.addGroupFromNextIndex
+            call sprites._addGroupFromNextIndex
             sprites._storeNextIndex
         utils.clobbers.end
     .endif
