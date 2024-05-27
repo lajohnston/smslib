@@ -113,12 +113,12 @@
 .endm
 
 ;====
-; Loads the next available sprite index (y position) into DE
+; (Private) Loads the next available sprite index (y position) into DE
 ;
 ; @out  de  the address of the next available sprite index
 ;====
-.macro "sprites.getNextIndex"
-    utils.clobbers "af", "de"
+.macro "sprites._getNextIndex"
+    utils.clobbers "af"
         ld de, sprites.ram.buffer.nextIndex
         ld a, (de)
         ld e, a
@@ -155,7 +155,7 @@
     sprites._addToNextIndex:
         ; Retrieve next slot
         ld iyl, a               ; preserve yPos
-        sprites.getNextIndex
+        sprites._getNextIndex
         ld a, iyl               ; restore yPos
                                 ; continue to sprites.add
 
@@ -229,7 +229,7 @@
     .endif
 
     .redefine sprites.batchInProgress 1
-    sprites.getNextIndex
+    sprites._getNextIndex
 .endm
 
 ;====
@@ -339,7 +339,7 @@
     ; @out  de  next free sprite index
     ;====
     sprites.addGroupFromNextIndex:
-        sprites.getNextIndex
+        sprites._getNextIndex
         jp sprites.addGroup
 
     ;====
