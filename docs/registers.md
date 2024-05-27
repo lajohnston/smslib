@@ -43,7 +43,7 @@ Macros that clobber registers can utilise `registers.clobbers` and `registers.cl
 
 Acceptable arguments are:
 
-- Main registers: `"AF"`, `"BC"`, `"DE"`, `"HL"`, `"IX"`, `"IY"`, `"I"`, `"ALL"` (case-insensitive)
+- Main registers: `"AF"`, `"BC"`, `"DE"`, `"HL"`, `"IX"`, `"IY"`, `"I"` (case-insensitive)
 - Shadow registers: `"AF'"`, `"BC'"`, `"DE'"`, `"HL'"`
 
 Clob scopes can be nested within one another, so when calling other macros it's possible for these to define their own clobber scopes. If you need to call a macro that isn't clobber scope aware, the calling macro will need to take responsibility to wrap the call.
@@ -82,11 +82,11 @@ Callers that rely on register states to be preserved can wrap the macro invokati
 
 Acceptable arguments are:
 
-- Main registers: `"AF"`, `"BC"`, `"DE"`, `"HL"`, `"IX"`, `"IY"`, `"I"`, `"ALL"` (case-insensitive)
-- Shadow registers: `"AF'"`, `"BC'"`, `"DE'"`, `"HL'"`
+- Main registers: `"af"`, `"bc"`, `"de"`, `"hl"`, `"ix"`, `"iy"`, `"i"` (case-insensitive)
+- Shadow registers: `"af'"`, `"bc'"`, `"de'"`, `"hl'"`
 
 As each clobber scope is encountered in the macro chain, it will now be aware which registers you wish to preserve and so preserve any that match. If the call passes through multiple nested clobber scopes that clobber the same particular register, only the first-encountered (outer) scope will preserve the register rather than it being preserved multiple times.
 
-Calling `registers.preserve` with no arguments will default to `registers.ALL`. This won't necessarily mean that every register pair gets pushed to the stack, but only each register pair that actually gets clobbered.
+Calling `registers.preserve` with no arguments will default to ensuring all registers that get clobbered are preserved.
 
 Like clobber scopes, it's possible to nest preserve scopes. Inner scopes are aware of what registers the outer scope needs preserving.

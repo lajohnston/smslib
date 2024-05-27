@@ -2,6 +2,17 @@ describe "register preservation"
     ; Deactivate AUTO_PRESERVE
     .redefine registers.AUTO_PRESERVE 0
 
+    test "preserves all clobbered registers by default"
+        zest.initRegisters
+
+        registers.preserve  ; no registers specified - preserve all by default
+            registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+                call suite.clobberAll
+            registers.clobberEnd
+        registers.restore
+
+        expect.all.toBeUnclobbered
+
     test "should not preserve any registers if no preserve scopes are in progress"
         registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
             expect.stack.size.toBe 0

@@ -42,13 +42,13 @@
 .define registers.IX    %10000
 .define registers.IY    %100000
 .define registers.I     %1000000
-.define registers.ALL   %1111111
 
 .define registers.SHADOW_AF  %10000000
 .define registers.SHADOW_BC  %100000000
 .define registers.SHADOW_DE  %1000000000
 .define registers.SHADOW_HL  %10000000000
-.define registers.SHADOW_ALL registers.SHADOW_AF | registers.SHADOW_BC | registers.SHADOW_DE | registers.SHADOW_HL
+
+.define registers.ALL   $ffff
 
 ;====
 ; Dependencies
@@ -148,7 +148,7 @@
     .endif
 
     ; All registers are currently unpreserved in this scope
-    .define registers.unpreserved{registers.preserveIndex} (registers.ALL | registers.SHADOW_ALL)
+    .define registers.unpreserved{registers.preserveIndex} registers.ALL
 
     ; Initialise stack size to 0
     .define registers.stack{registers.preserveIndex}_size 0
@@ -196,8 +196,6 @@
         .redefine registers._parse.returnValue registers.IY
     .elif string == "I" || string == "i"
         .redefine registers._parse.returnValue registers.I
-    .elif string == "ALL" || string == "all"
-        .redefine registers._parse.returnValue registers.ALL
     .elif string == "AF'" || string == "af'"
         .redefine registers._parse.returnValue registers.SHADOW_AF
     .elif string == "BC'" || string == "bc'"
@@ -282,11 +280,11 @@
 ; @in   ...registers    (optional) strings of one or more register pair to
 ;                       preserve
 ;                       Valid values:
-;                           "AF", "BC", "DE", "HL", "IX", "IY", "I" and "ALL",
-;                           "af", "bc", "de", "hl", "ix", "iy", "i" and "all",
+;                           "AF", "BC", "DE", "HL", "IX", "IY", "I"
+;                           "af", "bc", "de", "hl", "ix", "iy", "i"
 ;                           "AF'", "BC'", "DE'", "HL'"
 ;                           "af'", "bc'", "de'", "hl'"
-;                       Default = "ALL"
+;                       Defaults to all registers
 ;====
 .macro "registers.preserve"
     ; Create a new preserve scope
@@ -430,11 +428,10 @@
 ;
 ; @in   ...registers    list of registers that will be clobbered
 ;                       Valid values:
-;                           "AF", "BC", "DE", "HL", "IX", "IY", "I" and "ALL",
-;                           "af", "bc", "de", "hl", "ix", "iy", "i" and "all",
+;                           "AF", "BC", "DE", "HL", "IX", "IY", "I",
+;                           "af", "bc", "de", "hl", "ix", "iy", "i"
 ;                           "AF'", "BC'", "DE'", "HL'"
 ;                           "af'", "bc'", "de'", "hl'"
-;                       Default = "ALL"
 ;====
 .macro "registers.clobbers"
     .if nargs == 0
@@ -447,7 +444,7 @@
         ; If there are no clobber scopes or preserve scope in progress
         .if registers.clobberIndex == -1 && registers.preserveIndex == -1
             ; Preserve all registers including shadow registers
-            registers.preserve "ALL" "AF'" "BC'" "DE'" "HL'"
+            registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
             .redefine registers.autoPreserveIndex registers.preserveIndex
         .endif
     .endif
