@@ -18,12 +18,13 @@
     .include "mapper/48k.asm"
 .endif
 
+.include "registers.asm"    ; handles register preservation
+
 .include "input.asm"        ; handles input
 .include "interrupts.asm"   ; handles line and frame interrupts
 .include "palette.asm"      ; handles colors
 .include "patterns.asm"     ; handles patterns (tile images)
 .include "pause.asm"        ; handles pause button
-.include "registers.asm"    ; handles register preservation
 .include "sprites.asm"      ; handles sprites
 .include "tilemap.asm"      ; handles tilemap
 .include "vdp.asm"          ; handles vdp settings

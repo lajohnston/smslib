@@ -57,7 +57,12 @@
     .include "registers/sequentialClobberScopes.test.asm"
 .ends
 
-; Sprite preservation
+; Palette
+.section "palette.asm tests" appendto zest.suiteBank2
+    .include "palette/setIndex.test.asm"
+.ends
+
+; Sprites
 .section "sprite.asm tests" appendto zest.suiteBank2
     .include "sprites/add.test.asm"
     .include "sprites/addGroup.test.asm"
