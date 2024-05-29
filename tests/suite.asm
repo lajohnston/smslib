@@ -62,4 +62,5 @@
     .include "sprites/add.test.asm"
     .include "sprites/addGroup.test.asm"
     .include "sprites/copyToVram.test.asm"
+    .include "sprites/init.test.asm"
 .ends
