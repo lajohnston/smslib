@@ -60,6 +60,8 @@
 ; Palette
 .section "palette.asm tests" appendto zest.suiteBank2
     .include "palette/setIndex.test.asm"
+    .include "palette/writeBytes.test.asm"
+    .include "palette/writeRgb.test.asm"
     .include "palette/writeSlice.test.asm"
 .ends
 
