@@ -118,6 +118,8 @@
     utils.assert.label dataAddr, "palette.asm \.: Invalid label argument"
     utils.assert.number count, "palette.asm \.: Invalid count argument"
 
+    \@_\.:
+
     .ifdef offset
         utils.assert.equals NARGS, 3, "palette.asm \. received the wrong number of arguments"
         utils.assert.number offset, "palette.asm \.: Expected count to be a numeric value"
