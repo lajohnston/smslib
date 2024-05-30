@@ -65,6 +65,13 @@
     .include "palette/writeSlice.test.asm"
 .ends
 
+; Patterns
+.section "patterns.asm tests" appendto zest.suiteBank2
+    .include "patterns/setIndex.test.asm"
+    .include "patterns/writeBytes.test.asm"
+    .include "patterns/writeSlice.test.asm"
+.ends
+
 ; Sprites
 .section "sprite.asm tests" appendto zest.suiteBank2
     .include "sprites/add.test.asm"

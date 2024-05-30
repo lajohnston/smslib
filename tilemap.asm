@@ -25,6 +25,10 @@
     .include "utils/assert.asm"
 .endif
 
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
+.endif
+
 .ifndef utils.math
     .include "utils/math.asm"
 .endif
@@ -138,6 +142,8 @@
 ; @in   index   0 is top left tile
 ;====
 .macro "tilemap.setIndex" args index
+    utils.assert.range index 0, 895, "\.: Index should be between 0 and 895"
+
     utils.vdp.prepWrite (tilemap.VRAM_ADDRESS + (index * tilemap.TILE_SIZE_BYTES))
 .endm
 
@@ -148,6 +154,9 @@
 ; @in   row     row number (y)
 ;====
 .macro "tilemap.setColRow" args colX rowY
+    utils.assert.range colX, 0, 31, "\.: colX should be between 0 and 31"
+    utils.assert.range rowY, 0, 27, "\.: rowY should be between 0 and 27"
+
     tilemap.setIndex ((rowY * tilemap.COLS) + colX)
 .endm
 
