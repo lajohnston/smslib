@@ -1,4 +1,6 @@
 describe "sprites.addGroup"
+    sprites.init
+
     jr +
         testSpriteGroup:
             sprites.startGroup
@@ -21,16 +23,14 @@ describe "sprites.addGroup"
         expect.hl.toBe testSpriteGroup
 
     test "when in a batch should not clobber any registers apart from DE"
-        sprites.startBatch
-            zest.initRegisters
+        zest.initRegisters
 
-            registers.preserve
+        registers.preserve
+            sprites.startBatch
                 ld hl, testSpriteGroup
                 sprites.addGroup
-            registers.restore
+            sprites.endBatch
+        registers.restore
 
-            expect.all.toBeUnclobberedExcept "hl" "de"
-            expect.hl.toBe testSpriteGroup
-        sprites.endBatch
-
-        sprites.reset
+        expect.all.toBeUnclobberedExcept "hl" "de"
+        expect.hl.toBe testSpriteGroup

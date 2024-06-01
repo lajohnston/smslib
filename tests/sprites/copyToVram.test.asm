@@ -1,4 +1,6 @@
 describe "sprites.copyToVram"
+    sprites.init
+
     test "should not clobber any registers when there are no sprites"
         sprites.reset
         zest.initRegisters
