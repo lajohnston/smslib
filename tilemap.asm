@@ -169,14 +169,16 @@
 ; @out  c   the port to output data to (using out, outi etc)
 ;====
 .macro "tilemap.loadHLWriteAddress"
-    ; Multiply by 2 (2 bytes per tile)
-    add hl, hl
+    utils.clobbers "af"
+        ; Multiply by 2 (2 bytes per tile)
+        add hl, hl
 
-    ; Low byte of base address is 0, so we just need to manipulate high byte
-    ; Set A to high byte of base address with the write command set
-    ld a, >tilemap.VRAM_ADDRESS | utils.vdp.commands.WRITE
-    or h        ; combine bits with high byte of relative address
-    ld h, a     ; set HL to the full address
+        ; Low byte of base address is 0, so we just need to manipulate high byte
+        ; Set A to high byte of base address with the write command set
+        ld a, >tilemap.VRAM_ADDRESS | utils.vdp.commands.WRITE
+        or h        ; combine bits with high byte of relative address
+        ld h, a     ; set HL to the full address
+    utils.clobbers.end
 .endm
 
 ;====
@@ -188,7 +190,7 @@
 ;                       is set automatically
 ;====
 .macro "tilemap.tile" args patternIndex attributes
-    utils.assert.range NARGS, 1, 2, "tilemap.asm \.: Invalid number of arguments"
+    utils.assert.range NARGS, 1, 2, "\.: Invalid number of arguments"
     utils.assert.range patternIndex, 0, tilemap.MAX_PATTERN_INDEX, "tilemap.asm \.: Invalid patternIndex argument"
 
     .ifndef attributes
@@ -211,14 +213,16 @@
 ; @in   attributes      (optional) the tile attributes (see Tile attributes section).
 ;                       Note, if patternRef is greater than 255, tilemap.HIGH_BIT
 ;                       is set automatically
+;
+; @in   c               VDP data port
 ;====
 .macro "tilemap.writeTile" args patternIndex attributes
-    utils.assert.range patternIndex, 0, tilemap.MAX_PATTERN_INDEX, "tilemap.asm \.: Invalid patternIndex argument"
+    utils.assert.range patternIndex, 0, tilemap.MAX_PATTERN_INDEX, "\.: Invalid patternIndex argument"
 
     .ifndef attributes
         .define attributes $00
     .else
-        utils.assert.range attributes, 0, 255, "tilemap.asm \.: Invalid attributes argument"
+        utils.assert.range attributes, 0, 255, "\.: Invalid attributes argument"
     .endif
 
     ; Set high bit attribute if pattern index is above 255
@@ -226,11 +230,27 @@
         .redefine attributes attributes | tilemap.HIGH_BIT
     .endif
 
-    ld a, <(patternIndex)           ; load A with low-byte of pattern index
-    out (utils.vdp.DATA_PORT), a    ; write pattern ref
+    utils.clobbers "af"
+        ; Load A with low-byte of pattern index
+        .if <(patternIndex) == 0
+            xor a   ; set to 0
+        .else
+            ld a, <(patternIndex)
+        .endif
 
-    ld a, attributes
-    out (utils.vdp.DATA_PORT), a    ; write tile attributes
+        out (utils.vdp.DATA_PORT), a    ; write pattern index
+
+        ; Load A with attribute byte
+        .if attributes != <(patternIndex)
+            .if attributes == 0
+                xor a   ; set A to 0
+            .else
+                ld a, attributes
+            .endif
+        .endif
+
+        out (utils.vdp.DATA_PORT), a    ; write tile attributes
+    utils.clobbers.end
 .endm
 
 ;====
@@ -241,31 +261,10 @@
 ; @in   VRAM    pointer to destination address with write command
 ;====
 .macro "tilemap.writeTiles" args number
-    utils.assert.range number, 1, tilemap.TILES, "tilemap.asm \.: Invalid number argument"
+    utils.assert.range number, 1, tilemap.TILES, "\.: Invalid number argument"
 
     utils.outiBlock.write tilemap.TILE_SIZE_BYTES * number
 .endm
-
-;====
-; Reads pattern ref bytes and writes to the tilemap until a terminator byte is
-; reached.
-;
-; @in   hl  address of the data to write
-; @in   b   tile attributes to use for all the tiles
-; @in   c   the data port to write to
-; @in   d   the terminator byte value
-;====
-.section "tilemap.writeBytesUntil" free
-    tilemap.writeBytesUntil:
-        ld a, (hl)                      ; read byte
-        cp d                            ; compare value with terminator
-        ret z                           ; return if terminator byte found
-        out (utils.vdp.DATA_PORT), a    ; write pattern ref
-        ld a, b                         ; load attributes
-        out (utils.vdp.DATA_PORT), a    ; write attributes
-        inc hl                          ; next char
-        jp tilemap.writeBytesUntil      ; repeat
-.ends
 
 ;====
 ; Copies pattern ref bytes to VRAM until a terminator byte is reached
@@ -276,16 +275,22 @@
 ;                    attribute options at top). Defaults to 0
 ;====
 .macro "tilemap.writeBytesUntil" args terminator dataAddr attributes
-    ld d, terminator
-    ld hl, dataAddr
+    utils.assert.range terminator 0 255 "\.: terminator should be a byte value"
+    utils.assert.label dataAddr "\.: dataAddr should be a label"
 
-    .ifdef attributes
-        ld b, attributes
-    .else
-        ld b, 0
-    .endif
+    utils.clobbers "af", "bc", "de", "hl"
+        ld d, terminator
+        ld hl, dataAddr
 
-    call tilemap.writeBytesUntil
+        .ifdef attributes
+            utils.assert.range attributes 0 255 "\.: attributes should be a byte value"
+            ld b, attributes
+        .else
+            ld b, 0
+        .endif
+
+        call tilemap._writeBytesUntil
+    utils.clobbers.end
 .endm
 
 ;====
@@ -319,16 +324,21 @@
 ;                       See tile attribute options at top. Defaults to $00
 ;====
 .macro "tilemap.writeBytes" args address count attributes
-    ld hl, address
-    ld b,  count
+    utils.assert.label address "\.: Address should be a label"
+    utils.assert.range count 0 tilemap.TILES "\.: Count should be between 0 and {tilemap.TILES}"
 
-    .ifdef attributes
-        ld c, attributes
-    .else
-        ld c, 0
-    .endif
+    utils.clobbers "af", "hl", "bc"
+        ld hl, address
+        ld b,  count
 
-    call tilemap.writeBytes
+        .ifdef attributes
+            ld c, attributes
+        .else
+            ld c, 0
+        .endif
+
+        call tilemap.writeBytes
+    utils.clobbers.end
 .endm
 
 ;====
@@ -343,13 +353,6 @@
 .endm
 
 ;====
-; Alias for tilemap.writeRows
-;====
-.macro "tilemap.writeRows"
-    call tilemap.writeRows
-.endm
-
-;====
 ; Write tile data from an uncompressed map. Each tile is 2-bytes - the first is
 ; the tileRef and the second is the tile's attributes.
 ;
@@ -358,12 +361,31 @@
 ;           columns in the full map * 2 (as each tile is 2-bytes)
 ; @in   hl  pointer to the first tile to write
 ;====
-.section "tilemap.writeRows"
+.macro "tilemap.writeRows"
+    utils.clobbers "af", "bc", "de"
+        call tilemap._writeRows
+    utils.clobbers.end
+.endm
+
+;====
+; The same as tilemap.writeRows but jumps to the routine so the 'ret' returns
+; to the original caller
+;====
+.macro "tilemap.writeRowsThenReturn"
+    utils.clobbers "af", "bc", "de"
+        jp tilemap._writeRows
+    utils.clobbers.end
+.endm
+
+;====
+; Private (see macro)
+;====
+.section "tilemap._writeRows"
     _nextRow:
         ld a, e                 ; write row width into A
         utils.math.addHLA       ; add 1 row to full tilemap pointer
 
-    tilemap.writeRows:
+    tilemap._writeRows:
         push hl                 ; preserve HL
             tilemap.writeRow    ; write a row of data
         pop hl                  ; restore HL
@@ -374,40 +396,15 @@
 .ends
 
 ;====
-; Alias to call tilemap.reset
+; Initialises the RAM buffers and scroll values to their starting state
 ;====
 .macro "tilemap.reset"
-    call tilemap.reset
+    \@_\.:
+
+    utils.clobbers "af"
+        call tilemap._reset
+    utils.clobbers.end
 .endm
-
-;====
-; Initialise the RAM buffers and scroll values to their starting state
-;====
-.section "tilemap.reset" free
-    tilemap.reset:
-        xor a   ; set A to 0
-        ld (tilemap.ram.flags), a
-        ld (tilemap.ram.yScrollBuffer), a
-
-        ld (tilemap.ram.vramRowWrite), a
-        ld (tilemap.ram.vramRowWrite + 1), a
-
-        ld (tilemap.ram.colWriteCall), a
-        ld (tilemap.ram.colWriteCall + 1), a
-
-        ; Set the VDP SCROLL_Y_REGISTER to 0
-        utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER
-
-        ; Set the xScrollBuffer to the starting X_OFFSET value
-        ld a, tilemap.X_OFFSET
-        ld (tilemap.ram.xScrollBuffer), a
-
-        ; Write xScrollBuffer to the VDP SCROLL_X_REGISTER (needs to be negated)
-        ld a, -tilemap.X_OFFSET
-        utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
-
-        ret
-.ends
 
 ;====
 ; Adjusts the buffered tilemap xScroll value by a given number of pixels. If
@@ -422,7 +419,10 @@
 ;           left (shifting the tiles right)
 ;====
 .macro "tilemap.adjustXPixels"
-    call tilemap._adjustXPixels
+    \@_\.:
+    utils.clobbers "af" "bc" "hl"
+        call tilemap._adjustXPixels
+    utils.clobbers.end
 .endm
 
 ;====
@@ -438,7 +438,10 @@
 ;           up (shifting the tiles down)
 ;====
 .macro "tilemap.adjustYPixels"
-    call tilemap._adjustYPixels
+    \@_\.:
+    utils.clobbers "af" "bc" "hl"
+        call tilemap._adjustYPixels
+    utils.clobbers.end
 .endm
 
 ;====
@@ -450,8 +453,15 @@
 ;
 ; Note: This should be called before calling tilemap.calculateScroll
 ;====
-.section "tilemap.stopUpRowScroll" free
-    tilemap.stopUpRowScroll:
+.macro "tilemap.stopUpRowScroll"
+    \@_\.:
+    utils.clobbers "af"
+        call tilemap._stopUpRowScroll
+    utils.clobbers.end
+.endm
+
+.section "tilemap._stopUpRowScroll" free
+    tilemap._stopUpRowScroll:
         ; Reset UP scroll flag
         ld a, (tilemap.ram.flags)           ; load flags
         and tilemap.SCROLL_Y_RESET_MASK     ; reset Y scroll flags
@@ -475,13 +485,6 @@
 .ends
 
 ;====
-; Alias to call tilemap.stopUpRowScroll
-;====
-.macro "tilemap.stopUpRowScroll"
-    call tilemap.stopUpRowScroll
-.endm
-
-;====
 ; When tilemap.ifRowScroll indicates a down scroll, but you detect this new row
 ; will be out of bounds of the tilemap, call this to cap the y pixel scrolling
 ; to the top of the current in-bounds row. Further calls to tilemap.ifRowScroll
@@ -490,8 +493,15 @@
 ;
 ; Note: This should be called before calling tilemap.calculateScroll
 ;====
-.section "tilemap.stopDownRowScroll" free
-    tilemap.stopDownRowScroll:
+.macro "tilemap.stopDownRowScroll"
+    \@_\.:
+    utils.clobbers "af"
+        call tilemap._stopDownRowScroll
+    utils.clobbers.end
+.endm
+
+.section "tilemap._stopDownRowScroll" free
+    tilemap._stopDownRowScroll:
         ; Reset Y scroll flags
         ld a, (tilemap.ram.flags)           ; load flags
         and tilemap.SCROLL_Y_RESET_MASK     ; reset Y scroll flags
@@ -515,13 +525,6 @@
 .ends
 
 ;====
-; Alias to call tilemap.stopDownRowScroll
-;====
-.macro "tilemap.stopDownRowScroll"
-    call tilemap.stopDownRowScroll
-.endm
-
-;====
 ; When tilemap.ifColScroll indicates a left scroll, but you detect this new row
 ; will be out of bounds of the tilemap, call this to cap the x pixel scrolling
 ; to the left edge of the current in-bounds column. Further calls to
@@ -530,8 +533,15 @@
 ;
 ; Note: This should be called before calling tilemap.calculateScroll
 ;====
-.section "tilemap.stopLeftColScroll" free
-    tilemap.stopLeftColScroll:
+.macro "tilemap.stopLeftColScroll"
+    \@_\.:
+    utils.clobbers "af"
+        call tilemap._stopLeftColScroll
+    utils.clobbers.end
+.endm
+
+.section "tilemap._stopLeftColScroll" free
+    tilemap._stopLeftColScroll:
         ; Reset column scroll flags
         ld a, (tilemap.ram.flags)           ; load flags
         and tilemap.SCROLL_X_RESET_MASK     ; reset x scroll flags
@@ -547,13 +557,6 @@
 .ends
 
 ;====
-; Alias to call tilemap.stopLeftColScroll
-;====
-.macro "tilemap.stopLeftColScroll"
-    call tilemap.stopLeftColScroll
-.endm
-
-;====
 ; When tilemap.ifColScroll indicates a right scroll, but you detect this new row
 ; will be out of bounds of the tilemap, call this to cap the x pixel scrolling
 ; to the right edge of the current in-bounds column. Further calls to
@@ -562,8 +565,15 @@
 ;
 ; Note: This should be called before calling tilemap.calculateScroll
 ;====
-.section "tilemap.stopRightColScroll" free
-    tilemap.stopRightColScroll:
+.macro "tilemap.stopRightColScroll"
+    \@_\.:
+    utils.clobbers "af"
+        call tilemap._stopRightColScroll
+    utils.clobbers.end
+.endm
+
+.section "tilemap._stopRightColScroll" free
+    tilemap._stopRightColScroll:
         ; Reset column scroll flags
         ld a, (tilemap.ram.flags)           ; load flags
         and tilemap.SCROLL_X_RESET_MASK     ; reset x scroll flags
@@ -579,18 +589,14 @@
 .ends
 
 ;====
-; Alias to call tilemap.stopRightColScroll
-;====
-.macro "tilemap.stopRightColScroll"
-    call tilemap.stopRightColScroll
-.endm
-
-;====
 ; Calculates the adjustments made with tilemap.adjustXPixels/adjustYPixels
 ; and applies them to the RAM variables
 ;====
 .macro "tilemap.calculateScroll"
-    call tilemap._calculateScroll
+    \@_\.:
+    utils.clobbers "af" "bc"
+        call tilemap._calculateScroll
+    utils.clobbers.end
 .endm
 
 ;====
@@ -663,11 +669,15 @@
 ; @in   else    jump to this label if no columns need loading
 ;====
 .macro "tilemap.ifColScroll" args left, right, else
+    \@_\.:
+
     .if NARGS == 1
         ; Only one argument passed ('else' label)
-        ld a, (tilemap.ram.flags)   ; load flags
-        rlca                        ; set C to 7th bit
-        jp nc, \1                   ; jp to else if no col to scroll
+        utils.clobbers "af"
+            ld a, (tilemap.ram.flags)   ; load flags
+            rlca                        ; set carry to 7th bit
+            jp nc, \1                   ; jp to else if no col to scroll
+        utils.clobbers.end
         ; ...otherwise continue
     .elif NARGS == 3
         ; 3 arguments passed (left, right, else)
@@ -1189,6 +1199,35 @@
 .ends
 
 ;====
+; (Private) Initialises the RAM buffers and scroll values to their starting state
+;====
+.section "tilemap._reset" free
+    tilemap._reset:
+        xor a   ; set A to 0
+        ld (tilemap.ram.flags), a
+        ld (tilemap.ram.yScrollBuffer), a
+
+        ld (tilemap.ram.vramRowWrite), a
+        ld (tilemap.ram.vramRowWrite + 1), a
+
+        ld (tilemap.ram.colWriteCall), a
+        ld (tilemap.ram.colWriteCall + 1), a
+
+        ; Set the VDP SCROLL_Y_REGISTER to 0
+        utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER
+
+        ; Set the xScrollBuffer to the starting X_OFFSET value
+        ld a, tilemap.X_OFFSET
+        ld (tilemap.ram.xScrollBuffer), a
+
+        ; Write xScrollBuffer to the VDP SCROLL_X_REGISTER (needs to be negated)
+        ld a, -tilemap.X_OFFSET
+        utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
+
+        ret
+.ends
+
+;====
 ; Unrolled loop of column tile writes. Call one of the addresses stored in the
 ; tilemap._writeColumnLookup lookup table to start from a given row. The loop
 ; will wrap back to 0 after the 28th tile is written and continue until all
@@ -1263,6 +1302,27 @@
                 .redefine tilemap._writeColumnLookup_currentOffset tilemap._writeColumnLookup_currentOffset + 14
             .endif
         .endr
+.ends
+
+;====
+; Reads pattern ref bytes and writes to the tilemap until a terminator byte is
+; reached.
+;
+; @in   hl  address of the data to write
+; @in   b   tile attributes to use for all the tiles
+; @in   c   the data port to write to
+; @in   d   the terminator byte value
+;====
+.section "tilemap._writeBytesUntil" free
+    tilemap._writeBytesUntil:
+        ld a, (hl)                      ; read byte
+        cp d                            ; compare value with terminator
+        ret z                           ; return if terminator byte found
+        out (utils.vdp.DATA_PORT), a    ; write pattern ref
+        ld a, b                         ; load attributes
+        out (utils.vdp.DATA_PORT), a    ; write attributes
+        inc hl                          ; next char
+        jp tilemap._writeBytesUntil     ; repeat
 .ends
 
 ;====
