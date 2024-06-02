@@ -7,7 +7,7 @@ describe "register preservation"
 
         registers.preserve  ; no registers specified - preserve all by default
             registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
-                call suite.clobberAll
+                call suite.registers.clobberAll
             registers.clobberEnd
         registers.restore
 
@@ -25,7 +25,7 @@ describe "register preservation"
         registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
             ; This clobber scope clobbers all registers
             registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
-                call suite.clobberAll
+                call suite.registers.clobberAll
             registers.clobberEnd
         registers.restore
 

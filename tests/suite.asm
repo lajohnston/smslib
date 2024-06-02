@@ -21,35 +21,9 @@
 .ends
 
 ; Register preservation
+.include "registers/_helpers.asm"
+
 .section "registers.asm tests" appendto zest.suiteBank2
-    jp +
-        suite.setAllToA:
-            ld b, a
-            ld c, a
-            ld d, a
-            ld e, a
-            ld h, a
-            ld l, a
-            ld ixl, a
-            ld ixh, a
-            ld iyl, a
-            ld iyh, a
-            ld i, a
-            ret
-
-        suite.clobberAll:
-            ex af, af'  ; switch AF and AF' to clobber both
-            exx         ; switch main registers with shadow to clobber both sets
-
-            ; Clobber index registers
-            ld ixl, a
-            ld ixh, a
-            ld iyl, a
-            ld iyh, a
-            ld i, a
-            ret
-    +:
-
     .include "registers/autoPreserve.test.asm"
     .include "registers/iRegister.test.asm"
     .include "registers/nestedPreserveScopes.test.asm"

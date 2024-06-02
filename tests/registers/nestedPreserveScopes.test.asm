@@ -1,21 +1,21 @@
 describe "register preservation: nested preserve scopes"
     test "preserves registers for each preserve scope"
         ld a, $01
-        call suite.setAllToA
+        call suite.registers.setAllToA
 
         ; Preserve all registers (containing $01)
         registers.preserve
             ; Clob all registers
             registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                 ld a, $02
-                call suite.setAllToA
+                call suite.registers.setAllToA
 
                 ; Preserve all registers again (containing $02)
                 registers.preserve
                     ; Clob all registers with $03
                     registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                         ld a, $03
-                        call suite.setAllToA
+                        call suite.registers.setAllToA
                     registers.clobberEnd
                 registers.restore
 

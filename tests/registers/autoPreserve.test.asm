@@ -6,7 +6,7 @@ describe "automatic register preservation"
         zest.initRegisters
 
         registers.clobbers "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'", "hl'"
-            call suite.clobberAll
+            call suite.registers.clobberAll
         registers.clobberEnd
 
         expect.all.toBeUnclobbered
