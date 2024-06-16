@@ -18,6 +18,12 @@
     .include "mapper/48k.asm"
 .endif
 
+; Intelligent register preservation
+.include "utils/clobbers.asm"
+.include "utils/preserve.asm"
+.include "utils/restore.asm"
+
+; Modules
 .include "input.asm"        ; handles input
 .include "interrupts.asm"   ; handles line and frame interrupts
 .include "palette.asm"      ; handles colors

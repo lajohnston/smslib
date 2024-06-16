@@ -7,8 +7,6 @@
 .incdir ".."
     .define input.ENABLE_PORT_2
     .include "tests/smslib-zest.asm"
-    .include "utils/preserve.asm"
-    .include "utils/restore.asm"
 .incdir "."
 
 ; Test helpers
