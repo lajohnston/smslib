@@ -4,7 +4,7 @@ describe "tilemap.stopRightColScroll"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             tilemap.stopRightColScroll
         utils.registers.restore
 

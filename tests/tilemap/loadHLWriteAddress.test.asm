@@ -2,7 +2,7 @@ describe "tilemap.loadHLWriteAddress"
     test "returns HL but doesn't clobber other registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             tilemap.loadHLWriteAddress
         utils.registers.restore
 

@@ -19,7 +19,7 @@ To automatically preserve all registers by default, consider setting the `utils.
 .redefine utils.registers.AUTO_PRESERVE 1 ; activate
 ```
 
-You can opt-out of this on a per-call basis using `utils.registers.preserve` to create more-specific preserve scopes for particular calls.
+You can opt-out of this on a per-call basis using `utils.preserve` to create more-specific preserve scopes for particular calls.
 
 ## utils.registers.clobbers, utils.registers.clobberEnd
 
@@ -64,15 +64,15 @@ Utilising these macros within `sections` will produce unpredictable results as t
 .endm
 ```
 
-## utils.registers.preserve, utils.registers.restore
+## utils.preserve, utils.registers.restore
 
-Callers that rely on register states to be preserved can wrap the macro invokation with `utils.registers.preserve` and `utils.registers.restore`. This is referred to as a 'preserve scope'.
+Callers that rely on register states to be preserved can wrap the macro invokation with `utils.preserve` and `utils.registers.restore`. This is referred to as a 'preserve scope'.
 
 ```asm
 .macro "myMacro"
     ld bc, $1234
 
-    utils.registers.preserve "BC"
+    utils.preserve "BC"
         macroThatClobsThings
     utils.registers.restore
 
@@ -87,6 +87,6 @@ Acceptable arguments are:
 
 As each clobber scope is encountered in the macro chain, it will now be aware which registers you wish to preserve and so preserve any that match. If the call passes through multiple nested clobber scopes that clobber the same particular register, only the first-encountered (outer) scope will preserve the register rather than it being preserved multiple times.
 
-Calling `utils.registers.preserve` with no arguments will default to ensuring all registers that get clobbered are preserved.
+Calling `utils.preserve` with no arguments will default to ensuring all registers that get clobbered are preserved.
 
 Like clobber scopes, it's possible to nest preserve scopes. Inner scopes are aware of what registers the outer scope needs preserving.

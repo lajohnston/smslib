@@ -5,7 +5,7 @@ describe "register preservation"
     test "preserves all clobbered registers by default"
         zest.initRegisters
 
-       utils.registers.preserve  ; noutils.registers.specified - preserve all by default
+       utils.preserve  ; no registers - preserve all by default
            utils.registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                 call suite.registers.clobberAll
            utils.registers.clobberEnd
@@ -22,7 +22,7 @@ describe "register preservation"
         zest.initRegisters
 
         ; Preserve all registers
-       utils.registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+       utils.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
             ; This clobber scope clobbers all registers
            utils.registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                 call suite.registers.clobberAll
@@ -38,7 +38,7 @@ describe "register preservation"
         ld hl, $ffff
 
         ; Preserve BC and DE only
-       utils.registers.preserve "bc", "de"
+       utils.preserve "bc", "de"
             ; This clobber scope clobbers all registers
            utils.registers.clobbers "bc", "de", "hl"
                 ld bc, 0
@@ -60,7 +60,7 @@ describe "register preservation"
         ld hl, $ffff
 
         ; Preserve all registers
-       utils.registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+       utils.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
             ; This clobber scope only clobbers DE and HL
            utils.registers.clobbers "bc", "de"
                 ld bc, 0
@@ -80,7 +80,7 @@ describe "register preservation"
         ld bc, $bc01
 
         ; Preserve BC
-       utils.registers.preserve "bc"
+       utils.preserve "bc"
             ; Nothing should have been preserved yet
             expect.stack.size.toBe 0
 

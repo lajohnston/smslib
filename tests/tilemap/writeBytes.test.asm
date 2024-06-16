@@ -8,7 +8,7 @@ describe "tilemap.writeBytes"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             tilemap.setColRow 0 0
             tilemap.writeBytes _writeBytesData 2 0
         utils.registers.restore

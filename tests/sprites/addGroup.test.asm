@@ -14,7 +14,7 @@ describe "sprites.addGroup"
 
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             ld hl, testSpriteGroup
             sprites.addGroup
         utils.registers.restore
@@ -25,7 +25,7 @@ describe "sprites.addGroup"
     test "when in a batch should not clobber any registers apart from DE"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             sprites.startBatch
                 ld hl, testSpriteGroup
                 sprites.addGroup

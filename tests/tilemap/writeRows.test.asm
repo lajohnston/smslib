@@ -2,7 +2,7 @@ describe "tilemap.writeRows"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             tilemap.setColRow 0, 0
             ld d, 1
             ld e, 2

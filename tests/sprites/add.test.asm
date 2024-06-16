@@ -4,7 +4,7 @@ describe "sprites.add"
     test "should not clobber any registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             sprites.add
         utils.registers.restore
 
@@ -13,7 +13,7 @@ describe "sprites.add"
     test "when in a batch should not clobber any registers apart from DE"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             sprites.startBatch
                 sprites.add
             sprites.endBatch

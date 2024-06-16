@@ -3,7 +3,7 @@ describe "register preservation: sequential (unnested) clobber scopes"
         ld bc, $bc00
 
         ; Preserve scope
-       utils.registers.preserve "bc"
+       utils.preserve "bc"
             ; First clobber scope clobbers BC
            utils.registers.clobbers "bc"
                 expect.stack.size.toBe 1
@@ -26,7 +26,7 @@ describe "register preservation: sequential (unnested) clobber scopes"
         ld de, $de00
 
         ; Preserve scope preserves BC and DE
-       utils.registers.preserve "bc" "de"
+       utils.preserve "bc" "de"
             ; First clobber scope clobbers DE
            utils.registers.clobbers "de"
                 expect.stack.toContain $de00
@@ -46,7 +46,7 @@ describe "register preservation: sequential (unnested) clobber scopes"
     test "restores the correct registers (random order)"
         zest.initRegisters
 
-       utils.registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+       utils.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
            utils.registers.clobbers "hl"
                 ld h, a
                 ld l, a

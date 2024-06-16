@@ -4,7 +4,7 @@ describe "tilemap.adjustYPixels"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             ld a, 1
             tilemap.adjustYPixels
         utils.registers.restore

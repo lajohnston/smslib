@@ -2,7 +2,7 @@ describe "palette.setIndex"
     test "sets C to the port but does not clobber other registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             palette.setIndex 1
         utils.registers.restore
 

@@ -2,7 +2,7 @@ describe "tilemap.setColRow"
     test "sets C to the VDP data port but does not clobber other registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             tilemap.setColRow 0 0
         utils.registers.restore
 

@@ -9,7 +9,7 @@ describe "palette.writeBytes"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             palette.setIndex 0
             palette.writeBytes _palette.writeBytes.data 1
         utils.registers.restore

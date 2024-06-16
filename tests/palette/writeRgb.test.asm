@@ -2,7 +2,7 @@ describe "palette.writeRgb"
     test "does not clobber the registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             palette.setIndex 0
             palette.writeRgb 100 150 200
         utils.registers.restore

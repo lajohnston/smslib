@@ -18,7 +18,10 @@
 ; @in   ...registers    register strings. See registers.asm for details
 ;====
 .macro "utils.clobbers"
-    .if nargs == 1
+    .if nargs == 0
+        .print "\.: Expected one or more register arguments\n"
+        .fail
+    .elif nargs == 1
         utils.registers.clobbers \1
     .elif nargs == 2
         utils.registers.clobbers \1 \2
@@ -34,8 +37,14 @@
         utils.registers.clobbers \1 \2 \3 \4 \5 \6 \7
     .elif nargs == 8
         utils.registers.clobbers \1 \2 \3 \4 \5 \6 \7 \8
+    .elif nargs == 9
+        utils.registers.clobbers \1 \2 \3 \4 \5 \6 \7 \8 \9
+    .elif nargs == 10
+        utils.registers.clobbers \1 \2 \3 \4 \5 \6 \7 \8 \9 \10
+    .elif nargs == 11
+        utils.registers.clobbers \1 \2 \3 \4 \5 \6 \7 \8 \9 \10 \11
     .else
-        .print "\.: Doesn't currently support ", nargs, " arguments\n"
+        .print "\.: Too many arguments passed\n"
         .fail
     .endif
 .endm

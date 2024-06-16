@@ -11,7 +11,7 @@ describe "sprites.init"
     test "does not clobber any registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             sprites.init
         utils.registers.restore
 

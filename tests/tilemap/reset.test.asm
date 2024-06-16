@@ -2,7 +2,7 @@ describe "tilemap.reset"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             tilemap.reset
         utils.registers.restore
 

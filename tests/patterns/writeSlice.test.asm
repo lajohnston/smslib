@@ -9,7 +9,7 @@ describe "patterns.writeSlice"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             patterns.setIndex 0
             patterns.writeSlice _patterns.writeSlice.data 1
         utils.registers.restore
@@ -21,7 +21,7 @@ describe "patterns.writeSlice with offset"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             patterns.setIndex 0
             patterns.writeSlice _patterns.writeSlice.data 1 1
         utils.registers.restore

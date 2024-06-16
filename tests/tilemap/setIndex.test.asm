@@ -2,7 +2,7 @@ describe "tilemap.setIndex"
     test "sets C to the VDP data port but does not clobber other registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             tilemap.setIndex 1
         utils.registers.restore
 

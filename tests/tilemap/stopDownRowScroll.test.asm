@@ -4,7 +4,7 @@ describe "tilemap.stopDownRowScroll"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             tilemap.stopDownRowScroll
         utils.registers.restore
 

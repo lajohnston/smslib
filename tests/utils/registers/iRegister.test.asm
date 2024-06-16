@@ -2,7 +2,7 @@ describe "i-register preservation"
     test "preserves and restores AF and I"
         zest.initRegisters
 
-        utils.registers.preserve "af" "i"
+        utils.preserve "af" "i"
             utils.registers.clobbers "i"
                 ld i, a
             utils.registers.clobberEnd
@@ -21,7 +21,7 @@ describe "i-register preservation"
 
         ; Create multiple nested preserve and clobber scopes that inc I
         .repeat utils.registers.I_STACK_MAX_SIZE index index
-            utils.registers.preserve "i"
+            utils.preserve "i"
                 utils.registers.clobbers "i"
                     inc a
                     ld i, a

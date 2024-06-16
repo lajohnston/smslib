@@ -9,7 +9,7 @@ describe "patterns.writeBytes"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             patterns.setIndex 0
             patterns.writeBytes _patterns.writeBytes.data 1
         utils.registers.restore

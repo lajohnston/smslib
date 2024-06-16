@@ -9,7 +9,7 @@ describe "palette.writeSlice"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             palette.setIndex 0
             palette.writeSlice _palette.writeSlice.data 1
         utils.registers.restore
@@ -21,7 +21,7 @@ describe "palette.writeSlice with offset"
     test "does not clobber registers"
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             palette.setIndex 0
             palette.writeSlice _palette.writeSlice.data 1 1
         utils.registers.restore

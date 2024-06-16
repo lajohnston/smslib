@@ -5,7 +5,7 @@ describe "sprites.copyToVram"
         sprites.reset
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             sprites.copyToVram
         utils.registers.restore
 
@@ -17,7 +17,7 @@ describe "sprites.copyToVram"
 
         zest.initRegisters
 
-        utils.registers.preserve
+        utils.preserve
             sprites.copyToVram
         utils.registers.restore
 
