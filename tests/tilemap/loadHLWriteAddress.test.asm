@@ -4,7 +4,7 @@ describe "tilemap.loadHLWriteAddress"
 
         utils.preserve
             tilemap.loadHLWriteAddress
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "hl"
 

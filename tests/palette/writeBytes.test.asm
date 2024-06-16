@@ -12,7 +12,7 @@ describe "palette.writeBytes"
         utils.preserve
             palette.setIndex 0
             palette.writeBytes _palette.writeBytes.data 1
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port

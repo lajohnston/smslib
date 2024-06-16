@@ -17,7 +17,7 @@ describe "sprites.addGroup"
         utils.preserve
             ld hl, testSpriteGroup
             sprites.addGroup
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "hl"
         expect.hl.toBe testSpriteGroup
@@ -30,7 +30,7 @@ describe "sprites.addGroup"
                 ld hl, testSpriteGroup
                 sprites.addGroup
             sprites.endBatch
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "hl" "de"
         expect.hl.toBe testSpriteGroup

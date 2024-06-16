@@ -6,6 +6,6 @@ describe "tilemap.calculateScroll"
 
         utils.preserve
             tilemap.calculateScroll
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobbered

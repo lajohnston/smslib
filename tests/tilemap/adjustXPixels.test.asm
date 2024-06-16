@@ -7,7 +7,7 @@ describe "tilemap.adjustXPixels"
         utils.preserve
             ld a, 1
             tilemap.adjustXPixels
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "a"
         expect.a.toBe 1

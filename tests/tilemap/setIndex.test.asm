@@ -4,7 +4,7 @@ describe "tilemap.setIndex"
 
         utils.preserve
             tilemap.setIndex 1
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port

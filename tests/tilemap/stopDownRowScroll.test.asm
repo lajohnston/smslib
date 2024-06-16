@@ -6,6 +6,6 @@ describe "tilemap.stopDownRowScroll"
 
         utils.preserve
             tilemap.stopDownRowScroll
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobbered

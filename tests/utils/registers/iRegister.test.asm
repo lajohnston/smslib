@@ -10,7 +10,7 @@ describe "i-register preservation"
             utils.registers.clobbers "af"
                 inc a
             utils.registers.clobberEnd
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobbered
 
@@ -30,7 +30,7 @@ describe "i-register preservation"
         ; Restore each nested preserve scope
         .repeat utils.registers.I_STACK_MAX_SIZE index restoreIndex
                 utils.registers.clobberEnd
-            utils.registers.restore
+            utils.restore
 
             expect.i.toBe utils.registers.I_STACK_MAX_SIZE - restoreIndex - 1
         .endr

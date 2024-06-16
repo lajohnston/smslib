@@ -6,6 +6,6 @@ describe "tilemap.stopRightColScroll"
 
         utils.preserve
             tilemap.stopRightColScroll
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobbered

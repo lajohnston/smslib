@@ -4,7 +4,7 @@ describe "tilemap.setColRow"
 
         utils.preserve
             tilemap.setColRow 0 0
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port

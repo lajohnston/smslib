@@ -11,7 +11,7 @@ describe "tilemap.writeBytes"
         utils.preserve
             tilemap.setColRow 0 0
             tilemap.writeBytes _writeBytesData 2 0
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be

@@ -17,7 +17,7 @@ describe "register preservation: sequential (unnested) clobber scopes"
                 expect.stack.toContain $bc00 0 "Expected stack to still contain original BC value"
                 ld bc, $bc02
            utils.registers.clobberEnd
-       utils.registers.restore
+       utils.restore
 
         expect.bc.toBe $bc00
 
@@ -38,7 +38,7 @@ describe "register preservation: sequential (unnested) clobber scopes"
                 expect.stack.toContain $bc00
                 ld bc, $bc02
            utils.registers.clobberEnd
-       utils.registers.restore
+       utils.restore
 
         expect.bc.toBe $bc00
         expect.de.toBe $de00
@@ -58,6 +58,6 @@ describe "register preservation: sequential (unnested) clobber scopes"
                 ld ixh, a
                 ld ixl, a
            utils.registers.clobberEnd
-       utils.registers.restore
+       utils.restore
 
         expect.all.toBeUnclobbered

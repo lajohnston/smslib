@@ -12,7 +12,7 @@ describe "patterns.writeBytes"
         utils.preserve
             patterns.setIndex 0
             patterns.writeBytes _patterns.writeBytes.data 1
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port

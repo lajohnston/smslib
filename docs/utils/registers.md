@@ -64,9 +64,9 @@ Utilising these macros within `sections` will produce unpredictable results as t
 .endm
 ```
 
-## utils.preserve, utils.registers.restore
+## utils.preserve, utils.restore
 
-Callers that rely on register states to be preserved can wrap the macro invokation with `utils.preserve` and `utils.registers.restore`. This is referred to as a 'preserve scope'.
+Callers that rely on register states to be preserved can wrap the macro invokation with `utils.preserve` and `utils.restore`. This is referred to as a 'preserve scope'.
 
 ```asm
 .macro "myMacro"
@@ -74,7 +74,7 @@ Callers that rely on register states to be preserved can wrap the macro invokati
 
     utils.preserve "BC"
         macroThatClobsThings
-    utils.registers.restore
+    utils.restore
 
     ; bc will still be $1234
 .endm

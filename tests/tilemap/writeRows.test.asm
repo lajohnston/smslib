@@ -8,7 +8,7 @@ describe "tilemap.writeRows"
             ld e, 2
             ld hl, 0
             tilemap.writeRows
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "c" "de", "hl"
         expect.c.toBe $be   ; vdp data port

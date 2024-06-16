@@ -17,7 +17,7 @@ describe "register preservation: nested preserve scopes"
                         ld a, $03
                         call suite.registers.setAllToA
                     utils.registers.clobberEnd
-                utils.registers.restore
+                utils.restore
 
                 ; Expect registers to be back to $02 after inner context
                 expect.a.toBe $02
@@ -28,7 +28,7 @@ describe "register preservation: nested preserve scopes"
                 expect.iy.toBe $0202
                 expect.i.toBe $02
             utils.registers.clobberEnd
-        utils.registers.restore
+        utils.restore
 
         ; Expect all registers to be back to $01 after outer context
         expect.a.toBe $01
@@ -60,13 +60,13 @@ describe "register preservation: nested preserve scopes"
                         ld de, $de02
                         ld hl, $ff02
                     utils.registers.clobberEnd
-                utils.registers.restore
+                utils.restore
 
                 expect.hl.toBe $ff01    ; back to original
-            utils.registers.restore
+            utils.restore
 
             expect.de.toBe $de01        ; back to original
-        utils.registers.restore
+        utils.restore
 
         expect.bc.toBe $bc01            ; back to original
 
@@ -95,11 +95,11 @@ describe "register preservation: nested preserve scopes"
 
                         ld de, $de02
                    utils.registers.clobberEnd
-               utils.registers.restore
+               utils.restore
 
                 expect.de.toBe $de01
            utils.registers.clobberEnd
-       utils.registers.restore
+       utils.restore
 
         expect.bc.toBe $bc01
 
@@ -118,6 +118,6 @@ describe "register preservation: nested preserve scopes"
                     ld ixl, a
                utils.registers.clobberEnd
            utils.registers.clobberEnd
-       utils.registers.restore
+       utils.restore
 
         expect.all.toBeUnclobbered

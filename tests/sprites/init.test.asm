@@ -13,6 +13,6 @@ describe "sprites.init"
 
         utils.preserve
             sprites.init
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobbered

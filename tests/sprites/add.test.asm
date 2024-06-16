@@ -6,7 +6,7 @@ describe "sprites.add"
 
         utils.preserve
             sprites.add
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobbered
 
@@ -17,6 +17,6 @@ describe "sprites.add"
             sprites.startBatch
                 sprites.add
             sprites.endBatch
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "de"

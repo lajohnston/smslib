@@ -5,7 +5,7 @@
 ; and utils.registers.clobberEnd, stating which registers they clobber.
 ;
 ; Code that requires registers to be preserved when calling macros can wrap
-; the call in utils.registers.preserve and utils.registers.restore calls. Any registers
+; the call in utils.registers.preserve and utils.restore calls. Any registers
 ; in the preserve list and that get clobbered will be preserved
 ;====
 .define utils.registers.ENABLED

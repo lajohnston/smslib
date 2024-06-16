@@ -12,7 +12,7 @@ describe "palette.writeSlice"
         utils.preserve
             palette.setIndex 0
             palette.writeSlice _palette.writeSlice.data 1
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port
@@ -24,7 +24,7 @@ describe "palette.writeSlice with offset"
         utils.preserve
             palette.setIndex 0
             palette.writeSlice _palette.writeSlice.data 1 1
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port

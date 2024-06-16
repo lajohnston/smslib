@@ -7,7 +7,7 @@ describe "sprites.copyToVram"
 
         utils.preserve
             sprites.copyToVram
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobbered
 
@@ -19,6 +19,6 @@ describe "sprites.copyToVram"
 
         utils.preserve
             sprites.copyToVram
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobbered

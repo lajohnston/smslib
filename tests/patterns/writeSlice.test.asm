@@ -12,7 +12,7 @@ describe "patterns.writeSlice"
         utils.preserve
             patterns.setIndex 0
             patterns.writeSlice _patterns.writeSlice.data 1
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port
@@ -24,7 +24,7 @@ describe "patterns.writeSlice with offset"
         utils.preserve
             patterns.setIndex 0
             patterns.writeSlice _patterns.writeSlice.data 1 1
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port

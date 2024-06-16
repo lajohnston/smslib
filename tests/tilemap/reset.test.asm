@@ -4,6 +4,6 @@ describe "tilemap.reset"
 
         utils.preserve
             tilemap.reset
-        utils.registers.restore
+        utils.restore
 
         expect.all.toBeUnclobbered

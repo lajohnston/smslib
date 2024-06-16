@@ -46,6 +46,6 @@ describe "automatic register preservation"
                 expect.stack.size.toBe 1
                 expect.stack.toContain $bc00
             utils.registers.clobberEnd
-        utils.registers.restore
+        utils.restore
 
         expect.bc.toBe $bc00

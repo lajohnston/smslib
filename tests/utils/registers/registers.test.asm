@@ -9,7 +9,7 @@ describe "register preservation"
            utils.registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                 call suite.registers.clobberAll
            utils.registers.clobberEnd
-       utils.registers.restore
+       utils.restore
 
         expect.all.toBeUnclobbered
 
@@ -27,7 +27,7 @@ describe "register preservation"
            utils.registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                 call suite.registers.clobberAll
            utils.registers.clobberEnd
-       utils.registers.restore
+       utils.restore
 
         ; Expect all registers to have been preserved
         expect.all.toBeUnclobbered
@@ -45,7 +45,7 @@ describe "register preservation"
                 ld de, 0
                 ld hl, 0
            utils.registers.clobberEnd
-       utils.registers.restore
+       utils.restore
 
         ; Expect BC and DE to have been preserved
         expect.bc.toBe $bc01
@@ -67,7 +67,7 @@ describe "register preservation"
                 ld de, 0
                 ld hl, 0
            utils.registers.clobberEnd
-       utils.registers.restore
+       utils.restore
 
         ; Expect BC and DE to have been preserved
         expect.bc.toBe $bc01
@@ -102,7 +102,7 @@ describe "register preservation"
                     ld bc, $bc03
                utils.registers.clobberEnd
            utils.registers.clobberEnd
-       utils.registers.restore
+       utils.restore
 
         expect.stack.size.toBe 0 "Expected stack size to be back to 0"
         expect.bc.toBe $bc01
