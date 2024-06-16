@@ -4,8 +4,8 @@ describe "tilemap.calculateScroll"
     test "does not clobber registers"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             tilemap.calculateScroll
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobbered

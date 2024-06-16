@@ -3,21 +3,21 @@ describe "register preservation: sequential (unnested) clobber scopes"
         ld bc, $bc00
 
         ; Preserve scope
-        registers.preserve "bc"
+       utils.registers.preserve "bc"
             ; First clobber scope clobbers BC
-            registers.clobbers "bc"
+           utils.registers.clobbers "bc"
                 expect.stack.size.toBe 1
                 expect.stack.toContain $bc00
                 ld bc, $bc01
-            registers.clobberEnd
+           utils.registers.clobberEnd
 
             ; Second clobber scope also clobbers BC, but shouldn't push to stack again
-            registers.clobbers "bc"
+           utils.registers.clobbers "bc"
                 expect.stack.size.toBe 1 "Expected stack size to still be 1"
                 expect.stack.toContain $bc00 0 "Expected stack to still contain original BC value"
                 ld bc, $bc02
-            registers.clobberEnd
-        registers.restore
+           utils.registers.clobberEnd
+       utils.registers.restore
 
         expect.bc.toBe $bc00
 
@@ -26,19 +26,19 @@ describe "register preservation: sequential (unnested) clobber scopes"
         ld de, $de00
 
         ; Preserve scope preserves BC and DE
-        registers.preserve "bc" "de"
+       utils.registers.preserve "bc" "de"
             ; First clobber scope clobbers DE
-            registers.clobbers "de"
+           utils.registers.clobbers "de"
                 expect.stack.toContain $de00
                 ld de, $de01
-            registers.clobberEnd
+           utils.registers.clobberEnd
 
             ; Second clobber scope clobbers BC
-            registers.clobbers "bc"
+           utils.registers.clobbers "bc"
                 expect.stack.toContain $bc00
                 ld bc, $bc02
-            registers.clobberEnd
-        registers.restore
+           utils.registers.clobberEnd
+       utils.registers.restore
 
         expect.bc.toBe $bc00
         expect.de.toBe $de00
@@ -46,18 +46,18 @@ describe "register preservation: sequential (unnested) clobber scopes"
     test "restores the correct registers (random order)"
         zest.initRegisters
 
-        registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
-            registers.clobbers "hl"
+       utils.registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+           utils.registers.clobbers "hl"
                 ld h, a
                 ld l, a
-            registers.clobberEnd
+           utils.registers.clobberEnd
 
-            registers.clobbers "ix", "bc"
+           utils.registers.clobbers "ix", "bc"
                 ld b, a
                 ld c, a
                 ld ixh, a
                 ld ixl, a
-            registers.clobberEnd
-        registers.restore
+           utils.registers.clobberEnd
+       utils.registers.restore
 
         expect.all.toBeUnclobbered

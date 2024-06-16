@@ -5,9 +5,9 @@ describe "sprites.copyToVram"
         sprites.reset
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             sprites.copyToVram
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobbered
 
@@ -17,8 +17,8 @@ describe "sprites.copyToVram"
 
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             sprites.copyToVram
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobbered

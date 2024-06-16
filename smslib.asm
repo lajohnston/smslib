@@ -18,8 +18,6 @@
     .include "mapper/48k.asm"
 .endif
 
-.include "registers.asm"    ; handles register preservation
-
 .include "input.asm"        ; handles input
 .include "interrupts.asm"   ; handles line and frame interrupts
 .include "palette.asm"      ; handles colors

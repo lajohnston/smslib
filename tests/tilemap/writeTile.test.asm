@@ -2,11 +2,11 @@ describe "tilemap.writeTile"
     test "does not clobber registers"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             tilemap.setColRow 0, 0
             tilemap.writeTile 1
             tilemap.writeTile 2 tilemap.FLIP_X
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port

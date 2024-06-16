@@ -2,9 +2,9 @@ describe "tilemap.loadHLWriteAddress"
     test "returns HL but doesn't clobber other registers"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             tilemap.loadHLWriteAddress
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobberedExcept "hl"
 

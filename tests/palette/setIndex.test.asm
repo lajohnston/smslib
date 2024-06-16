@@ -2,9 +2,9 @@ describe "palette.setIndex"
     test "sets C to the port but does not clobber other registers"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             palette.setIndex 1
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port

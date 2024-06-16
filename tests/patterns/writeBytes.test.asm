@@ -9,10 +9,10 @@ describe "patterns.writeBytes"
     test "does not clobber registers"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             patterns.setIndex 0
             patterns.writeBytes _patterns.writeBytes.data 1
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port

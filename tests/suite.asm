@@ -21,14 +21,14 @@
 .ends
 
 ; Register preservation
-.include "registers/_helpers.asm"
+.include "utils/registers/_helpers.asm"
 
-.section "registers.asm tests" appendto zest.suiteBank2
-    .include "registers/autoPreserve.test.asm"
-    .include "registers/iRegister.test.asm"
-    .include "registers/nestedPreserveScopes.test.asm"
-    .include "registers/registers.test.asm"
-    .include "registers/sequentialClobberScopes.test.asm"
+.section "utils/registers.asm tests" appendto zest.suiteBank2
+    .include "utils/registers/autoPreserve.test.asm"
+    .include "utils/registers/iRegister.test.asm"
+    .include "utils/registers/nestedPreserveScopes.test.asm"
+    .include "utils/registers/registers.test.asm"
+    .include "utils/registers/sequentialClobberScopes.test.asm"
 .ends
 
 ; Palette

@@ -4,19 +4,19 @@ describe "sprites.add"
     test "should not clobber any registers"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             sprites.add
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobbered
 
     test "when in a batch should not clobber any registers apart from DE"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             sprites.startBatch
                 sprites.add
             sprites.endBatch
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobberedExcept "de"

@@ -34,7 +34,6 @@ See example programs in the `examples` directory. Build the examples using the `
 - [palette.asm](./docs/palette.md) - Color palettes
 - [patterns.asm](./docs/patterns.md) - Patterns (tile images)
 - [pause.asm](./docs/pause.md) - Pause button
-- [registers.asm](./docs/registers.md) - Efficiently preserve Z80 register states
 - [sprites.asm](./docs/sprites.md) - Manages a sprite table in a RAM and pushes to VRAM when required
 - [scroll/tiles.asm](./docs/scroll/tiles.md) - Scrollable tilemaps
 - [scroll/metatiles.asm](./docs/scroll/metatiles.md) - Scrollable maps of metatiles
@@ -44,6 +43,7 @@ See example programs in the `examples` directory. Build the examples using the `
 ### Additional utils
 
 - [utils/ram.asm](./docs/utils/ram.md) - Utilities for setting values in RAM
+- [utils/registers.asm](./docs/utils/registers.md) - Efficiently preserve Z80 register states
 
 ## Design Principles
 
@@ -64,7 +64,7 @@ As part of the speed priority, by default the library routines will happily 'clo
 
 The register values before and after a call may therefore change. This shifts the responsibility of preservation to the caller, mainly for efficiency reasons; the caller knows best what registers it actually cares about, so only needs to preserve those.
 
-The flipside of this is that it is a bit of a 'gotcha' to be aware of, so you can opt-out of this by enabling the `registers.AUTO_PRESERVE` setting to ensure all registers are preserved by default (see [registers.asm](./docs/registers.md)).
+The flipside of this is that it is a bit of a 'gotcha' to be aware of, so you can opt-out of this by enabling the `utils.registers.AUTO_PRESERVE` setting to ensure all registers are preserved by default (see [utils/registers.asm](./docs/utils/registers.md)).
 
 ### Decoupled
 

@@ -9,10 +9,10 @@ describe "tilemap.writeBytesUntil"
     test "does not clobber registers"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             tilemap.setColRow 0 0
             tilemap.writeBytesUntil $ff _writeBytesUntilData tilemap.FLIP_XY
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port

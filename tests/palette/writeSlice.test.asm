@@ -9,10 +9,10 @@ describe "palette.writeSlice"
     test "does not clobber registers"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             palette.setIndex 0
             palette.writeSlice _palette.writeSlice.data 1
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port
@@ -21,10 +21,10 @@ describe "palette.writeSlice with offset"
     test "does not clobber registers"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             palette.setIndex 0
             palette.writeSlice _palette.writeSlice.data 1 1
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobberedExcept "c"
         expect.c.toBe $be   ; vdp data port

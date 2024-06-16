@@ -11,8 +11,8 @@ describe "sprites.init"
     test "does not clobber any registers"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             sprites.init
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobbered

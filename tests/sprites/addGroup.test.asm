@@ -14,10 +14,10 @@ describe "sprites.addGroup"
 
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             ld hl, testSpriteGroup
             sprites.addGroup
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobberedExcept "hl"
         expect.hl.toBe testSpriteGroup
@@ -25,12 +25,12 @@ describe "sprites.addGroup"
     test "when in a batch should not clobber any registers apart from DE"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             sprites.startBatch
                 ld hl, testSpriteGroup
                 sprites.addGroup
             sprites.endBatch
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobberedExcept "hl" "de"
         expect.hl.toBe testSpriteGroup

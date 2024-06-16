@@ -4,8 +4,8 @@ describe "tilemap.stopUpRowScroll"
     test "does not clobber registers"
         zest.initRegisters
 
-        registers.preserve
+        utils.registers.preserve
             tilemap.stopUpRowScroll
-        registers.restore
+        utils.registers.restore
 
         expect.all.toBeUnclobbered
