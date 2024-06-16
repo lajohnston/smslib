@@ -164,6 +164,17 @@
         .fail
     .endif
 
+    ; If I was preserved on i-stack
+    .if (registers.I & (registers.unpreserved{registers.preserveIndex} ~ $ff)) > 0
+        ; Decrement i-stack size
+        .redefine registers.iStackIndex registers.iStackIndex - 1
+    .endif
+
+    ; Clear preserve stack registers
+    .repeat registers.stack{registers.preserveIndex}_size index index
+        .undefine registers.stack{registers.preserveIndex}_{index}
+    .endr
+
     ; Clean up registers
     .undefine registers.doNotClobber{registers.preserveIndex}
     .undefine registers.unpreserved{registers.preserveIndex}
@@ -214,16 +225,32 @@
 ; Restores the registers that have been preserved by the current preserve scope
 ;====
 .macro "registers._restoreRegisters"
-    .redefine \.\@stackSize registers.stack{registers.preserveIndex}_size
+    ; Assert there are preserve scopes in progress
+    .if registers.preserveIndex == -1
+        .print "\.: was called but no preserve scopes are in progress\n"
+        .fail
+    .endif
+
+    ; Check if we need to restore the I register
+    .if (registers.I & (registers.unpreserved{registers.preserveIndex} ~ $ff)) > 0
+        .if registers.iStackIndex == -1
+            .print "\.: I stack popped but there's no value on it\n"
+            .fail
+        .endif
+
+        ; This will clobber A - if it's needed it will be restored further below
+        ld a, (registers.iStack.{registers.iStackIndex})
+        ld i, a
+    .endif
 
     ; Pop each register from the stack
+    .redefine \.\@stackSize registers.stack{registers.preserveIndex}_size
     .repeat (\.\@stackSize) index index
         ; Reverse order (start from top of stack)
         .redefine index (\.\@stackSize) - index - 1
 
         ; Pop register identifier from variable stack
         .redefine \.\@register registers.stack{registers.preserveIndex}_{index}
-        .undefine registers.stack{registers.preserveIndex}_{index}
 
         ; If it's one of the shadow registers
         .if \.\@register & (registers.SHADOW_BC | registers.SHADOW_DE | registers.SHADOW_HL)
@@ -316,20 +343,6 @@
     .if registers.preserveIndex == -1
         .print "\.: was called but no preserve scopes are in progress\n"
         .fail
-    .endif
-
-    ; Check if we need to restore the I register
-    .if (registers.I & (registers.unpreserved{registers.preserveIndex} ~ $ff)) > 0
-        .if registers.iStackIndex == -1
-            .print "\.: I stack popped but there's no value on it\n"
-            .fail
-        .endif
-
-        ; This will clobber A - if it's needed it will be restored further below
-        ld a, (registers.iStack.{registers.iStackIndex})
-        ld i, a
-
-        .redefine registers.iStackIndex registers.iStackIndex - 1
     .endif
 
     ; Restore the registers
