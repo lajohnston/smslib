@@ -102,3 +102,22 @@ describe "register preservation: nested preserve scopes"
         registers.restore
 
         expect.bc.toBe $bc01
+
+    test "restores the correct registers (random order)"
+        zest.initRegisters
+
+        registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+            registers.clobbers "hl"
+                ld h, a
+                ld l, a
+
+                registers.clobbers "ix", "bc"
+                    ld b, a
+                    ld c, a
+                    ld ixh, a
+                    ld ixl, a
+                registers.clobberEnd
+            registers.clobberEnd
+        registers.restore
+
+        expect.all.toBeUnclobbered

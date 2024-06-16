@@ -42,3 +42,22 @@ describe "register preservation: sequential (unnested) clobber scopes"
 
         expect.bc.toBe $bc00
         expect.de.toBe $de00
+
+    test "restores the correct registers (random order)"
+        zest.initRegisters
+
+        registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+            registers.clobbers "hl"
+                ld h, a
+                ld l, a
+            registers.clobberEnd
+
+            registers.clobbers "ix", "bc"
+                ld b, a
+                ld c, a
+                ld ixh, a
+                ld ixl, a
+            registers.clobberEnd
+        registers.restore
+
+        expect.all.toBeUnclobbered
