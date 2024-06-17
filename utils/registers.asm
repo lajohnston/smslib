@@ -187,33 +187,33 @@
 ; Parse a register string into one of the register constants
 ;
 ; @in       string  the register string (i.e. "AF", "af", "HL'", "hl'")
-; @out      utils.registers._parse.returnValue defined with the register constant
+; @out      utils.registers.parse.returnValue defined with the register constant
 ; @fails    if the string cannot be parsed
 ;====
-.macro "utils.registers._parse" args string
+.macro "utils.registers.parse" args string
     ; Resolve register string to a constant
     .if string == "AF" || string == "af"
-        .redefine utils.registers._parse.returnValue utils.registers.AF
+        .redefine utils.registers.parse.returnValue utils.registers.AF
     .elif string == "BC" || string == "bc"
-        .redefine utils.registers._parse.returnValue utils.registers.BC
+        .redefine utils.registers.parse.returnValue utils.registers.BC
     .elif string == "DE" || string == "de"
-        .redefine utils.registers._parse.returnValue utils.registers.DE
+        .redefine utils.registers.parse.returnValue utils.registers.DE
     .elif string == "HL" || string == "hl"
-        .redefine utils.registers._parse.returnValue utils.registers.HL
+        .redefine utils.registers.parse.returnValue utils.registers.HL
     .elif string == "IX" || string == "ix"
-        .redefine utils.registers._parse.returnValue utils.registers.IX
+        .redefine utils.registers.parse.returnValue utils.registers.IX
     .elif string == "IY" || string == "iy"
-        .redefine utils.registers._parse.returnValue utils.registers.IY
+        .redefine utils.registers.parse.returnValue utils.registers.IY
     .elif string == "I" || string == "i"
-        .redefine utils.registers._parse.returnValue utils.registers.I
+        .redefine utils.registers.parse.returnValue utils.registers.I
     .elif string == "AF'" || string == "af'"
-        .redefine utils.registers._parse.returnValue utils.registers.SHADOW_AF
+        .redefine utils.registers.parse.returnValue utils.registers.SHADOW_AF
     .elif string == "BC'" || string == "bc'"
-        .redefine utils.registers._parse.returnValue utils.registers.SHADOW_BC
+        .redefine utils.registers.parse.returnValue utils.registers.SHADOW_BC
     .elif string == "DE'" || string == "de'"
-        .redefine utils.registers._parse.returnValue utils.registers.SHADOW_DE
+        .redefine utils.registers.parse.returnValue utils.registers.SHADOW_DE
     .elif string == "HL'" || string == "hl'"
-        .redefine utils.registers._parse.returnValue utils.registers.SHADOW_HL
+        .redefine utils.registers.parse.returnValue utils.registers.SHADOW_HL
     .else
         .print "\.: Unknown register value: ", string, "\n"
         .fail
@@ -324,8 +324,8 @@
         ; Combine (OR) all given args into doNotClobber value
         .repeat nargs
             ; Parse the register string into a constant
-            utils.registers._parse \1
-            .redefine \.\@register utils.registers._parse.returnValue
+            utils.registers.parse \1
+            .redefine \.\@register utils.registers.parse.returnValue
 
             ; Set given bit in doNotClobber
             utils.registers._addDoNotClobber (\.\@register)

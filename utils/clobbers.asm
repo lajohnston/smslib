@@ -47,8 +47,8 @@
     .define \.\@_clobbing 0
     .repeat nargs
         ; Parse the register string into a constant
-        utils.registers._parse \1
-        .redefine \.\@_clobbing (\.\@_clobbing | utils.registers._parse.returnValue)
+        utils.registers.parse \1
+        .redefine \.\@_clobbing (\.\@_clobbing | utils.registers.parse.returnValue)
         .shift  ; shift args (\2 => \1)
     .endr
 
