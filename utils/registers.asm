@@ -440,10 +440,13 @@
 ;           the registers (i.e. utils.registers.AF) ORed into a single value
 ;====
 .macro "utils.registers.getVulnerable"
-    .redefine \.doNotClobber (utils.registers.doNotClobber{utils.registers.preserveIndex})
-    .redefine \.unpreserved (utils.registers.unpreserved{utils.registers.preserveIndex})
-
-    .redefine utils.registers.getVulnerable.returnValue (\.doNotClobber & \.unpreserved)
+    .if utils.registers.preserveIndex == -1
+        .redefine utils.registers.getVulnerable.returnValue 0
+    .else
+        .redefine \.doNotClobber (utils.registers.doNotClobber{utils.registers.preserveIndex})
+        .redefine \.unpreserved (utils.registers.unpreserved{utils.registers.preserveIndex})
+        .redefine utils.registers.getVulnerable.returnValue (\.doNotClobber & \.unpreserved)
+    .endif
 .endm
 
 ;====

@@ -46,15 +46,11 @@
         .shift  ; shift args (\2 => \1)
     .endr
 
-    ; If there are preserve scopes in progress
-    .if utils.registers.preserveIndex > -1
-        ; Get list of registers that are being clobbered, that should be preserved,
-        ; but haven't yet been
-        utils.registers.getVulnerable
+    ; Get list of registers that should be preserved but haven't been yet
+    utils.registers.getVulnerable
 
-        ; Preserve these registers
-        utils.registers._preserveRegisters (\.\@_clobbing & utils.registers.getVulnerable.returnValue)
-    .endif
+    ; Preserve registers that are vulnerable and are being clobbered
+    utils.registers._preserveRegisters (\.\@_clobbing & utils.registers.getVulnerable.returnValue)
 .endm
 
 ;====
