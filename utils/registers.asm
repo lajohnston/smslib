@@ -432,3 +432,16 @@
         exx ; switch back to non-shadow registers
     .endif
 .endm
+
+;====
+; Returns the registers that should be protected but haven't been preserved yet
+;
+; @out  utils.registers.getVulnerable.returnValue
+;           the registers (i.e. utils.registers.AF) ORed into a single value
+;====
+.macro "utils.registers.getVulnerable"
+    .redefine \.doNotClobber (utils.registers.doNotClobber{utils.registers.preserveIndex})
+    .redefine \.unpreserved (utils.registers.unpreserved{utils.registers.preserveIndex})
+
+    .redefine utils.registers.getVulnerable.returnValue (\.doNotClobber & \.unpreserved)
+.endm

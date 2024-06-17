@@ -56,12 +56,10 @@
     .if utils.registers.preserveIndex > -1
         ; Get list of registers that are being clobbered, that should be preserved,
         ; but haven't yet been
-        .define \.\@_doNotClobber (utils.registers.doNotClobber{utils.registers.preserveIndex})
-        .define \.\@_unpreserved (utils.registers.unpreserved{utils.registers.preserveIndex})
-        .define \.\@_shouldPush (\.\@_clobbing & \.\@_doNotClobber & \.\@_unpreserved)
+        utils.registers.getVulnerable
 
         ; Preserve these registers
-        utils.registers._preserveRegisters (\.\@_shouldPush)
+        utils.registers._preserveRegisters (\.\@_clobbing & utils.registers.getVulnerable.returnValue)
     .endif
 .endm
 
