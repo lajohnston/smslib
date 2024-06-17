@@ -445,3 +445,26 @@
 
     .redefine utils.registers.getVulnerable.returnValue (\.doNotClobber & \.unpreserved)
 .endm
+
+;====
+; Should be called when the initial/outer-most clobber scope has been started
+;====
+.macro "utils.registers.onInitialClobberScope"
+    ; If auto preserve is enabled and there are no existing preserve scopes
+    .if utils.registers.AUTO_PRESERVE == 1 && utils.registers.preserveIndex == -1
+        ; Preserve all registers including shadow registers
+        utils.registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+        .redefine utils.registers.autoPreserveIndex utils.registers.preserveIndex
+    .endif
+.endm
+
+;====
+; Should be called when the last/outer-most scope has been closed
+;====
+.macro "utils.registers.onFinalClobberScopeEnd"
+    ; If this is the auto preserve scope
+    .if utils.registers.preserveIndex > -1 && utils.registers.preserveIndex == utils.registers.autoPreserveIndex
+        utils.registers.restore
+        .redefine utils.registers.autoPreserveIndex -1
+    .endif
+.endm

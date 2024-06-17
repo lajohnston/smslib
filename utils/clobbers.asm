@@ -30,14 +30,8 @@
         .fail
     .endif
 
-    ; If auto preserve is enabled
-    .if utils.registers.AUTO_PRESERVE == 1
-        ; If there are no clobber scopes or preserve scope in progress
-        .if utils.clobbers.index == -1 && utils.registers.preserveIndex == -1
-            ; Preserve all registers including shadow registers
-            utils.registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
-            .redefine utils.registers.autoPreserveIndex utils.registers.preserveIndex
-        .endif
+    .if utils.clobbers.index == -1
+        utils.registers.onInitialClobberScope
     .endif
 
     ; Increment the clobber index
@@ -77,10 +71,6 @@
 
     ; If there are no more clobber scopes in progress
     .if utils.clobbers.index == -1
-        ; If this is the auto preserve scope
-        .if utils.registers.preserveIndex > -1 && utils.registers.preserveIndex == utils.registers.autoPreserveIndex
-            utils.registers.restore
-            .redefine utils.registers.autoPreserveIndex -1
-        .endif
+        utils.registers.onFinalClobberScopeEnd
     .endif
 .endm
