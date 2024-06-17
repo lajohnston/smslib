@@ -5,18 +5,18 @@ describe "register preservation: sequential (unnested) clobber scopes"
         ; Preserve scope
        utils.preserve "bc"
             ; First clobber scope clobbers BC
-           utils.registers.clobbers "bc"
+           utils.clobbers "bc"
                 expect.stack.size.toBe 1
                 expect.stack.toContain $bc00
                 ld bc, $bc01
-           utils.registers.clobberEnd
+           utils.clobbers.end
 
             ; Second clobber scope also clobbers BC, but shouldn't push to stack again
-           utils.registers.clobbers "bc"
+           utils.clobbers "bc"
                 expect.stack.size.toBe 1 "Expected stack size to still be 1"
                 expect.stack.toContain $bc00 0 "Expected stack to still contain original BC value"
                 ld bc, $bc02
-           utils.registers.clobberEnd
+           utils.clobbers.end
        utils.restore
 
         expect.bc.toBe $bc00
@@ -28,16 +28,16 @@ describe "register preservation: sequential (unnested) clobber scopes"
         ; Preserve scope preserves BC and DE
        utils.preserve "bc" "de"
             ; First clobber scope clobbers DE
-           utils.registers.clobbers "de"
+           utils.clobbers "de"
                 expect.stack.toContain $de00
                 ld de, $de01
-           utils.registers.clobberEnd
+           utils.clobbers.end
 
             ; Second clobber scope clobbers BC
-           utils.registers.clobbers "bc"
+           utils.clobbers "bc"
                 expect.stack.toContain $bc00
                 ld bc, $bc02
-           utils.registers.clobberEnd
+           utils.clobbers.end
        utils.restore
 
         expect.bc.toBe $bc00
@@ -47,17 +47,17 @@ describe "register preservation: sequential (unnested) clobber scopes"
         zest.initRegisters
 
        utils.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
-           utils.registers.clobbers "hl"
+           utils.clobbers "hl"
                 ld h, a
                 ld l, a
-           utils.registers.clobberEnd
+           utils.clobbers.end
 
-           utils.registers.clobbers "ix", "bc"
+           utils.clobbers "ix", "bc"
                 ld b, a
                 ld c, a
                 ld ixh, a
                 ld ixl, a
-           utils.registers.clobberEnd
+           utils.clobbers.end
        utils.restore
 
         expect.all.toBeUnclobbered

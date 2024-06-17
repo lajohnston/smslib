@@ -6,17 +6,17 @@ describe "register preservation"
         zest.initRegisters
 
        utils.preserve  ; no registers - preserve all by default
-           utils.registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+           utils.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                 call suite.registers.clobberAll
-           utils.registers.clobberEnd
+           utils.clobbers.end
        utils.restore
 
         expect.all.toBeUnclobbered
 
     test "should not preserve any registers if no preserve scopes are in progress"
-       utils.registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+       utils.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
             expect.stack.size.toBe 0
-       utils.registers.clobberEnd
+       utils.clobbers.end
 
     test "preserves all registers marked as clobbered"
         zest.initRegisters
@@ -24,9 +24,9 @@ describe "register preservation"
         ; Preserve all registers
        utils.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
             ; This clobber scope clobbers all registers
-           utils.registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+           utils.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                 call suite.registers.clobberAll
-           utils.registers.clobberEnd
+           utils.clobbers.end
        utils.restore
 
         ; Expect all registers to have been preserved
@@ -40,11 +40,11 @@ describe "register preservation"
         ; Preserve BC and DE only
        utils.preserve "bc", "de"
             ; This clobber scope clobbers all registers
-           utils.registers.clobbers "bc", "de", "hl"
+           utils.clobbers "bc", "de", "hl"
                 ld bc, 0
                 ld de, 0
                 ld hl, 0
-           utils.registers.clobberEnd
+           utils.clobbers.end
        utils.restore
 
         ; Expect BC and DE to have been preserved
@@ -62,11 +62,11 @@ describe "register preservation"
         ; Preserve all registers
        utils.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
             ; This clobber scope only clobbers DE and HL
-           utils.registers.clobbers "bc", "de"
+           utils.clobbers "bc", "de"
                 ld bc, 0
                 ld de, 0
                 ld hl, 0
-           utils.registers.clobberEnd
+           utils.clobbers.end
        utils.restore
 
         ; Expect BC and DE to have been preserved
@@ -85,7 +85,7 @@ describe "register preservation"
             expect.stack.size.toBe 0
 
             ; This clobber scope clobbers BC
-           utils.registers.clobbers "bc"
+           utils.clobbers "bc"
                 ; Expect BC to have been pushed to the stack
                 expect.stack.size.toBe 1
                 expect.stack.toContain $bc01
@@ -93,15 +93,15 @@ describe "register preservation"
                 ld bc, $bc02
 
                 ; This inner clobber scope also clobbers BC
-               utils.registers.clobbers "bc"
+               utils.clobbers "bc"
                     ; The outer scope has already preserved BC in the stack,
                     ; so expect this not to have pushed it again
                     expect.stack.size.toBe 1 "Expected stack size to still be 1"
                     expect.stack.toContain $bc01 0 "Expected stack to still contain the original value"
 
                     ld bc, $bc03
-               utils.registers.clobberEnd
-           utils.registers.clobberEnd
+               utils.clobbers.end
+           utils.clobbers.end
        utils.restore
 
         expect.stack.size.toBe 0 "Expected stack size to be back to 0"

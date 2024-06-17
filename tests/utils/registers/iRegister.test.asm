@@ -3,13 +3,13 @@ describe "i-register preservation"
         zest.initRegisters
 
         utils.preserve "af" "i"
-            utils.registers.clobbers "i"
+            utils.clobbers "i"
                 ld i, a
-            utils.registers.clobberEnd
+            utils.clobbers.end
 
-            utils.registers.clobbers "af"
+            utils.clobbers "af"
                 inc a
-            utils.registers.clobberEnd
+            utils.clobbers.end
         utils.restore
 
         expect.all.toBeUnclobbered
@@ -22,14 +22,14 @@ describe "i-register preservation"
         ; Create multiple nested preserve and clobber scopes that inc I
         .repeat utils.registers.I_STACK_MAX_SIZE index index
             utils.preserve "i"
-                utils.registers.clobbers "i"
+                utils.clobbers "i"
                     inc a
                     ld i, a
         .endr
 
         ; Restore each nested preserve scope
         .repeat utils.registers.I_STACK_MAX_SIZE index restoreIndex
-                utils.registers.clobberEnd
+                utils.clobbers.end
             utils.restore
 
             expect.i.toBe utils.registers.I_STACK_MAX_SIZE - restoreIndex - 1

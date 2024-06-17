@@ -1,8 +1,8 @@
 ;====
 ; Utilities to handle efficient register preservation on the stack.
 ;
-; Macros that clobber registers can wrap the their code with utils.registers.clobbers
-; and utils.registers.clobberEnd, stating which registers they clobber.
+; Macros that clobber registers can wrap the their code with utils.clobbers
+; and utils.clobbers.end, stating which registers they clobber.
 ;
 ; Code that requires registers to be preserved when calling macros can wrap
 ; the call in utils.registers.preserve and utils.restore calls. Any registers
@@ -82,7 +82,6 @@
 ; Variables
 ;====
 .define utils.registers.autoPreserveIndex -1  ; the current auto preserve scope
-.define utils.registers.clobberIndex -1       ; the current clobber scope
 .define utils.registers.preserveIndex -1      ; the current preserve scope
 .define utils.registers.iStackIndex -1        ; the current i register stack index
 
@@ -431,80 +430,5 @@
                 utils.registers._registerPushed utils.registers.SHADOW_HL
             .endif
         exx ; switch back to non-shadow registers
-    .endif
-.endm
-
-;====
-; Starts a clobber scope, in which the specific registers will be clobbered.
-; If the current preserve scope needs these values to be preserved they will
-; be pushed to the stack
-;
-; @in   ...registers    list of registers that will be clobbered
-;                       Valid values:
-;                           "AF", "BC", "DE", "HL", "IX", "IY", "I",
-;                           "af", "bc", "de", "hl", "ix", "iy", "i"
-;                           "AF'", "BC'", "DE'", "HL'"
-;                           "af'", "bc'", "de'", "hl'"
-;====
-.macro "utils.registers.clobbers"
-    .if nargs == 0
-        .print "\.: Expected at least 1 register to be passed\n"
-        .fail
-    .endif
-
-    ; If auto preserve is enabled
-    .if utils.registers.AUTO_PRESERVE == 1
-        ; If there are no clobber scopes or preserve scope in progress
-        .if utils.registers.clobberIndex == -1 && utils.registers.preserveIndex == -1
-            ; Preserve all registers including shadow registers
-            utils.registers.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
-            .redefine utils.registers.autoPreserveIndex utils.registers.preserveIndex
-        .endif
-    .endif
-
-    ; Increment the clobber index
-    .redefine utils.registers.clobberIndex utils.registers.clobberIndex + 1
-
-    ; Combine (OR) all given registers into a single value
-    .define \.\@_clobbing 0
-    .repeat nargs
-        ; Parse the register string into a constant
-        utils.registers._parse \1
-        .redefine \.\@_clobbing (\.\@_clobbing | utils.registers._parse.returnValue)
-        .shift  ; shift args (\2 => \1)
-    .endr
-
-    ; If there are preserve scopes in progress
-    .if utils.registers.preserveIndex > -1
-        ; Get list of registers that are being clobbered, that should be preserved,
-        ; but haven't yet been
-        .define \.\@_doNotClobber (utils.registers.doNotClobber{utils.registers.preserveIndex})
-        .define \.\@_unpreserved (utils.registers.unpreserved{utils.registers.preserveIndex})
-        .define \.\@_shouldPush (\.\@_clobbing & \.\@_doNotClobber & \.\@_unpreserved)
-
-        ; Preserve these registers
-        utils.registers._preserveRegisters (\.\@_shouldPush)
-    .endif
-.endm
-
-;====
-; Marks the end of a clobber scope
-;====
-.macro "utils.registers.clobberEnd"
-    ; Assert there are clobber scopes in progress
-    .if utils.registers.clobberIndex == -1
-        .print "\. was called but no clobber scopes are in progress\n"
-        .fail
-    .endif
-
-    .redefine utils.registers.clobberIndex utils.registers.clobberIndex - 1
-
-    ; If there are no more clobber scopes in progress
-    .if utils.registers.clobberIndex == -1
-        ; If this is the auto preserve scope
-        .if utils.registers.preserveIndex > -1 && utils.registers.preserveIndex == utils.registers.autoPreserveIndex
-            utils.registers.restore
-            .redefine utils.registers.autoPreserveIndex -1
-        .endif
     .endif
 .endm

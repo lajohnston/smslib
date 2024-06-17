@@ -5,9 +5,9 @@ describe "automatic register preservation"
     test "preserves all clobbered registers"
         zest.initRegisters
 
-        utils.registers.clobbers "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'", "hl'"
+        utils.clobbers "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'", "hl'"
             call suite.registers.clobberAll
-        utils.registers.clobberEnd
+        utils.clobbers.end
 
         expect.all.toBeUnclobbered
 
@@ -15,25 +15,25 @@ describe "automatic register preservation"
         ld bc, $bc01
         ld de, $de01
 
-        utils.registers.clobbers "bc"
+        utils.clobbers "bc"
             expect.stack.size.toBe 1
             expect.stack.toContain $bc01
-        utils.registers.clobberEnd
+        utils.clobbers.end
 
-        utils.registers.clobbers "bc" "de"
+        utils.clobbers "bc" "de"
             expect.stack.size.toBe 2
             expect.stack.toContain $de01
             expect.stack.toContain $bc01 1
-        utils.registers.clobberEnd
+        utils.clobbers.end
 
     test "only preserves registers once if there are nested preserve scopes"
-        utils.registers.clobbers "af"
+        utils.clobbers "af"
             expect.stack.size.toBe 1
 
-            utils.registers.clobbers "af"
+            utils.clobbers "af"
                 expect.stack.size.toBe 1 "Expected stack size to still be 1"
-            utils.registers.clobberEnd
-        utils.registers.clobberEnd
+            utils.clobbers.end
+        utils.clobbers.end
 
     test "does not override existing preserve scopes"
         ld bc, $bc00
@@ -41,11 +41,11 @@ describe "automatic register preservation"
         ; Preserve scope already exists - this should not be overridden
         utils.registers.preserve "bc"
             ; Clobber scope clobbers all registers
-            utils.registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+            utils.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                 ; Only BC should have been preserved
                 expect.stack.size.toBe 1
                 expect.stack.toContain $bc00
-            utils.registers.clobberEnd
+            utils.clobbers.end
         utils.restore
 
         expect.bc.toBe $bc00

@@ -6,17 +6,17 @@ describe "register preservation: nested preserve scopes"
         ; Preserve all registers (containing $01)
         utils.preserve
             ; Clob all registers
-            utils.registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+            utils.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                 ld a, $02
                 call suite.registers.setAllToA
 
                 ; Preserve all registers again (containing $02)
                 utils.preserve
                     ; Clob all registers with $03
-                    utils.registers.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
+                    utils.clobbers "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
                         ld a, $03
                         call suite.registers.setAllToA
-                    utils.registers.clobberEnd
+                    utils.clobbers.end
                 utils.restore
 
                 ; Expect registers to be back to $02 after inner context
@@ -27,7 +27,7 @@ describe "register preservation: nested preserve scopes"
                 expect.ix.toBe $0202
                 expect.iy.toBe $0202
                 expect.i.toBe $02
-            utils.registers.clobberEnd
+            utils.clobbers.end
         utils.restore
 
         ; Expect all registers to be back to $01 after outer context
@@ -54,12 +54,12 @@ describe "register preservation: nested preserve scopes"
                 ; Inner context preserves HL
                 utils.preserve "hl"
                     ; This clobber scope clobbers all three pairs
-                    utils.registers.clobbers "bc" "de" "hl"
+                    utils.clobbers "bc" "de" "hl"
                         expect.stack.size.toBe 3
                         ld bc, $bc02
                         ld de, $de02
                         ld hl, $ff02
-                    utils.registers.clobberEnd
+                    utils.clobbers.end
                 utils.restore
 
                 expect.hl.toBe $ff01    ; back to original
@@ -77,7 +77,7 @@ describe "register preservation: nested preserve scopes"
         ; Outer context requires BC to be preserved
         utils.preserve "bc"
             ; Clob scope clobbers BC
-           utils.registers.clobbers "bc"
+           utils.clobbers "bc"
                 ; Expect BC to have been preserved by this point
                 expect.stack.size.toBe 1
                 expect.stack.toContain $bc01
@@ -86,7 +86,7 @@ describe "register preservation: nested preserve scopes"
                 ; Inner scope requires DE to be preserved
                utils.preserve "de"
                     ; This clobber scope clobbers both BC and DE
-                   utils.registers.clobbers "bc" "de"
+                   utils.clobbers "bc" "de"
                         ; DE shouldn't be preserved again as the outer clobberStart
                         ; has already done so
                         expect.stack.size.toBe 2
@@ -94,11 +94,11 @@ describe "register preservation: nested preserve scopes"
                         expect.stack.toContain $bc01 1  ; original value of BC
 
                         ld de, $de02
-                   utils.registers.clobberEnd
+                   utils.clobbers.end
                utils.restore
 
                 expect.de.toBe $de01
-           utils.registers.clobberEnd
+           utils.clobbers.end
        utils.restore
 
         expect.bc.toBe $bc01
@@ -107,17 +107,17 @@ describe "register preservation: nested preserve scopes"
         zest.initRegisters
 
        utils.preserve "af", "bc", "de", "hl", "ix", "iy", "i", "af'", "bc'", "de'", "hl'"
-           utils.registers.clobbers "hl"
+           utils.clobbers "hl"
                 ld h, a
                 ld l, a
 
-               utils.registers.clobbers "ix", "bc"
+               utils.clobbers "ix", "bc"
                     ld b, a
                     ld c, a
                     ld ixh, a
                     ld ixl, a
-               utils.registers.clobberEnd
-           utils.registers.clobberEnd
+               utils.clobbers.end
+           utils.clobbers.end
        utils.restore
 
         expect.all.toBeUnclobbered

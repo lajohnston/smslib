@@ -1,6 +1,6 @@
-# utils.registers
+# Register preservation (utils.clobbers, utils.preserve, utils.restore)
 
-This module provides utilities for efficiently preserving Z80 register states between macro calls.
+These utility modules provide a system for efficiently preserving Z80 register states between macro calls, ensuring only the needed registers are preserved.
 
 It's common practice for routines to `push` and `pop` the registers they clobber onto the stack to prevent unexpected side-effects for the caller. These `push`/`pop`s instruction pairs take 21-28 cycles each and so can unfortunately add up to a large percentage of the routine's total cost, particularly if sub-routines they rely on also `push`/`pop` the same values. Routines are also less free to utilise registers as temporary locations, knowing they will have to preserve those as well.
 
@@ -21,9 +21,9 @@ To automatically preserve all registers by default, consider setting the `utils.
 
 You can opt-out of this on a per-call basis using `utils.preserve` to create more-specific preserve scopes for particular calls.
 
-## utils.registers.clobbers, utils.registers.clobberEnd
+## utils.clobbers, utils.clobbers.end
 
-Macros that clobber registers can utilise `utils.registers.clobbers` and `utils.registers.clobberEnd` in place of the `push`/`pop` calls they would normally make. This is referred to as a 'clobber scope'.
+Macros that clobber registers can utilise `utils.clobbers` and `utils.clobbers.end` in place of the `push`/`pop` calls they would normally make. This is referred to as a 'clobber scope'.
 
 ```asm
 .macro "normal way"
@@ -35,9 +35,9 @@ Macros that clobber registers can utilise `utils.registers.clobbers` and `utils.
 .endm
 
 .macro "with registers.asm"
-    utils.registers.clobbers "AF" "DE"
+    utils.clobbers "AF" "DE"
         ...
-    utils.registers.clobberEnd
+    utils.clobbers.end
 .endm
 ```
 
@@ -58,9 +58,9 @@ Utilising these macros within `sections` will produce unpredictable results as t
 .ends
 
 .macro "someRoutine"    ; WLA-DX allows you to use the same name if you wish
-    utils.registers.clobbers "AF" "HL"
+    utils.clobbers "AF" "HL"
         call someRoutine
-    utils.registers.clobberEnd
+    utils.clobbers.end
 .endm
 ```
 
