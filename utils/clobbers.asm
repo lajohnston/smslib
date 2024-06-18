@@ -13,6 +13,40 @@
 .define utils.clobbers.index -1       ; the current clobber scope
 
 ;====
+; (Private) Starts a new clobber scope, specifying which registers are about to
+; be clobbed.
+;
+; @in   clobbing    the registers being clobbed (utils.registers.XX constants
+;                   ORed together)
+; @in   type        if "standard", registers that have already been preserved
+;                   within the current preserve scope (or its ancestors) won't
+;                   be preserved again. If "isolated", they will be preserved again.
+;====
+.macro "utils.clobbers._startScope" args clobbing type
+    utils.assert.range clobbing utils.registers.AF, utils.registers.ALL, "\.: clobbing should be the register.* constants ORed together"
+
+    ; Increment the clobber index
+    .if utils.clobbers.index == -1
+        utils.registers.onInitialClobberScope
+    .endif
+
+    .redefine utils.clobbers.index utils.clobbers.index + 1
+
+    ; Preserve registers that need preserving and are being clobbered
+    .if type == "standard"
+        ; Registers that should be protected and haven't been yet
+        utils.registers.getVulnerable
+        utils.registers._preserveRegisters (clobbing & utils.registers.getVulnerable.returnValue)
+    .elif type == "isolated"
+        ; Registers that are marked as protected
+        utils.registers.getProtected
+        utils.registers._preserveRegisters (clobbing & utils.registers.getProtected.returnValue)
+    .else
+        utils.assert.fail "\.: Invalid type" type "standard or isolated"
+    .endif
+.endm
+
+;====
 ; Starts a clobber scope, in which the specific registers will be clobbered.
 ; If the current preserve scope needs these values to be preserved they will
 ; be pushed to the stack
@@ -30,27 +64,16 @@
         .fail
     .endif
 
-    .if utils.clobbers.index == -1
-        utils.registers.onInitialClobberScope
-    .endif
-
-    ; Increment the clobber index
-    .redefine utils.clobbers.index utils.clobbers.index + 1
-
     ; Combine (OR) all given registers into a single value
-    .define \.\@_clobbing 0
+    .redefine \.._clobbing 0
     .repeat nargs
         ; Parse the register string into a constant
         utils.registers.parse \1
-        .redefine \.\@_clobbing (\.\@_clobbing | utils.registers.parse.returnValue)
+        .redefine \.._clobbing (\.._clobbing | utils.registers.parse.returnValue)
         .shift  ; shift args (\2 => \1)
     .endr
 
-    ; Get list of registers that should be preserved but haven't been yet
-    utils.registers.getVulnerable
-
-    ; Preserve registers that are vulnerable and are being clobbered
-    utils.registers._preserveRegisters (\.\@_clobbing & utils.registers.getVulnerable.returnValue)
+    utils.clobbers._startScope (\.._clobbing) "standard"
 .endm
 
 ;====
