@@ -77,6 +77,40 @@
 .endm
 
 ;====
+; Starts a clobber scope that behaves the same way as standard scopes but
+; supports jumps outside the clobber scope. The scope works independently from
+; other active scopes so the branching logic knows what needs to be restored
+;
+; @in   ...registers    list of registers that will be clobbered
+;                       Valid values:
+;                           "AF", "BC", "DE", "HL", "IX", "IY", "I",
+;                           "af", "bc", "de", "hl", "ix", "iy", "i"
+;                           "AF'", "BC'", "DE'", "HL'"
+;                           "af'", "bc'", "de'", "hl'"
+;====
+.macro "utils.clobbers.withBranching"
+    .if nargs == 0
+        .print "\.: Expected at least 1 register to be passed\n"
+        .fail
+    .endif
+
+    ; Combine (OR) all given registers into a single value
+    .redefine \.._clobbing 0
+    .repeat nargs
+        ; Parse the register string into a constant
+        utils.registers.parse \1
+        .redefine \.._clobbing (\.._clobbing | utils.registers.parse.returnValue)
+        .shift  ; shift args (\2 => \1)
+    .endr
+
+    ;===
+    ; Start an isolated clobber scope so it preserves registers independently of
+    ; the preserve scope. This allows it to know what to restore when jumping
+    ;===
+    utils.clobbers._startScope (\.._clobbing) "isolated"
+.endm
+
+;====
 ; Marks the end of a clobber scope
 ;====
 .macro "utils.clobbers.end"

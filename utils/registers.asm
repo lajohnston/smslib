@@ -434,6 +434,22 @@
 .endm
 
 ;====
+; Returns the registers that are protected within the current preserve scope
+; or its ancestors
+;
+; @out  utils.registers.getProtected.returnValue
+;           the registers (i.e. utils.registers.AF) ORed into a single value
+;====
+.macro "utils.registers.getProtected"
+    .if utils.registers.preserveIndex == -1
+        .redefine utils.registers.getProtected.returnValue 0
+    .else
+        .redefine \.doNotClobber (utils.registers.doNotClobber{utils.registers.preserveIndex})
+        .redefine utils.registers.getProtected.returnValue (\.doNotClobber)
+    .endif
+.endm
+
+;====
 ; Returns the registers that should be protected but haven't been preserved yet
 ;
 ; @out  utils.registers.getVulnerable.returnValue
