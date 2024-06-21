@@ -18,11 +18,8 @@
 ;
 ; @in   clobbing    the registers being clobbed (utils.registers.XX constants
 ;                   ORed together)
-; @in   type        if "standard", registers that have already been preserved
-;                   within the current preserve scope (or its ancestors) won't
-;                   be preserved again. If "isolated", they will be preserved again.
 ;====
-.macro "utils.clobbers._startScope" args clobbing type
+.macro "utils.clobbers._startScope" args clobbing
     utils.assert.range clobbing utils.registers.AF, utils.registers.ALL, "\.: clobbing should be the register.* constants ORed together"
 
     ; Increment the clobber index
@@ -33,17 +30,8 @@
     .redefine utils.clobbers.index utils.clobbers.index + 1
 
     ; Preserve registers that need preserving and are being clobbered
-    .if type == "standard"
-        ; Registers that should be protected and haven't been yet
-        utils.registers.getVulnerable
-        utils.registers._preserveRegisters (clobbing & utils.registers.getVulnerable.returnValue)
-    .elif type == "isolated"
-        ; Registers that are marked as protected
-        utils.registers.getProtected
-        utils.registers._preserveRegisters (clobbing & utils.registers.getProtected.returnValue)
-    .else
-        utils.assert.fail "\.: Invalid type" type "standard or isolated"
-    .endif
+    utils.registers.getVulnerable
+    utils.registers._preserveRegisters (clobbing & utils.registers.getVulnerable.returnValue)
 .endm
 
 ;====
@@ -75,7 +63,7 @@
         .shift  ; shift args (\2 => \1)
     .endr
 
-    utils.clobbers._startScope (\.._clobbing) "standard"
+    utils.clobbers._startScope (\.._clobbing)
 .endm
 
 ;====
@@ -108,10 +96,20 @@
     .endr
 
     ;===
-    ; Start an isolated clobber scope so it preserves registers independently of
-    ; the preserve scope. This allows it to know what to restore when jumping
+    ; Isolate the scope within its own preserve scope so it doesn't affect
+    ; outer scopes, allowing conditional jumps to pop registers without
+    ; causing mismatches in some edge cases
     ;===
-    utils.clobbers._startScope (\.._clobbing) "isolated"
+    ; Get registers that should be preserved
+    utils.registers.getProtected
+
+    ; Start preserve scope
+    utils.registers.preserve (\.._clobbing & utils.registers.getProtected.returnValue)
+
+    ; Start clobber scope
+    utils.clobbers._startScope (\.._clobbing)
+
+    .define utils.clobbers{utils.clobbers.index}.isIsolated
 .endm
 
 ;====
@@ -124,10 +122,16 @@
         .fail
     .endif
 
-    .redefine utils.clobbers.index utils.clobbers.index - 1
-
-    ; If there are no more clobber scopes in progress
-    .if utils.clobbers.index == -1
+    ; If this is the last clobber scope in progress
+    .if utils.clobbers.index == 0
         utils.registers.onFinalClobberScopeEnd
     .endif
+
+    ; If this was an isolated scope
+    .ifdef utils.clobbers{utils.clobbers.index}.isIsolated
+        .undefine utils.clobbers{utils.clobbers.index}.isIsolated
+        utils.registers.restore
+    .endif
+
+    .redefine utils.clobbers.index utils.clobbers.index - 1
 .endm
