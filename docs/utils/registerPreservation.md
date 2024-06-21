@@ -43,8 +43,8 @@ Macros that clobber registers can utilise `utils.clobbers` and `utils.clobbers.e
 
 Acceptable arguments are:
 
-- Main registers: `"AF"`, `"BC"`, `"DE"`, `"HL"`, `"IX"`, `"IY"`, `"I"` (case-insensitive)
-- Shadow registers: `"AF'"`, `"BC'"`, `"DE'"`, `"HL'"`
+- Main registers: `"af"`, `"bc"`, `"de"`, `"hl"`, `"ix"`, `"iy"`, `"i"` (case-insensitive)
+- Shadow registers: `"af'"`, `"bc'"`, `"de'"`, `"hl'"`
 
 Clob scopes can be nested within one another, so when calling other macros it's possible for these to define their own clobber scopes. If you need to call a macro that isn't clobber scope aware, the calling macro will need to take responsibility to wrap the call.
 
@@ -58,7 +58,7 @@ Utilising these macros within `sections` will produce unpredictable results as t
 .ends
 
 .macro "someRoutine"    ; WLA-DX allows you to use the same name if you wish
-    utils.clobbers "AF" "HL"
+    registers.clobbers "af" "hl"
         call someRoutine
     utils.clobbers.end
 .endm
@@ -72,7 +72,7 @@ Callers that rely on register states to be preserved can wrap the macro invokati
 .macro "myMacro"
     ld bc, $1234
 
-    utils.preserve "BC"
+    registers.preserve "bc"
         macroThatClobsThings
     utils.restore
 
