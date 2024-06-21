@@ -49,3 +49,5 @@ describe "automatic register preservation"
         utils.restore
 
         expect.bc.toBe $bc00
+
+.redefine registers.AUTO_PRESERVE 0

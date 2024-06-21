@@ -1,4 +1,6 @@
 .section "suite.registers helpers"
+    suite.registers.setAllToZero:
+        xor a
     suite.registers.setAllToA:
         ld b, a
         ld c, a
@@ -59,5 +61,23 @@
             expect.de.toBe 0
             expect.hl.toBe 0
         exx
+        ret
+
+    suite.registers.setAllFlags:
+        push hl
+            ld h, a
+            ld l, $ff   ; flags
+            push hl     ; push to stack
+            pop af      ; restore to AF
+        pop hl
+        ret
+
+    suite.registers.resetAllFlags:
+        push hl
+            ld h, a
+            ld l, 0     ; flags
+            push hl     ; push to stack
+            pop af      ; restore to AF
+        pop hl
         ret
 .ends

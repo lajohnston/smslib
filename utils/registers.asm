@@ -230,7 +230,7 @@
 ;====
 ; Restores the registers that have been preserved by the current preserve scope
 ;====
-.macro "utils.registers._restoreRegisters"
+.macro "utils.registers.restoreRegisters"
     ; Assert there are preserve scopes in progress
     .if utils.registers.preserveIndex == -1
         .print "\.: was called but no preserve scopes are in progress\n"
@@ -354,7 +354,7 @@
     .endif
 
     ; Restore the registers
-    utils.registers._restoreRegisters
+    utils.registers.restoreRegisters
 
     ; Remove the preserve scope
     utils.registers._popPreserveScope

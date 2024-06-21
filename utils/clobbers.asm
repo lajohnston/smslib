@@ -135,3 +135,46 @@
 
     .redefine utils.clobbers.index utils.clobbers.index - 1
 .endm
+
+;====
+; If a utils.clobbers.withBranching is in progress, restores the registers from
+; its isolated preserve scope. This should be called before making jumps outside
+; of the clobber scope
+;
+; @fails    if no utils.clobbers.withBranching scope is in progress
+;====
+.macro "utils.clobbers.end.branch"
+    ; If this was an isolated scope
+    .ifndef utils.clobbers{utils.clobbers.index}.isIsolated
+        .print "\. called but no utils.clobbing.withBranching in progress\n"
+        .fail
+    .endif
+
+    ; Restore registers (but don't end preserve scope)
+    utils.registers.restoreRegisters
+.endm
+
+;====
+; If Z is set, restore the registers for the active utils.clobbers.withBranching
+; scope and relative jumps to the given label. If there are no registers to
+; restore will just generate the jr z instruction
+;
+; @in   label   the label to jump to if Z is set
+;====
+.macro "utils.clobbers.end.jrz" args label
+    utils.assert.equals NARGS 1 "\.: Expected a label argument"
+    utils.assert.label label "\.: Argument should be a label"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ; No registers to restore - just generate jump
+        jr z, label
+    .else
+        jr nz, _\@_\.
+            ; Restore registers then jump
+            utils.clobbers.end.branch
+            jr label
+        _\@_\.:
+    .endif
+.endm
