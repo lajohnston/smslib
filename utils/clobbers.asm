@@ -56,7 +56,9 @@
 ;                           "AF", "BC", "DE", "HL", "IX", "IY", "I",
 ;                           "af", "bc", "de", "hl", "ix", "iy", "i"
 ;                           "AF'", "BC'", "DE'", "HL'"
-;                           "af'", "bc'", "de'", "hl'"
+;                           "af'", "bc'", "de'", "hl'",
+;                           or one or more utils.registers.xx constants ORed
+;                           together
 ;====
 .macro "utils.clobbers"
     .if nargs == 0
@@ -86,7 +88,9 @@
 ;                           "AF", "BC", "DE", "HL", "IX", "IY", "I",
 ;                           "af", "bc", "de", "hl", "ix", "iy", "i"
 ;                           "AF'", "BC'", "DE'", "HL'"
-;                           "af'", "bc'", "de'", "hl'"
+;                           "af'", "bc'", "de'", "hl'",
+;                           or one or more utils.registers.xx constants ORed
+;                           together
 ;====
 .macro "utils.clobbers.withBranching"
     .if nargs == 0

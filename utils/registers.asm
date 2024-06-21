@@ -184,35 +184,42 @@
 .endm
 
 ;====
-; Parse a register string into one of the register constants
+; Parse a register identifier into one of the register constants
 ;
-; @in       string  the register string (i.e. "AF", "af", "HL'", "hl'")
-; @out      utils.registers.parse.returnValue defined with the register constant
-; @fails    if the string cannot be parsed
+; @in       rawValue    the register string (i.e. "AF", "af", "HL'", "hl'")
+;                       or one or more register constants ORed together
+;
+; @out      utils.registers.parse.returnValue
+;               defined with the register constant
+;
+; @fails    if the value cannot be parsed
 ;====
-.macro "utils.registers.parse" args string
+.macro "utils.registers.parse" args rawValue
     ; Resolve register string to a constant
-    .if string == "AF" || string == "af"
+    .if \?1 != ARG_STRING
+        utils.assert.range \1 0 utils.registers.ALL "\.: Unknown register register value"
+        .redefine utils.registers.parse.returnValue \1
+    .elif rawValue == "AF" || rawValue == "af"
         .redefine utils.registers.parse.returnValue utils.registers.AF
-    .elif string == "BC" || string == "bc"
+    .elif rawValue == "BC" || rawValue == "bc"
         .redefine utils.registers.parse.returnValue utils.registers.BC
-    .elif string == "DE" || string == "de"
+    .elif rawValue == "DE" || rawValue == "de"
         .redefine utils.registers.parse.returnValue utils.registers.DE
-    .elif string == "HL" || string == "hl"
+    .elif rawValue == "HL" || rawValue == "hl"
         .redefine utils.registers.parse.returnValue utils.registers.HL
-    .elif string == "IX" || string == "ix"
+    .elif rawValue == "IX" || rawValue == "ix"
         .redefine utils.registers.parse.returnValue utils.registers.IX
-    .elif string == "IY" || string == "iy"
+    .elif rawValue == "IY" || rawValue == "iy"
         .redefine utils.registers.parse.returnValue utils.registers.IY
-    .elif string == "I" || string == "i"
+    .elif rawValue == "I" || rawValue == "i"
         .redefine utils.registers.parse.returnValue utils.registers.I
-    .elif string == "AF'" || string == "af'"
+    .elif rawValue == "AF'" || rawValue == "af'"
         .redefine utils.registers.parse.returnValue utils.registers.SHADOW_AF
-    .elif string == "BC'" || string == "bc'"
+    .elif rawValue == "BC'" || rawValue == "bc'"
         .redefine utils.registers.parse.returnValue utils.registers.SHADOW_BC
-    .elif string == "DE'" || string == "de'"
+    .elif rawValue == "DE'" || rawValue == "de'"
         .redefine utils.registers.parse.returnValue utils.registers.SHADOW_DE
-    .elif string == "HL'" || string == "hl'"
+    .elif rawValue == "HL'" || rawValue == "hl'"
         .redefine utils.registers.parse.returnValue utils.registers.SHADOW_HL
     .else
         .print "\.: Unknown register value: ", string, "\n"
@@ -309,7 +316,9 @@
 ;                           "AF", "BC", "DE", "HL", "IX", "IY", "I"
 ;                           "af", "bc", "de", "hl", "ix", "iy", "i"
 ;                           "AF'", "BC'", "DE'", "HL'"
-;                           "af'", "bc'", "de'", "hl'"
+;                           "af'", "bc'", "de'", "hl'",
+;                           or one or more utils.registers.xx constants ORed
+;                           together
 ;                       Defaults to all registers
 ;====
 .macro "utils.registers.preserve"
