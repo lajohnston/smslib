@@ -143,7 +143,7 @@
 ;
 ; @fails    if no utils.clobbers.withBranching scope is in progress
 ;====
-.macro "utils.clobbers.end.branch"
+.macro "utils.clobbers.endBranch"
     ; If this was an isolated scope
     .ifndef utils.clobbers{utils.clobbers.index}.isIsolated
         .print "\. called but no utils.clobbing.withBranching in progress\n"
@@ -173,7 +173,7 @@
     .else
         jr nz, _\@_\.
             ; Restore registers then jump
-            utils.clobbers.end.branch
+            utils.clobbers.endBranch
             jr label
         _\@_\.:
     .endif
@@ -198,7 +198,7 @@
     .else
         jr z, _\@_\.
             ; Restore registers then jump
-            utils.clobbers.end.branch
+            utils.clobbers.endBranch
             jr label
         _\@_\.:
     .endif
