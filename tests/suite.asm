@@ -26,7 +26,9 @@
 .section "utils/registers.asm tests" appendto zest.suiteBank2
     .include "utils/clobbers/clobberBranch.test.asm"
     .include "utils/clobbers/sequentialClobberScopes.test.asm"
+
     .include "utils/clobbers/clobbers.end.jrz.test.asm"
+    .include "utils/clobbers/clobbers.end.jrnz.test.asm"
 
     .include "utils/registers/autoPreserve.test.asm"
     .include "utils/registers/iRegister.test.asm"
