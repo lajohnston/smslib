@@ -226,6 +226,56 @@
 
 ;====
 ; If Z is set, restore the registers for the active utils.clobbers.withBranching
+; scope and jumps to the given label. If there are no registers to restore will
+; just generate the jp z instruction
+;
+; @in   label   the label to jump to if Z is set
+;====
+.macro "utils.clobbers.end.jpz" args label
+    utils.assert.equals NARGS 1 "\.: Expected a label argument"
+    utils.assert.label label "\.: Argument should be a label"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ; No registers to restore - just generate jump
+        jp z, label
+    .else
+        jr nz, _\@_\.
+            ; Restore registers then jump
+            utils.clobbers.endBranch
+            jp label
+        _\@_\.:
+    .endif
+.endm
+
+;====
+; If NZ is set, restore the registers for the active utils.clobbers.withBranching
+; scope and jumps to the given label. If there are no registers to restore will
+; just generate the jp nz instruction
+;
+; @in   label   the label to jump to if Z is reset
+;====
+.macro "utils.clobbers.end.jpnz" args label
+    utils.assert.equals NARGS 1 "\.: Expected a label argument"
+    utils.assert.label label "\.: Argument should be a label"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ; No registers to restore - just generate jump
+        jp nz, label
+    .else
+        jr z, _\@_\.
+            ; Restore registers then jump
+            utils.clobbers.endBranch
+            jp label
+        _\@_\.:
+    .endif
+.endm
+
+;====
+; If Z is set, restore the registers for the active utils.clobbers.withBranching
 ; scope and relative jumps to the given label. If there are no registers to
 ; restore will just generate the jr z instruction
 ;

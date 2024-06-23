@@ -80,4 +80,7 @@
             pop af      ; restore to AF
         pop hl
         ret
+
+    suite.registers.unexpectedJump:
+        zest.fail "Unexpected jump"
 .ends

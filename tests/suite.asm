@@ -27,6 +27,9 @@
     .include "utils/clobbers/clobbers.withBranching.test.asm"
     .include "utils/clobbers/clobbers.endBranch.test.asm"
 
+    .include "utils/clobbers/clobbers.end.jpz.test.asm"
+    .include "utils/clobbers/clobbers.end.jpnz.test.asm"
+
     .include "utils/clobbers/clobbers.end.jrc.test.asm"
     .include "utils/clobbers/clobbers.end.jrnc.test.asm"
 
