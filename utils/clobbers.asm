@@ -275,6 +275,56 @@
 .endm
 
 ;====
+; If parity/overflow is set, restore the registers for the active
+; utils.clobbers.withBranching scope and jumps to the given label. If there are
+; no registers to restore will just generate the jp po instruction
+;
+; @in   label   the label to jump to if carry is set
+;====
+.macro "utils.clobbers.end.jppe" args label
+    utils.assert.equals NARGS 1 "\.: Expected a label argument"
+    utils.assert.label label "\.: Argument should be a label"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ; No registers to restore - just generate jump
+        jp pe, label
+    .else
+        jp po, _\@_\.
+            ; Restore registers then jump
+            utils.clobbers.endBranch
+            jp label
+        _\@_\.:
+    .endif
+.endm
+
+;====
+; If parity/overflow is reset, restore the registers for the active
+; utils.clobbers.withBranching scope and jumps to the given label. If there are
+; no registers to restore will just generate the jp po instruction
+;
+; @in   label   the label to jump to if carry is set
+;====
+.macro "utils.clobbers.end.jppo" args label
+    utils.assert.equals NARGS 1 "\.: Expected a label argument"
+    utils.assert.label label "\.: Argument should be a label"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ; No registers to restore - just generate jump
+        jp po, label
+    .else
+        jp pe, _\@_\.
+            ; Restore registers then jump
+            utils.clobbers.endBranch
+            jp label
+        _\@_\.:
+    .endif
+.endm
+
+;====
 ; If Z is set, restore the registers for the active utils.clobbers.withBranching
 ; scope and jumps to the given label. If there are no registers to restore will
 ; just generate the jp z instruction

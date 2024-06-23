@@ -33,6 +33,9 @@
     .include "utils/clobbers/clobbers.end.jrc.test.asm"
     .include "utils/clobbers/clobbers.end.jrnc.test.asm"
 
+    .include "utils/clobbers/clobbers.end.jppo.test.asm"
+    .include "utils/clobbers/clobbers.end.jppe.test.asm"
+
     .include "utils/clobbers/clobbers.end.jpz.test.asm"
     .include "utils/clobbers/clobbers.end.jpnz.test.asm"
 

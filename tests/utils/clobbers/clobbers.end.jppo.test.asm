@@ -1,5 +1,5 @@
-describe "utils.clobbers.end.jpz"
-    test "when NZ - does not jump or restore"
+describe "utils.clobbers.end.jppo"
+    test "does not jump or restore when parity/overflow is set"
         ; Set all registers to $FF
         ld a, $ff
         call suite.registers.setAllToA
@@ -8,27 +8,27 @@ describe "utils.clobbers.end.jpz"
             utils.clobbers.withBranching "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'" "hl'"
                 ; Set all registers to zero
                 call suite.registers.setAllToZero
-                call suite.registers.resetAllFlags  ; set NZ
+                call suite.registers.setAllFlags    ; set parity/overflow
 
                 ; This shouldn't jump
-                utils.clobbers.end.jpz suite.registers.unexpectedJump
+                utils.clobbers.end.jppo suite.registers.unexpectedJump
 
                 ; Expect everything to still be zero
                 call suite.registers.expectAllToBeZero
             utils.clobbers.end
         utils.restore
 
-    test "when Z - restores and jumps"
+    test "restores and jumps when parity/overflow is reset"
         zest.initRegisters
 
         utils.preserve "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'" "hl'"
             utils.clobbers.withBranching "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'" "hl'"
-                ; Zero registers but set Z flag
+                ; Zero registers
                 call suite.registers.setAllToZero
-                call suite.registers.setAllFlags
+                call suite.registers.resetAllFlags  ; reset parity
 
                 ; Expect this to jump
-                utils.clobbers.end.jpz +
+                utils.clobbers.end.jppo +
                 zest.fail "Did not jump"
             utils.clobbers.end
 
@@ -36,8 +36,8 @@ describe "utils.clobbers.end.jpz"
             expect.all.toBeUnclobbered
         utils.restore
 
-describe "utils.clobbers.end.jpz with nothing to restore"
-    test "when NZ - does not jump or restore"
+describe "utils.clobbers.end.jppo with nothing to restore"
+    test "does not jump or restore when parity/overflow is set"
         zest.initRegisters
 
         utils.preserve "hl"
@@ -45,28 +45,28 @@ describe "utils.clobbers.end.jpz with nothing to restore"
             utils.clobbers.withBranching "af"
                 ; Set all registers to zero
                 call suite.registers.setAllToZero
-                call suite.registers.resetAllFlags
+                call suite.registers.setAllFlags
 
                 ; This shouldn't jump
-                utils.clobbers.end.jpz suite.registers.unexpectedJump
+                utils.clobbers.end.jppo suite.registers.unexpectedJump
 
                 ; Expect everything to still be zero
                 call suite.registers.expectAllToBeZero
             utils.clobbers.end
         utils.restore
 
-    test "when Z - jumps but doesn't restore"
+    test "jumps but doesn't restore when parity/overflow is reset"
         zest.initRegisters
 
         utils.preserve "hl"
             ; Doesn't clobber scope doesn't affect HL - nothing to preserve
             utils.clobbers.withBranching "af"
-                ; Set all registers to zero, but set Z flag
+                ; Set all registers to zero
                 call suite.registers.setAllToZero
-                call suite.registers.setAllFlags
+                call suite.registers.resetAllFlags  ; reset parity
 
                 ; Expect this to jump
-                utils.clobbers.end.jpz +
+                utils.clobbers.end.jppo +
                 zest.fail "Did not jump"
             utils.clobbers.end
 
