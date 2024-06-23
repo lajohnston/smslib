@@ -78,6 +78,15 @@ utils.clobbers.withBranching "af"
     utils.clobbers.end.jrnz _someLabel  ; if NZ, restore and jr
     utils.clobbers.end.jrc, _someLabel  ; if carry set, restore and jr
     utils.clobbers.end.jrnc, _someLabel ; if carry is reset, restore and jr
+
+    utils.clobbers.end.jpz  _someLabel  ; if Z, restore and jp
+    utils.clobbers.end.jpnz _someLabel  ; if NZ, restore and jp
+    utils.clobbers.end.jpc  _someLabel  ; if carry, restore and jp
+    utils.clobbers.end.jpnc _someLabel  ; if not carry, restore and jp
+    utils.clobbers.end.jppe _someLabel  ; if parity/overflow, restore and jp
+    utils.clobbers.end.jppo _someLabel  ; if not parity/overflow, restore and jp
+    utils.clobbers.end.jpm  _someLabel  ; if sign, restore and jp
+    utils.clobbers.end.jpp  _someLabel  ; if not sign, restore and jp
 utils.clobbers.end
 ```
 
