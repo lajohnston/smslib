@@ -88,3 +88,36 @@ describe "utils.clobbers.withBranching"
 
         expect.stack.size.toBe 0
         expect.bc.toBe $bc00
+
+    test "endBranch restores the registers without closing the clobber scope"
+        zest.initRegisters
+
+        utils.preserve "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'" "hl'"
+            utils.clobbers.withBranching "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'" "hl'"
+                call suite.registers.clobberAll
+
+                utils.clobbers.endBranch
+
+                expect.all.toBeUnclobbered
+                expect.stack.size.toBe 0
+
+                ld a, utils.clobbers.index
+                expect.a.toBe 0 "Expected clobber scope to remain in progress"
+            utils.clobbers.closeBranch
+        utils.restore
+
+    test "closeBranch ends the clobber scope without restoring the registers"
+        zest.initRegisters
+
+        utils.preserve "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'" "hl'"
+            utils.clobbers.withBranching "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'" "hl'"
+                call suite.registers.setAllToZero
+            utils.clobbers.closeBranch
+
+            ; Expect nothing to have been restored
+            call suite.registers.expectAllToBeZero
+
+            ; Expect clobber scope to have been closed
+            ld a, utils.clobbers.index
+            expect.a.toBe -1 "Expected no clobber scopes to be in progress"
+        utils.restore

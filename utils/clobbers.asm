@@ -127,7 +127,7 @@
         utils.registers.onFinalClobberScopeEnd
     .endif
 
-    ; If this was an isolated scope
+    ; If this was an isolated scope with its own preserve scope
     .ifdef utils.clobbers{utils.clobbers.index}.isIsolated
         .undefine utils.clobbers{utils.clobbers.index}.isIsolated
         utils.registers.restore
@@ -144,7 +144,7 @@
 ; @fails    if no utils.clobbers.withBranching scope is in progress
 ;====
 .macro "utils.clobbers.endBranch"
-    ; If this was an isolated scope
+    ; Ensure current scope is an isolated/branching scope
     .ifndef utils.clobbers{utils.clobbers.index}.isIsolated
         .print "\. called but no utils.clobbing.withBranching in progress\n"
         .fail
@@ -152,6 +152,26 @@
 
     ; Restore registers (but don't end preserve scope)
     utils.registers.restoreRegisters
+.endm
+
+;====
+; Closes the current utils.clobbers.withBranching scope without restoring the
+; registers. This can be used if a utils.clobber.endBranch has already been
+; called separately
+;
+; @fails    if no utils.clobbers.withBranching scope is in progress
+;====
+.macro "utils.clobbers.closeBranch"
+    ; Ensure current scope is an isolated/branching scope
+    .ifndef utils.clobbers{utils.clobbers.index}.isIsolated
+        .print "\. called but no utils.clobbing.withBranching in progress\n"
+        .fail
+    .endif
+
+    ; End the branching preserve scope
+    utils.registers.closePreserveScope
+    .undefine utils.clobbers{utils.clobbers.index}.isIsolated
+    utils.clobbers.end
 .endm
 
 ;====

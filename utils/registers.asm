@@ -155,8 +155,9 @@
 
 ;====
 ; Pops the most recent preserve scope from the preserve scope variable stack
+; without producing any restore instructions
 ;====
-.macro "utils.registers._popPreserveScope"
+.macro "utils.registers.closePreserveScope"
     ; Assert there are preserve scopes in progress
     .if utils.registers.preserveIndex == -1
         .print "\.: was called but no preserve scopes are in progress\n"
@@ -357,7 +358,7 @@
     utils.registers.restoreRegisters
 
     ; Remove the preserve scope
-    utils.registers._popPreserveScope
+    utils.registers.closePreserveScope
 .endm
 
 ;====

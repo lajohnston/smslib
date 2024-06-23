@@ -64,6 +64,38 @@ Utilising these macros within `sections` will produce unpredictable results as t
 .endm
 ```
 
+### utils.clobbers.withBranching
+
+If the macro produces code with multiple exit points (i.e. jumps that skip over `utils.clobbers.end`), you can use the `utils.clobbers.withBranching` branch with special jump instructions to ensure relevant registers are restored before the jumps. If there are no registers to restore these will just perform their vanilla jump instructions.
+
+Care should be taken to ensure the jumps don't jump outside of multiple clobber scopes and preserve scopes. The macros don't know where the jump locations are so aren't able to determine if multiple scopes should be restored.
+
+```asm
+utils.clobbers.withBranching "af"
+    utils.clobbers.endBranch            ; call before unconditional jp or jr
+
+    utils.clobbers.end.jrz, _someLabel  ; if Z, restore and jr
+    utils.clobbers.end.jrnz _someLabel  ; if NZ, restore and jr
+    utils.clobbers.end.jrc, _someLabel  ; if carry set, restore and jr
+    utils.clobbers.end.jrnc, _someLabel ; if carry is reset, restore and jr
+utils.clobbers.end
+```
+
+In most cases `utils.clobbers.withBranching` results in the same performance as `utils.clobbers`, but in certain edge cases it knows to opt out of some optimisations to ensure there isn't a mismatch between the registers that get pushed and popped onto the stack.
+
+If using conditional jumps, `utils.clobbers.end` is still needed to mark the end of the clobber scope and restore the registers if the jumps don't occur.
+
+#### utils.clobbers.closeBranch
+
+If the restore instructions aren't needed (i.e. there's an unconditional jump at the end that will always jump over it) you can use `utils.clobbers.closeBranch` to close off the branching clobber scope without generating the uneeded restore instructions.
+
+```asm
+utils.clobbers.withBranching "af"
+    utils.clobbers.endBranch    ; restore registers
+    jp +                        ; unconditional jump
+utils.clobbers.closeBranch      ; close off branching clobber scope without restoring
+```
+
 ## utils.preserve, utils.restore
 
 Callers that rely on register states to be preserved can wrap the macro invokation with `utils.preserve` and `utils.restore`. This is referred to as a 'preserve scope'.

@@ -40,3 +40,11 @@
         .fail
     .endif
 .endm
+
+;====
+; Closes a preserve scope without producing the restore instructions. Sometimes
+; needed by branching clobber scopes which restore the registers separately
+;====
+.macro "utils.preserve.close"
+    utils.registers.closePreserveScope
+.endm
