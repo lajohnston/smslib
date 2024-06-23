@@ -27,11 +27,14 @@
     .include "utils/clobbers/clobbers.withBranching.test.asm"
     .include "utils/clobbers/clobbers.endBranch.test.asm"
 
-    .include "utils/clobbers/clobbers.end.jpz.test.asm"
-    .include "utils/clobbers/clobbers.end.jpnz.test.asm"
+    .include "utils/clobbers/clobbers.end.jpc.test.asm"
+    .include "utils/clobbers/clobbers.end.jpnc.test.asm"
 
     .include "utils/clobbers/clobbers.end.jrc.test.asm"
     .include "utils/clobbers/clobbers.end.jrnc.test.asm"
+
+    .include "utils/clobbers/clobbers.end.jpz.test.asm"
+    .include "utils/clobbers/clobbers.end.jpnz.test.asm"
 
     .include "utils/clobbers/clobbers.end.jrz.test.asm"
     .include "utils/clobbers/clobbers.end.jrnz.test.asm"
