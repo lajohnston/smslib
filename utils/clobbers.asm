@@ -155,6 +155,31 @@
 .endm
 
 ;====
+; If carry is set, restore the registers for the active
+; utils.clobbers.withBranching scope and relative jumps to the given label. If
+; there are no registers to restore will just generate the jr c instruction
+;
+; @in   label   the label to jump to if carry is set
+;====
+.macro "utils.clobbers.end.jrc" args label
+    utils.assert.equals NARGS 1 "\.: Expected a label argument"
+    utils.assert.label label "\.: Argument should be a label"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ; No registers to restore - just generate jump
+        jr c, label
+    .else
+        jr nc, _\@_\.
+            ; Restore registers then jump
+            utils.clobbers.endBranch
+            jr label
+        _\@_\.:
+    .endif
+.endm
+
+;====
 ; If Z is set, restore the registers for the active utils.clobbers.withBranching
 ; scope and relative jumps to the given label. If there are no registers to
 ; restore will just generate the jr z instruction
