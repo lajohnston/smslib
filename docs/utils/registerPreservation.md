@@ -58,7 +58,7 @@ Utilising these macros within `sections` will produce unpredictable results as t
 .ends
 
 .macro "someRoutine"    ; WLA-DX allows you to use the same name if you wish
-    registers.clobbers "af" "hl"
+    utils.clobbers "af" "hl"
         call someRoutine
     utils.clobbers.end
 .endm
