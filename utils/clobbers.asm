@@ -18,16 +18,32 @@
 ;
 ; @in   clobbing    the registers being clobbed (utils.registers.XX constants
 ;                   ORed together)
+; @in   type        (Optional) if "isolated", the scope will be wrapped in its
+;                   own preserve scope. This is needed for branching clobber
+;                   scopes
 ;====
-.macro "utils.clobbers._startScope" args clobbing
+.macro "utils.clobbers._startScope" args clobbing type
     utils.assert.range clobbing utils.registers.AF, utils.registers.ALL, "\.: clobbing should be the register.* constants ORed together"
 
     ; Increment the clobber index
-    .if utils.clobbers.index == -1
+    .redefine utils.clobbers.index utils.clobbers.index + 1
+
+    ; Inform utils.registers (which may start an auto-preserve scope)
+    .if utils.clobbers.index == 0   ; first scope
         utils.registers.onInitialClobberScope
     .endif
 
-    .redefine utils.clobbers.index utils.clobbers.index + 1
+    ; If this is an isolated scope, start a preserve scope to wrap it
+    .ifdef type
+        .if type == "isolated"
+            ; Get registers protected by existing preserve scopes
+            utils.registers.getProtected
+
+            ; Start preserve scope to isolate this clobber scope
+            utils.registers.preserve (clobbing & utils.registers.getProtected.returnValue)
+            .define utils.clobbers{utils.clobbers.index}.isIsolated
+        .endif
+    .endif
 
     ; Preserve registers that need preserving and are being clobbered
     utils.registers.getVulnerable
@@ -96,20 +112,11 @@
     .endr
 
     ;===
-    ; Isolate the scope within its own preserve scope so it doesn't affect
-    ; outer scopes, allowing conditional jumps to pop registers without
+    ; Start a clobber scope wrapped within its own preserve scope so it doesn't
+    ; affect outer scopes, allowing conditional jumps to pop registers without
     ; causing mismatches in some edge cases
     ;===
-    ; Get registers that should be preserved
-    utils.registers.getProtected
-
-    ; Start preserve scope
-    utils.registers.preserve (\.._clobbing & utils.registers.getProtected.returnValue)
-
-    ; Start clobber scope
-    utils.clobbers._startScope (\.._clobbing)
-
-    .define utils.clobbers{utils.clobbers.index}.isIsolated
+    utils.clobbers._startScope (\.._clobbing) "isolated"
 .endm
 
 ;====
@@ -122,15 +129,15 @@
         .fail
     .endif
 
-    ; If this is the last clobber scope in progress
-    .if utils.clobbers.index == 0
-        utils.registers.onFinalClobberScopeEnd
-    .endif
-
     ; If this was an isolated scope with its own preserve scope
     .ifdef utils.clobbers{utils.clobbers.index}.isIsolated
         .undefine utils.clobbers{utils.clobbers.index}.isIsolated
         utils.registers.restore
+    .endif
+
+    ; If this is the last clobber scope in progress
+    .if utils.clobbers.index == 0
+        utils.registers.onFinalClobberScopeEnd
     .endif
 
     .redefine utils.clobbers.index utils.clobbers.index - 1

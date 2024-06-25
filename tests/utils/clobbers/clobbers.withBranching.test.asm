@@ -10,6 +10,27 @@ describe "utils.clobbers.withBranching"
             expect.all.toBeUnclobbered
         utils.restore
 
+    test "preserves registers it clobbers when auto-preserve is enabled"
+        .redefine utils.registers.AUTO_PRESERVE 1
+
+        zest.initRegisters
+
+        utils.clobbers.withBranching "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'", "hl'"
+            call suite.registers.clobberAll
+        utils.clobbers.end
+
+        expect.all.toBeUnclobbered
+
+        ; Assert all clobber scopes have been resolved
+        ld a, utils.clobbers.index
+        expect.a.toBe -1
+
+        ; Assert all preserve scopes have been resolved
+        ld a, utils.registers.preserveIndex
+        expect.a.toBe -1
+
+        .redefine utils.registers.AUTO_PRESERVE 0
+
     test "doesn't preserve registers that aren't marked for preservation"
         utils.preserve "af"
             utils.clobbers.withBranching "af" "bc" "de" "hl" "ix" "iy" "i" "af'" "bc'" "de'", "hl'"
