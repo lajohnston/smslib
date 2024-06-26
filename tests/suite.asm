@@ -1,5 +1,5 @@
 ; Include Zest library
-.define zest.SUITE_BANKS 2
+.define zest.SUITE_BANKS 3
 .incdir "./zest"        ; point to zest directory
 .include "zest.asm"     ; include the zest.asm library
 
@@ -45,6 +45,9 @@
     .include "utils/clobbers/clobbers.end.jrz.test.asm"
     .include "utils/clobbers/clobbers.end.jrnz.test.asm"
 
+    .include "utils/clobbers/clobbers.end.retc.test.asm"
+    .include "utils/clobbers/clobbers.end.retnc.test.asm"
+
     .include "utils/clobbers/sequentialClobberScopes.test.asm"
 
     .include "utils/registers/autoPreserve.test.asm"
@@ -54,7 +57,7 @@
 .ends
 
 ; Palette
-.section "palette.asm tests" appendto zest.suiteBank2
+.section "palette.asm tests" appendto zest.suiteBank3
     .include "palette/setIndex.test.asm"
     .include "palette/writeBytes.test.asm"
     .include "palette/writeRgb.test.asm"
@@ -62,14 +65,14 @@
 .ends
 
 ; Patterns
-.section "patterns.asm tests" appendto zest.suiteBank2
+.section "patterns.asm tests" appendto zest.suiteBank3
     .include "patterns/setIndex.test.asm"
     .include "patterns/writeBytes.test.asm"
     .include "patterns/writeSlice.test.asm"
 .ends
 
 ; Sprites
-.section "sprite.asm tests" appendto zest.suiteBank2
+.section "sprite.asm tests" appendto zest.suiteBank3
     .include "sprites/add.test.asm"
     .include "sprites/addGroup.test.asm"
     .include "sprites/copyToVram.test.asm"
@@ -77,7 +80,7 @@
 .ends
 
 ; Tilemap
-.section "tilemap.asm tests" appendto zest.suiteBank2
+.section "tilemap.asm tests" appendto zest.suiteBank3
     .include "tilemap/adjustXPixels.test.asm"
     .include "tilemap/adjustYPixels.test.asm"
     .include "tilemap/calculateScroll.test.asm"

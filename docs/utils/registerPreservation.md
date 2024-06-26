@@ -87,6 +87,9 @@ utils.clobbers.withBranching "af"
     utils.clobbers.end.jppo _someLabel  ; if not parity/overflow, restore and jp
     utils.clobbers.end.jpm  _someLabel  ; if sign, restore and jp
     utils.clobbers.end.jpp  _someLabel  ; if not sign, restore and jp
+
+    utils.clobbers.end.retc             ; return if carry set
+    utils.clobbers.end.retnc            ; return if carry is reset
 utils.clobbers.end
 ```
 

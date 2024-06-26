@@ -480,3 +480,43 @@
         _\@_\.:
     .endif
 .endm
+
+;====
+; If carry is set, restore the registers for the active
+; utils.clobbers.withBranching scope and return to the caller.
+;====
+.macro "utils.clobbers.end.retc"
+    utils.assert.equals NARGS 0 "\.: Expected no arguments"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ret c   ; no registers to restore
+    .else
+        jr nc, _\@_\.
+            ; Condition true - restore registers then ret
+            utils.clobbers.endBranch
+            ret
+        _\@_\.:
+    .endif
+.endm
+
+;====
+; If carry is reset, restore the registers for the active
+; utils.clobbers.withBranching scope and return to the caller.
+;====
+.macro "utils.clobbers.end.retnc"
+    utils.assert.equals NARGS 0 "\.: Expected no arguments"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ret nc  ; no registers to restore
+    .else
+        jr c, _\@_\.
+            ; Condition true - restore registers then ret
+            utils.clobbers.endBranch
+            ret
+        _\@_\.:
+    .endif
+.endm
