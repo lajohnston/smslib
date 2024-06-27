@@ -560,3 +560,43 @@
         _\@_\.:
     .endif
 .endm
+
+;====
+; If parity/overflow is set, restore the registers for the active
+; utils.clobbers.withBranching scope and return to the caller.
+;====
+.macro "utils.clobbers.end.retpe"
+    utils.assert.equals NARGS 0 "\.: Expected no arguments"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ret pe   ; no registers to restore
+    .else
+        jp po, _\@_\.
+            ; Condition true - restore registers then ret
+            utils.clobbers.endBranch
+            ret
+        _\@_\.:
+    .endif
+.endm
+
+;====
+; If parity/overflow is reset, restore the registers for the active
+; utils.clobbers.withBranching scope and return to the caller.
+;====
+.macro "utils.clobbers.end.retpo"
+    utils.assert.equals NARGS 0 "\.: Expected no arguments"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ret po  ; no registers to restore
+    .else
+        jp pe, _\@_\.
+            ; Condition true - restore registers then ret
+            utils.clobbers.endBranch
+            ret
+        _\@_\.:
+    .endif
+.endm

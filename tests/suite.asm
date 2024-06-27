@@ -51,6 +51,9 @@
     .include "utils/clobbers/clobbers.end.retc.test.asm"
     .include "utils/clobbers/clobbers.end.retnc.test.asm"
 
+    .include "utils/clobbers/clobbers.end.retpe.test.asm"
+    .include "utils/clobbers/clobbers.end.retpo.test.asm"
+
     .include "utils/clobbers/sequentialClobberScopes.test.asm"
 
     .include "utils/registers/autoPreserve.test.asm"
