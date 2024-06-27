@@ -520,3 +520,43 @@
         _\@_\.:
     .endif
 .endm
+
+;====
+; If zero is set, restore the registers for the active
+; utils.clobbers.withBranching scope and return to the caller.
+;====
+.macro "utils.clobbers.end.retz"
+    utils.assert.equals NARGS 0 "\.: Expected no arguments"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ret z   ; no registers to restore
+    .else
+        jr nz, _\@_\.
+            ; Condition true - restore registers then ret
+            utils.clobbers.endBranch
+            ret
+        _\@_\.:
+    .endif
+.endm
+
+;====
+; If zero is reset, restore the registers for the active
+; utils.clobbers.withBranching scope and return to the caller.
+;====
+.macro "utils.clobbers.end.retnz"
+    utils.assert.equals NARGS 0 "\.: Expected no arguments"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ret nz  ; no registers to restore
+    .else
+        jr z, _\@_\.
+            ; Condition true - restore registers then ret
+            utils.clobbers.endBranch
+            ret
+        _\@_\.:
+    .endif
+.endm

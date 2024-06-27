@@ -45,6 +45,9 @@
     .include "utils/clobbers/clobbers.end.jrz.test.asm"
     .include "utils/clobbers/clobbers.end.jrnz.test.asm"
 
+    .include "utils/clobbers/clobbers.end.retz.test.asm"
+    .include "utils/clobbers/clobbers.end.retnz.test.asm"
+
     .include "utils/clobbers/clobbers.end.retc.test.asm"
     .include "utils/clobbers/clobbers.end.retnc.test.asm"
 
