@@ -600,3 +600,43 @@
         _\@_\.:
     .endif
 .endm
+
+;====
+; If sign is set, restore the registers for the active
+; utils.clobbers.withBranching scope and return to the caller.
+;====
+.macro "utils.clobbers.end.retm"
+    utils.assert.equals NARGS 0 "\.: Expected no arguments"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ret m   ; no registers to restore
+    .else
+        jp p, _\@_\.
+            ; Condition true - restore registers then ret
+            utils.clobbers.endBranch
+            ret
+        _\@_\.:
+    .endif
+.endm
+
+;====
+; If sign is reset, restore the registers for the active
+; utils.clobbers.withBranching scope and return to the caller.
+;====
+.macro "utils.clobbers.end.retp"
+    utils.assert.equals NARGS 0 "\.: Expected no arguments"
+
+    ; Check if there are any registers to restore within this scope
+    utils.registers.getProtected
+    .if utils.registers.getProtected.returnValue == 0
+        ret p   ; no registers to restore
+    .else
+        jp m, _\@_\.
+            ; Condition true - restore registers then ret
+            utils.clobbers.endBranch
+            ret
+        _\@_\.:
+    .endif
+.endm

@@ -23,7 +23,7 @@
 ; Register preservation
 .include "utils/registers/_helpers.asm"
 
-.section "utils/registers.asm tests" appendto zest.suiteBank2
+.section "utils/clobbers.asm tests" appendto zest.suiteBank2
     .include "utils/clobbers/clobbers.withBranching.test.asm"
     .include "utils/clobbers/clobbers.endBranch.test.asm"
 
@@ -54,8 +54,11 @@
     .include "utils/clobbers/clobbers.end.retpe.test.asm"
     .include "utils/clobbers/clobbers.end.retpo.test.asm"
 
-    .include "utils/clobbers/sequentialClobberScopes.test.asm"
+    .include "utils/clobbers/clobbers.end.retm.test.asm"
+    .include "utils/clobbers/clobbers.end.retp.test.asm"
+.ends
 
+.section "utils/registers.asm tests" appendto zest.suiteBank3
     .include "utils/registers/autoPreserve.test.asm"
     .include "utils/registers/iRegister.test.asm"
     .include "utils/registers/nestedPreserveScopes.test.asm"
