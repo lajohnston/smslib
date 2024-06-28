@@ -763,19 +763,18 @@
 ; @in   down    if scrolling down, will jump to this label
 ;====
 .macro "tilemap.ifRowScrollElseRet" args up, down
-    .if NARGS != 2
-        .print "\ntilemap.ifRowScrollElseRet requires 2 arguments (up and down)\n\n"
-        .fail
-    .endif
+    utils.assert.equals NARGS 2 "\. requires 2 arguments (up and down)"
 
-    ld a, (tilemap.ram.flags)               ; load flags
-    rrca                                    ; set C to bit 0
-    ret nc                                  ; return if no row to scroll
+    utils.clobbers.withBranching "af"
+        ld a, (tilemap.ram.flags)   ; load flags
+        rrca                        ; set C to bit 0
+        utils.clobbers.end.retnc    ; return if no row to scroll
 
-    ; Check down scroll flag
-    rrca                                    ; set C to what was bit 1
-    jp c, down                              ; jp if down scroll (bit 1 was set)
-    ; ...otherwise continue to 'up' label
+        ; Check down scroll flag
+        rrca                        ; set C to what was bit 1
+        utils.clobbers.end.jpc down ; jp if down scroll (bit 1 was set)
+        ; ...otherwise continue to 'up' label
+    utils.clobbers.end
 .endm
 
 ;====
