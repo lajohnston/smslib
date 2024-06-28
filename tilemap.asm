@@ -731,20 +731,24 @@
 ;====
 .macro "tilemap.ifRowScroll" args up, down, else
     .if NARGS == 1
-        ; Only one argument passed ('else' label)
-        ld a, (tilemap.ram.flags)   ; load flags
-        rrca                        ; set C to bit 0
-        jp nc, \1                   ; jp to else if no row scroll (bit 0 was 0)
-        ; ...otherwise continue
+        utils.clobbers.withBranching "af"
+            ; Only one argument passed ('else' label)
+            ld a, (tilemap.ram.flags)   ; load flags
+            rrca                        ; set C to bit 0
+            utils.clobbers.end.jpnc \1  ; jp to else if no row scroll (bit 0 was 0)
+            ; ...otherwise continue
+        utils.clobbers.end
     .elif NARGS == 3
-        ld a, (tilemap.ram.flags)   ; load flags
-        rrca                        ; set C to bit 0
-        jp nc, else                 ; no row to scroll (bit 0 was 0)
+        utils.clobbers.withBranching "af"
+            ld a, (tilemap.ram.flags)   ; load flags
+            rrca                        ; set C to bit 0
+            utils.clobbers.end.jpnc else; no row to scroll (bit 0 was 0)
 
-        ; Check down scroll flag
-        rrca                        ; set C to what was bit 1
-        jp c, down                  ; jp if scrolling down (bit 1 was set)
-        ; ...otherwise continue to 'up' label
+            ; Check down scroll flag
+            rrca                        ; set C to what was bit 1
+            utils.clobbers.end.jpc down ; jp if scrolling down (bit 1 was set)
+            ; ...otherwise continue to 'up' label
+        utils.clobbers.end
     .else
         .print "\ntilemap.ifRowScroll requires 1 or 3 arguments (up/down/else, or just else alone)\n\n"
         .fail

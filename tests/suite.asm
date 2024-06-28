@@ -95,6 +95,7 @@
     .include "tilemap/calculateScroll.test.asm"
     .include "tilemap/ifColScroll.test.asm"
     .include "tilemap/ifColScrollElseRet.test.asm"
+    .include "tilemap/ifRowScroll.test.asm"
     .include "tilemap/loadHLWriteAddress.test.asm"
     .include "tilemap/reset.test.asm"
     .include "tilemap/setColRow.test.asm"
