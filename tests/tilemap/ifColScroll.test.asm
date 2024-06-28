@@ -47,7 +47,7 @@ describe "tilemap.ifColScroll with 1 arg (else label)"
         ++:
 
 describe "tilemap.ifColScroll with left, right, else args"
-    test "jumps to the left label when no col scroll needed"
+    test "jumps to the left label when left col scroll needed"
         tilemap.reset
         ld a, -8
         tilemap.adjustXPixels
@@ -65,7 +65,7 @@ describe "tilemap.ifColScroll with left, right, else args"
                 zest.fail "Else called"
         ++++: ; pass
 
-    test "jumps to the left label when no col scroll needed"
+    test "jumps to the right label when right scroll needed"
         tilemap.reset
         ld a, 8
         tilemap.adjustXPixels
