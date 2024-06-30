@@ -871,7 +871,9 @@
 ; This should be called when the display is off or during VBlank
 ;====
 .macro "tilemap.writeScrollBuffers"
-    call tilemap.writeScrollBuffers
+    utils.clobbers "af" "bc" "de" "hl" "iy"
+        call tilemap.writeScrollBuffers
+    utils.clobbers.end
 .endm
 
 ;====

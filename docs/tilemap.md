@@ -227,7 +227,7 @@ If a column scroll is detected you can transfer the new column data to the colum
 tilemap.loadDEColBuffer ; point DE to the column buffer
 
 tilemap.loadBColBytes   ; load B with the number of bytes to write to the buffer
-tilemap.loadBCColBytes  ; or, load BC with the value (for use with ldi)
+tilemap.loadBCColBytes  ; or, load BC with the value (for use with ldi/ldir)
 ```
 
 You will need a routine to write sequential tile data for a column from top to bottom. The routine should write a tile, jump to the next row, then write another tile, until the byte counter is 0.
