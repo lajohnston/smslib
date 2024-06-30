@@ -20,7 +20,7 @@ assemble() {
 
     # Create ROM from object files
     cd $build_dir
-    wlalink -v -d -S -A $link_file $name.sms
+    wlalink -d -S -A $link_file $name.sms
 
     # Delete temp files
     rm -f $build_dir/$name.o $link_file
