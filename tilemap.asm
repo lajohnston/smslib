@@ -782,12 +782,14 @@
 ; when the display is off or during a V or H interrupt
 ;====
 .macro "tilemap.writeScrollRegisters"
-    ld a, (tilemap.ram.xScrollBuffer)
-    neg
-    utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
+    utils.clobbers "af"
+        ld a, (tilemap.ram.xScrollBuffer)
+        neg
+        utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
 
-    ld a, (tilemap.ram.yScrollBuffer)
-    utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER
+        ld a, (tilemap.ram.yScrollBuffer)
+        utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER
+    utils.clobbers.end
 .endm
 
 ;====
