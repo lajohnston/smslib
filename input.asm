@@ -190,11 +190,13 @@
 ; @out  a   the just-pressed buttons (--21RLDU)
 ;====
 .macro "input.loadAPressed"
-    ; Load L with current input value and H with previous
-    ld hl, (input.ram.activePort.current)
-    ld a, l ; load current into A
-    xor h   ; XOR with previous. The set bits are now buttons that have changed
-    and l   ; AND with current; Set bits have changed AND are currently pressed
+    utils.clobbers "hl"
+        ; Load L with current input value and H with previous
+        ld hl, (input.ram.activePort.current)
+        ld a, l ; load current into A
+        xor h   ; XOR with previous. The set bits are now buttons that have changed
+        and l   ; AND with current; Set bits have changed AND are currently pressed
+    utils.clobbers.end
 .endm
 
 ;====
@@ -308,9 +310,11 @@
         utils.assert.label \2, "input.asm \.: Invalid label argument"
 
         ; Load input that was released last frame but is now pressed
-        input.loadAPressed
-        and \1      ; check button bit
-        jp z, \2    ; jp to else if the bit was not set
+        utils.clobbers.withBranching "af"
+            input.loadAPressed
+            and \1                      ; check button bit
+            utils.clobbers.end.jpz \2   ; jp to else if the bit was not set
+        utils.clobbers.end
     .else
         ;===
         ; Check if all buttons are pressed, and that not all of them were pressed
@@ -330,21 +334,25 @@
         ; Assert remaining \1 argument is the else label
         utils.assert.label \1, "input.asm \.: Expected last argument to be a label"
 
-        ; Load H with previous and L with current
-        ld hl, (input.ram.activePort.current)
+        utils.clobbers.withBranching "af" "hl"
+            ; Load H with previous and L with current
+            ld hl, (input.ram.activePort.current)
 
-        ; If all given buttons are currently pressed
-        ld a, l         ; load current into A
-        ld l, mask\.\@  ; load buttons mask into L
-        and l           ; filter out other buttons
-        cp l            ; check if all given buttons are currently pressed
-        jp nz, \1       ; jump if all given buttons aren't currently pressed
+            ; If all given buttons are currently pressed
+            ld a, l         ; load current into A
+            ld l, mask\.\@  ; load buttons mask into L
+            and l           ; filter out other buttons
+            cp l            ; check if all given buttons are currently pressed
+            utils.clobbers.end.jpnz \1  ; jp if all given buttons aren't pressed
 
-        ; All given buttons are pressed; Check if they were pressed last frame
-        ld a, h         ; load previous input
-        and l           ; filter out other buttons
-        cp l            ; check if all given buttons are currently pressed
-        jp z, \1        ; jp to else if all were already pressed last frame
+            ; All given buttons are pressed; Check if they were pressed last frame
+            ld a, h         ; load previous input
+            and l           ; filter out other buttons
+            cp l            ; check if all given buttons are currently pressed
+
+            ; Jump to else if all were already pressed last frame
+            utils.clobbers.end.jpz \1
+        utils.clobbers.end
     .endif
 .endm
 

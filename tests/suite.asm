@@ -1,5 +1,5 @@
 ; Include Zest library
-.define zest.SUITE_BANKS 3
+.define zest.SUITE_BANKS 4
 .incdir "./zest"        ; point to zest directory
 .include "zest.asm"     ; include the zest.asm library
 
@@ -16,6 +16,9 @@
 .section "input tests (bank 1)" appendto zest.suite
     .include "input/if.test.asm"
     .include "input/ifHeld.test.asm"
+.ends
+
+.section "input tests (bank 2)" appendto zest.suiteBank2
     .include "input/ifPressed.test.asm"
     .include "input/ifReleased.test.asm"
 .ends
@@ -23,7 +26,7 @@
 ; Register preservation
 .include "utils/registers/_helpers.asm"
 
-.section "utils/clobbers.asm tests" appendto zest.suiteBank2
+.section "utils/clobbers.asm tests" appendto zest.suiteBank3
     .include "utils/clobbers/clobbers.withBranching.test.asm"
     .include "utils/clobbers/clobbers.endBranch.test.asm"
 
@@ -58,7 +61,7 @@
     .include "utils/clobbers/clobbers.end.retp.test.asm"
 .ends
 
-.section "utils/registers.asm tests" appendto zest.suiteBank3
+.section "utils/registers.asm tests" appendto zest.suiteBank4
     .include "utils/registers/autoPreserve.test.asm"
     .include "utils/registers/iRegister.test.asm"
     .include "utils/registers/nestedPreserveScopes.test.asm"
@@ -66,7 +69,7 @@
 .ends
 
 ; Palette
-.section "palette.asm tests" appendto zest.suiteBank3
+.section "palette.asm tests" appendto zest.suiteBank4
     .include "palette/setIndex.test.asm"
     .include "palette/writeBytes.test.asm"
     .include "palette/writeRgb.test.asm"
@@ -74,14 +77,14 @@
 .ends
 
 ; Patterns
-.section "patterns.asm tests" appendto zest.suiteBank3
+.section "patterns.asm tests" appendto zest.suiteBank4
     .include "patterns/setIndex.test.asm"
     .include "patterns/writeBytes.test.asm"
     .include "patterns/writeSlice.test.asm"
 .ends
 
 ; Sprites
-.section "sprite.asm tests" appendto zest.suiteBank3
+.section "sprite.asm tests" appendto zest.suiteBank4
     .include "sprites/add.test.asm"
     .include "sprites/addGroup.test.asm"
     .include "sprites/copyToVram.test.asm"
@@ -89,7 +92,7 @@
 .ends
 
 ; Tilemap
-.section "tilemap.asm tests" appendto zest.suiteBank3
+.section "tilemap.asm tests" appendto zest.suiteBank4
     .include "tilemap/adjustXPixels.test.asm"
     .include "tilemap/adjustYPixels.test.asm"
     .include "tilemap/calculateScroll.test.asm"
