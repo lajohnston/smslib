@@ -176,10 +176,12 @@
 ; @out  a   held buttons (--21RLDU)
 ;====
 .macro "input.loadAHeld"
-    ; Load current input into L and previous into H
-    ld hl, (input.ram.activePort.current)
-    ld a, l     ; load current into A
-    and h       ; AND with previous
+    utils.clobbers "hl"
+        ; Load current input into L and previous into H
+        ld hl, (input.ram.activePort.current)
+        ld a, l     ; load current into A
+        and h       ; AND with previous
+    utils.clobbers.end
 .endm
 
 ;====
@@ -262,9 +264,11 @@
         utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
         utils.assert.label \2, "input.asm \.: Invalid else argument"
 
-        input.loadAHeld ; load A with held buttons
-        and \1          ; check button bit
-        jp z, \2        ; jp to else if the bit was not set
+        utils.clobbers.withBranching "af"
+            input.loadAHeld ; load A with held buttons
+            and \1          ; check button bit
+            utils.clobbers.end.jpz \2   ; jp to else if the bit was not set
+        utils.clobbers.end
     .else
         ;===
         ; Check if multiple buttons are pressed
@@ -282,10 +286,12 @@
         ; Assert remaining \1 argument is the else label
         utils.assert.label \1, "input.asm \.: Expected last argument to be a label"
 
-        input.loadAHeld ; load A with held buttons
-        and mask\.\@    ; clear other buttons
-        cp mask\.\@     ; compare result with mask
-        jp nz, \1       ; jp to else if not all buttons are held
+        utils.clobbers.withBranching "af"
+            input.loadAHeld ; load A with held buttons
+            and mask\.\@    ; clear other buttons
+            cp mask\.\@     ; compare result with mask
+            utils.clobbers.end.jpnz \1  ; jp to else if not all buttons are held
+        utils.clobbers.end
     .endif
 .endm
 
