@@ -219,9 +219,11 @@
         utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
         utils.assert.label \2, "input.asm \.: Invalid else argument"
 
-        ld a, (input.ram.activePort.current)
-        and \1      ; check button bit
-        jp z, \2    ; jp to else if the bit was not set
+        utils.clobbers.withBranching "af"
+            ld a, (input.ram.activePort.current)
+            and \1                      ; check button bit
+            utils.clobbers.end.jpz \2   ; jp to else if the bit was not set
+        utils.clobbers.end
     .else
         ;===
         ; Check if multiple buttons are pressed
@@ -239,10 +241,12 @@
         ; Assert remaining \1 argument is the else label
         utils.assert.label \1, "input.asm \.: Expected last argument to be a label"
 
-        ld a, (input.ram.activePort.current)
-        and mask\.\@    ; clear other buttons
-        cp mask\.\@     ; compare result with mask
-        jp nz, \1       ; jp to else if not all buttons are pressed
+        utils.clobbers.withBranching "af"
+            ld a, (input.ram.activePort.current)
+            and mask\.\@                ; clear other buttons
+            cp mask\.\@                 ; compare result with mask
+            utils.clobbers.end.jpnz \1  ; jp to else if not all buttons are pressed
+        utils.clobbers.end
     .endif
 .endm
 
