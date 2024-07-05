@@ -102,3 +102,11 @@
     .include "patterns/writeBytes.test.asm"
     .include "patterns/writeSlice.test.asm"
 .ends
+
+; Sprites
+.section "sprite.asm tests" appendto zest.suiteBank5
+    .include "sprites/add.test.asm"
+    .include "sprites/addGroup.test.asm"
+    .include "sprites/copyToVram.test.asm"
+    .include "sprites/init.test.asm"
+.ends

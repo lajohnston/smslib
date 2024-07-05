@@ -27,12 +27,16 @@
     .include "utils/ram.asm"
 .endif
 
-.ifndef utils.vdp
-    .include "utils/vdp.asm"
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
 .endif
 
 .ifndef utils.outiBlock
     .include "utils/outiBlock.asm"
+.endif
+
+.ifndef utils.vdp
+    .include "utils/vdp.asm"
 .endif
 
 ;====
@@ -109,14 +113,16 @@
 .endm
 
 ;====
-; Loads the next available sprite index (y position) into DE
+; (Private) Loads the next available sprite index (y position) into DE
 ;
 ; @out  de  the address of the next available sprite index
 ;====
-.macro "sprites.getNextIndex"
-    ld de, sprites.ram.buffer.nextIndex
-    ld a, (de)
-    ld e, a
+.macro "sprites._getNextIndex"
+    utils.clobbers "af"
+        ld de, sprites.ram.buffer.nextIndex
+        ld a, (de)
+        ld e, a
+    utils.clobbers.end
 .endm
 
 ;====
@@ -126,26 +132,30 @@
 ;====
 .macro "sprites._storeNextIndex"
     ; Store next index
-    ld a, e
-    ld de, sprites.ram.buffer.nextIndex
-    ld (de), a
+    utils.clobbers "af"
+        ld a, e
+        ld (sprites.ram.buffer.nextIndex), a
+    utils.clobbers.end
 .endm
 
 ;====
-; Adds a sprite to the buffer
+; (Private) Adds a sprite to the buffer. See sprites.add macro for public
+; macro
 ;====
-.section "sprites.add" free
+.section "sprites._add" free
     ;====
     ; Add sprite to the next available index
     ;
     ; @in  a  screen yPos
     ; @in  b  screen xPos
     ; @in  c  pattern number
+    ;
+    ; @out de pointer to next available y slot in sprite buffer
     ;====
-    sprites.addToNextIndex:
+    sprites._addToNextIndex:
         ; Retrieve next slot
         ld iyl, a               ; preserve yPos
-        sprites.getNextIndex
+        sprites._getNextIndex
         ld a, iyl               ; restore yPos
                                 ; continue to sprites.add
 
@@ -156,8 +166,10 @@
     ; @in  a  screen yPos
     ; @in  b  screen xPos
     ; @in  c  pattern number
+    ;
+    ; @out de pointer to next available y slot in sprite buffer
     ;====
-    sprites.add:
+    sprites._add:
         ; Set ypos
         ld (de), a
 
@@ -180,19 +192,26 @@
 ;====
 ; Add a sprite to the buffer
 ;
-; @in  a  screen yPos
-; @in  b  screen xPos
-; @in  c  pattern number
+; @in  a    screen yPos
+; @in  b    screen xPos
+; @in  c    pattern number
 ;
-; @in  de (optional)    pointer to next available index (yPos) in sprite buffer
-;                       Only required if a batch is in progress
+; @in  de   (optional) pointer to next available index (yPos) in sprite buffer
+;           Only required if a batch is in progress
+;
+; @out de   (if batch in progress) pointer to next available index (yPos) in
+;           sprite buffer
 ;====
 .macro "sprites.add"
     .if sprites.batchInProgress == 1
-        call sprites.add
+        utils.clobbers "af"
+            call sprites._add
+        utils.clobbers.end
     .else
-        call sprites.addToNextIndex
-        sprites._storeNextIndex
+        utils.clobbers "af", "de", "iy"
+            call sprites._addToNextIndex
+            sprites._storeNextIndex
+        utils.clobbers.end
     .endif
 .endm
 
@@ -204,12 +223,13 @@
 ;====
 .macro "sprites.startBatch"
     .ifeq sprites.batchInProgress 1
-        .print "Warning: sprites.startBatch called but batch already in progress."
-        .print " Ensure you also call sprites.endBatch\n\n"
+        .print "\. called but batch already in progress."
+        .print " Ensure you also call sprites.endBatch\n"
+        .fail
     .endif
 
     .redefine sprites.batchInProgress 1
-    sprites.getNextIndex
+    sprites._getNextIndex
 .endm
 
 ;====
@@ -217,7 +237,8 @@
 ;====
 .macro "sprites.endBatch"
     .ifeq sprites.batchInProgress 0
-        .print "Warning: sprites.endBatch called but no batch is in progress"
+        .print "\. called but no batch is in progress\n"
+        .fail
     .else
         .redefine sprites.batchInProgress 0
         sprites._storeNextIndex
@@ -228,9 +249,11 @@
 ; Initialises a sprite buffer in RAM
 ;====
 .macro "sprites.init"
-    ; Set nextIndex to index 0
-    ld a, <(sprites.ram.buffer) + sprites.Buffer.yPos   ; low byte of index 0
-    ld (sprites.ram.buffer.nextIndex), a                ; store in nextIndex
+    utils.clobbers "af"
+        ; Set nextIndex to index 0
+        ld a, <(sprites.ram.buffer) + sprites.Buffer.yPos   ; low byte of index 0
+        ld (sprites.ram.buffer.nextIndex), a                ; store in nextIndex
+    utils.clobbers.end
 .endm
 
 ;====
@@ -241,11 +264,11 @@
 .endm
 
 ;====
-; Copies the sprite buffer from RAM to VRAM. This should be performed while the
+; (Private) Copies the sprite buffer from RAM to VRAM. This should be performed while the
 ; display is off or during VBlank
 ;====
-.section "sprites.copyToVram"
-    sprites.copyToVram:
+.section "sprites._copyToVram"
+    sprites._copyToVram:
         ; Set VDP write address to y positions
         utils.vdp.prepWrite sprites.VRAM_ADDRESS
 
@@ -259,7 +282,7 @@
         ; Copy y positions to VRAM
         ld b, ixl                       ; load size into B
         inc l                           ; point to y positions in buffer
-        call utils.outiBlock.writeUpTo128Bytes  ; write data
+        utils.outiBlock.writeUpTo128Bytes   ; write data
 
         ; Output sprite terminator at end of y positions
         ld a, ixl                       ; load counter into A
@@ -276,7 +299,7 @@
         ; Copy x positions and patterns from buffer to VRAM
         ld b, ixl                       ; restore sprite count
         rlc b                           ; double to get xPos + pattern
-        jp utils.outiBlock.writeUpTo128Bytes    ; write bytes, then ret
+        utils.outiBlock.writeUpTo128BytesThenReturn ; write bytes, then ret
 
     ; No sprites in buffer - cap table with sprite terminator then return
     ; VRAM address must be set
@@ -287,22 +310,19 @@
 .ends
 
 ;====
-; Alias for sprites.copyToVram
+; Copies the sprite buffer from RAM to VRAM. This should be performed while the
+; display is off or during VBlank
 ;====
 .macro "sprites.copyToVram"
-    call sprites.copyToVram
+    utils.clobbers "af", "bc", "hl", "ix", "iy"
+        call sprites._copyToVram
+    utils.clobbers.end
 .endm
 
 ;====
-; Adds a group of sprites relative to an anchor position. Sprites within the
-; group that fall off-screen are not added.
-;
-; Limitation: Once the anchorX position falls off screen the entire group will
-; disappear, meaning the group cannot move smoothly off the left edge of the
-; screen. This can be partially obscured by setting the VDP registers to hide
-; the left column
+; (Private) See sprites.addGroup
 ;====
-.section "sprites.addGroup"
+.section "sprites._addGroup" free
     ;====
     ; Gets the next free sprite index and adds a sprite group from there onwards
     ;
@@ -313,9 +333,9 @@
     ;
     ; @out  de  next free sprite index
     ;====
-    sprites.addGroupFromNextIndex:
-        sprites.getNextIndex
-        jp sprites.addGroup
+    sprites._addGroupFromNextIndex:
+        sprites._getNextIndex
+        jp sprites._addGroup
 
     ;====
     ; Add a group of sprites from the currently selected slot
@@ -335,14 +355,14 @@
     _nextSprite:
         inc hl  ; point to next item
 
-    sprites.addGroup:
+    sprites._addGroup:
         ld a, (hl)          ; load relX
         cp sprites.GROUP_TERMINATOR
         ret z               ; end of group
 
         ; Add relative x
         add a, b            ; relX + anchorX
-        jp c, _xOffScreen   ; off screen; next sprite
+        jr c, _xOffScreen   ; off screen; next sprite
         ld ixh, a           ; store result x for later
 
         ; Add relative y
@@ -350,7 +370,7 @@
         ld a, (hl)          ; load relY
         add a, c            ; relY + anchorY
         cp sprites.MAX_Y_POSITION   ; compare with max y allowed
-        jp nc, _yOffScreen  ; off screen; next sprite
+        jr nc, _yOffScreen  ; off screen; next sprite
 
         ; Output sprite to sprite buffer
         ld (de), a          ; set sprite y in buffer
@@ -367,13 +387,26 @@
 .ends
 
 ;====
-; Macro alias for sprites.addGroup
+; Adds a group of sprites relative to an anchor position. Sprites within the
+; group that fall off-screen are not added.
+;
+; Limitation: Once the anchorX position falls off screen the entire group will
+; disappear, meaning the group cannot move smoothly off the left edge of the
+; screen. This can be partially obscured by setting the VDP registers to hide
+; the left column
+;
+; @in   hl  pointer to sprites.Sprite instances terminated by
+;           sprites.GROUP_TERMINATOR
 ;====
 .macro "sprites.addGroup"
     .if sprites.batchInProgress == 1
-        call sprites.addGroup
+        utils.clobbers "af", "hl", "ix"
+            call sprites._addGroup
+        utils.clobbers.end
     .else
-        call sprites.addGroupFromNextIndex
-        sprites._storeNextIndex
+        utils.clobbers "af", "de", "hl", "ix"
+            call sprites._addGroupFromNextIndex
+            sprites._storeNextIndex
+        utils.clobbers.end
     .endif
 .endm
