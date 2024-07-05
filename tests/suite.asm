@@ -1,5 +1,5 @@
 ; Include Zest library
-.define zest.SUITE_BANKS 2
+.define zest.SUITE_BANKS 5
 .incdir "./zest"        ; point to zest directory
 .include "zest.asm"     ; include the zest.asm library
 
@@ -16,14 +16,37 @@
 .section "input tests (bank 1)" appendto zest.suite
     .include "input/if.test.asm"
     .include "input/ifHeld.test.asm"
+
+    .include "input/ifXDir.test.asm"
+    .include "input/ifXDirHeld.test.asm"
+    .include "input/ifXDirPressed.test.asm"
+    .include "input/ifXDirReleased.test.asm"
+.ends
+
+.section "input tests (bank 2)" appendto zest.suiteBank2
     .include "input/ifPressed.test.asm"
     .include "input/ifReleased.test.asm"
+
+    .include "input/ifYDir.test.asm"
+    .include "input/ifYDirHeld.test.asm"
+.ends
+
+.section "input tests (bank 3)" appendto zest.suiteBank3
+    .include "input/ifYDirPressed.test.asm"
+    .include "input/ifYDirReleased.test.asm"
+
+    .include "input/loadADirX.test.asm"
+    .include "input/loadADirY.test.asm"
+
+    .include "input/init.test.asm"
+    .include "input/readPort1.test.asm"
+    .include "input/readPort2.test.asm"
 .ends
 
 ; Register preservation
 .include "utils/registers/_helpers.asm"
 
-.section "utils/clobbers.asm tests" appendto zest.suiteBank2
+.section "utils/clobbers.asm tests" appendto zest.suiteBank4
     .include "utils/clobbers/clobbers.withBranching.test.asm"
     .include "utils/clobbers/clobbers.endBranch.test.asm"
 
@@ -58,7 +81,7 @@
     .include "utils/clobbers/clobbers.end.retp.test.asm"
 .ends
 
-.section "utils/registers.asm tests" appendto zest.suiteBank2
+.section "utils/registers.asm tests" appendto zest.suiteBank5
     .include "utils/registers/autoPreserve.test.asm"
     .include "utils/registers/iRegister.test.asm"
     .include "utils/registers/nestedPreserveScopes.test.asm"

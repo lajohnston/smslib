@@ -73,14 +73,16 @@
 ;====
 .macro "input.init"
     ; Initialise all buttons to released
-    xor a
-    ld (input.ram.activePort.current), a
-    ld (input.ram.activePort.previous), a
+    utils.clobbers "af"
+        xor a
+        ld (input.ram.activePort.current), a
+        ld (input.ram.activePort.previous), a
 
-    .ifdef input.ENABLE_PORT_2
-        ld (input.ram.previous.port1), a
-        ld (input.ram.previous.port2), a
-    .endif
+        .ifdef input.ENABLE_PORT_2
+            ld (input.ram.previous.port1), a
+            ld (input.ram.previous.port2), a
+        .endif
+    utils.clobbers.end
 .endm
 
 ;====
@@ -99,25 +101,29 @@
 ;====
 .macro "input.readPort1"
     .ifdef input.ENABLE_PORT_2
-        ; Copy previous value of port 1 to activePort.previous
-        ld a, (input.ram.previous.port1)        ; load previous.port1
-        ld (input.ram.activePort.previous), a   ; store in activePort.previous
+        utils.clobbers "af"
+            ; Copy previous value of port 1 to activePort.previous
+            ld a, (input.ram.previous.port1)        ; load previous.port1
+            ld (input.ram.activePort.previous), a   ; store in activePort.previous
 
-        ; Load current port 1 input and store in activePort.current
-        utils.port.read input.PORT_1            ; load input
-        xor $ff                                 ; invert so 1 = pressed and 0 = released
-        ld (input.ram.activePort.current), a    ; store in activePort.current
-        ld (input.ram.previous.port1), a        ; store in previous.port1 for next time
+            ; Load current port 1 input and store in activePort.current
+            utils.port.read input.PORT_1            ; load input
+            xor $ff                                 ; invert so 1 = pressed and 0 = released
+            ld (input.ram.activePort.current), a    ; store in activePort.current
+            ld (input.ram.previous.port1), a        ; store in previous.port1 for next time
+        utils.clobbers.end
     .else
-        ld a, (input.ram.activePort.current)    ; load previous input
-        ld h, a                                 ; store in H as previous value
+        utils.clobbers "af", "hl"
+            ld a, (input.ram.activePort.current)    ; load previous input
+            ld h, a                                 ; store in H as previous value
 
-        utils.port.read input.PORT_1            ; load input
-        xor $ff                                 ; invert so 1 = pressed and 0 = released
-        ld l, a                                 ; set to L
+            utils.port.read input.PORT_1            ; load input
+            xor $ff                                 ; invert so 1 = pressed and 0 = released
+            ld l, a                                 ; set to L
 
-        ; Set activePort current to L and previous to H
-        ld (input.ram.activePort.current), hl
+            ; Set activePort current to L and previous to H
+            ld (input.ram.activePort.current), hl
+        utils.clobbers.end
     .endif
 .endm
 
@@ -166,7 +172,9 @@
         .fail
     .endif
 
-    call input._readPort2
+    utils.clobbers "af" "bc"
+        call input._readPort2
+    utils.clobbers.end
 .endm
 
 ;====
@@ -176,10 +184,12 @@
 ; @out  a   held buttons (--21RLDU)
 ;====
 .macro "input.loadAHeld"
-    ; Load current input into L and previous into H
-    ld hl, (input.ram.activePort.current)
-    ld a, l     ; load current into A
-    and h       ; AND with previous
+    utils.clobbers "hl"
+        ; Load current input into L and previous into H
+        ld hl, (input.ram.activePort.current)
+        ld a, l     ; load current into A
+        and h       ; AND with previous
+    utils.clobbers.end
 .endm
 
 ;====
@@ -188,11 +198,13 @@
 ; @out  a   the just-pressed buttons (--21RLDU)
 ;====
 .macro "input.loadAPressed"
-    ; Load L with current input value and H with previous
-    ld hl, (input.ram.activePort.current)
-    ld a, l ; load current into A
-    xor h   ; XOR with previous. The set bits are now buttons that have changed
-    and l   ; AND with current; Set bits have changed AND are currently pressed
+    utils.clobbers "hl"
+        ; Load L with current input value and H with previous
+        ld hl, (input.ram.activePort.current)
+        ld a, l ; load current into A
+        xor h   ; XOR with previous. The set bits are now buttons that have changed
+        and l   ; AND with current; Set bits have changed AND are currently pressed
+    utils.clobbers.end
 .endm
 
 ;====
@@ -201,11 +213,13 @@
 ; @out  a   released buttons (--21RLDU)
 ;====
 .macro "input.loadAReleased"
-    ; Load L with current input value and H with previous
-    ld hl, (input.ram.activePort.current)
-    ld a, l ; load current into A
-    xor h   ; XOR with previous. The set bits are now buttons that have changed
-    and h   ; AND with previous; Set bits have changed AND are not currently pressed
+    utils.clobbers "hl"
+        ; Load L with current input value and H with previous
+        ld hl, (input.ram.activePort.current)
+        ld a, l ; load current into A
+        xor h   ; XOR with previous. The set bits are now buttons that have changed
+        and h   ; AND with previous; Set bits have changed AND are not currently pressed
+    utils.clobbers.end
 .endm
 
 ;====
@@ -219,9 +233,11 @@
         utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
         utils.assert.label \2, "input.asm \.: Invalid else argument"
 
-        ld a, (input.ram.activePort.current)
-        and \1      ; check button bit
-        jp z, \2    ; jp to else if the bit was not set
+        utils.clobbers.withBranching "af"
+            ld a, (input.ram.activePort.current)
+            and \1                      ; check button bit
+            utils.clobbers.end.jpz \2   ; jp to else if the bit was not set
+        utils.clobbers.end
     .else
         ;===
         ; Check if multiple buttons are pressed
@@ -239,10 +255,12 @@
         ; Assert remaining \1 argument is the else label
         utils.assert.label \1, "input.asm \.: Expected last argument to be a label"
 
-        ld a, (input.ram.activePort.current)
-        and mask\.\@    ; clear other buttons
-        cp mask\.\@     ; compare result with mask
-        jp nz, \1       ; jp to else if not all buttons are pressed
+        utils.clobbers.withBranching "af"
+            ld a, (input.ram.activePort.current)
+            and mask\.\@                ; clear other buttons
+            cp mask\.\@                 ; compare result with mask
+            utils.clobbers.end.jpnz \1  ; jp to else if not all buttons are pressed
+        utils.clobbers.end
     .endif
 .endm
 
@@ -258,9 +276,11 @@
         utils.assert.range \1, input.UP, input.BUTTON_2, "input.asm \.: Invalid button argument"
         utils.assert.label \2, "input.asm \.: Invalid else argument"
 
-        input.loadAHeld ; load A with held buttons
-        and \1          ; check button bit
-        jp z, \2        ; jp to else if the bit was not set
+        utils.clobbers.withBranching "af"
+            input.loadAHeld ; load A with held buttons
+            and \1          ; check button bit
+            utils.clobbers.end.jpz \2   ; jp to else if the bit was not set
+        utils.clobbers.end
     .else
         ;===
         ; Check if multiple buttons are pressed
@@ -278,10 +298,12 @@
         ; Assert remaining \1 argument is the else label
         utils.assert.label \1, "input.asm \.: Expected last argument to be a label"
 
-        input.loadAHeld ; load A with held buttons
-        and mask\.\@    ; clear other buttons
-        cp mask\.\@     ; compare result with mask
-        jp nz, \1       ; jp to else if not all buttons are held
+        utils.clobbers.withBranching "af"
+            input.loadAHeld ; load A with held buttons
+            and mask\.\@    ; clear other buttons
+            cp mask\.\@     ; compare result with mask
+            utils.clobbers.end.jpnz \1  ; jp to else if not all buttons are held
+        utils.clobbers.end
     .endif
 .endm
 
@@ -298,9 +320,11 @@
         utils.assert.label \2, "input.asm \.: Invalid label argument"
 
         ; Load input that was released last frame but is now pressed
-        input.loadAPressed
-        and \1      ; check button bit
-        jp z, \2    ; jp to else if the bit was not set
+        utils.clobbers.withBranching "af"
+            input.loadAPressed
+            and \1                      ; check button bit
+            utils.clobbers.end.jpz \2   ; jp to else if the bit was not set
+        utils.clobbers.end
     .else
         ;===
         ; Check if all buttons are pressed, and that not all of them were pressed
@@ -320,21 +344,25 @@
         ; Assert remaining \1 argument is the else label
         utils.assert.label \1, "input.asm \.: Expected last argument to be a label"
 
-        ; Load H with previous and L with current
-        ld hl, (input.ram.activePort.current)
+        utils.clobbers.withBranching "af" "hl"
+            ; Load H with previous and L with current
+            ld hl, (input.ram.activePort.current)
 
-        ; If all given buttons are currently pressed
-        ld a, l         ; load current into A
-        ld l, mask\.\@  ; load buttons mask into L
-        and l           ; filter out other buttons
-        cp l            ; check if all given buttons are currently pressed
-        jp nz, \1       ; jump if all given buttons aren't currently pressed
+            ; If all given buttons are currently pressed
+            ld a, l         ; load current into A
+            ld l, mask\.\@  ; load buttons mask into L
+            and l           ; filter out other buttons
+            cp l            ; check if all given buttons are currently pressed
+            utils.clobbers.end.jpnz \1  ; jp if all given buttons aren't pressed
 
-        ; All given buttons are pressed; Check if they were pressed last frame
-        ld a, h         ; load previous input
-        and l           ; filter out other buttons
-        cp l            ; check if all given buttons are currently pressed
-        jp z, \1        ; jp to else if all were already pressed last frame
+            ; All given buttons are pressed; Check if they were pressed last frame
+            ld a, h         ; load previous input
+            and l           ; filter out other buttons
+            cp l            ; check if all given buttons are currently pressed
+
+            ; Jump to else if all were already pressed last frame
+            utils.clobbers.end.jpz \1
+        utils.clobbers.end
     .endif
 .endm
 
@@ -351,9 +379,11 @@
         utils.assert.label \2, "input.asm \.: Invalid label argument"
 
         ; Load input that was released last frame but is now pressed
-        input.loadAReleased
-        and \1      ; check button bit
-        jp z, \2    ; jp to else if the bit was not set
+        utils.clobbers.withBranching "af"
+            input.loadAReleased
+            and \1                      ; check button bit
+            utils.clobbers.end.jpz \2   ; jp to else if the bit was not set
+        utils.clobbers.end
     .else
         ; OR button masks together to create a single mask
         .define mask\.\@ 0
@@ -371,28 +401,36 @@
         ; Check if all buttons had been pressed last frame, but not all are now
         ;===
 
-        ; Load H with previous and L with current
-        ld hl, (input.ram.activePort.current)
+        utils.clobbers.withBranching "af" "hl"
+            ; Load H with previous and L with current
+            ld hl, (input.ram.activePort.current)
 
-        ; If all given buttons were pressed
-        ld a, h         ; load previous into A
-        ld h, mask\.\@  ; load buttons mask into H
-        and h           ; filter out other buttons
-        cp h            ; check if all given buttons were pressed
-        jp nz, \1       ; jump if all given buttons weren't pressed last frame
+            ; If all given buttons were pressed
+            ld a, h         ; load previous into A
+            ld h, mask\.\@  ; load buttons mask into H
+            and h           ; filter out other buttons
+            cp h            ; check if all given buttons were pressed
 
-        ; All given buttons were pressed; Check if any are now released
-        ld a, l         ; load current input
-        and h           ; filter out other buttons
-        cp h            ; check if all given buttons are currently pressed
-        jp z, \1        ; jp to else if all are still pressed
+            ; Jump if all given buttons weren't pressed last frame
+            utils.clobbers.end.jpnz \1
+
+            ; All given buttons were pressed; Check if any are now released
+            ld a, l         ; load current input
+            and h           ; filter out other buttons
+            cp h            ; check if all given buttons are currently pressed
+
+            ; Jump to else if all are still pressed
+            utils.clobbers.end.jpz \1
+        utils.clobbers.end
     .endif
 .endm
 
 ;====
 ; Checks if either direction on an axis is pressed and jumps to the relevant
 ; label. If the negative direction (left or up) on the axis is pressed, it
-; will continue the code flow without jumping
+; will continue the code flow without jumping.
+;
+; Should be called within a utils.clobbers.withBranching scope protecting AF
 ;
 ; @in   a               input value to check (--21RLDU)
 ;
@@ -413,11 +451,11 @@
     utils.assert.label positiveLabel "input.asm \.: Invalid 'positiveLabel' argument"
     utils.assert.label elseLabel "input.asm \.: Invalid 'elseLabel' argument"
 
-    and negativeDir | positiveDir   ; check if either direction is pressed
-    jp z, elseLabel                 ; jump to else label if neither are pressed
+    and negativeDir | positiveDir       ; check if either direction is pressed
+    utils.clobbers.end.jpz elseLabel    ; jp to else label if neither are pressed
 
-    and positiveDir                 ; check positive direction
-    jp nz, positiveLabel            ; jump if positive direction pressed
+    and positiveDir                         ; check positive direction
+    utils.clobbers.end.jpnz positiveLabel   ; jp if positive direction pressed
 
     ; ...continue to the negativeLabel handler
 .endm
@@ -436,8 +474,10 @@
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
     ; Load currently pressed input and jump to relevant label
-    ld a, (input.ram.activePort.current)
-    input._jpIfDirection input.LEFT input.RIGHT left right else
+    utils.clobbers.withBranching "af"
+        ld a, (input.ram.activePort.current)
+        input._jpIfDirection input.LEFT input.RIGHT left right else
+    utils.clobbers.end
 .endm
 
 ;====
@@ -454,9 +494,11 @@
     utils.assert.label right "input.asm \.: Invalid 'right' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
-    ; Load held input and jump to relevant label
-    input.loadAHeld
-    input._jpIfDirection input.LEFT input.RIGHT left right else
+    utils.clobbers.withBranching "af"
+        ; Load held input and jump to relevant label
+        input.loadAHeld
+        input._jpIfDirection input.LEFT input.RIGHT left right else
+    utils.clobbers.end
 .endm
 
 ;====
@@ -473,11 +515,13 @@
     utils.assert.label right "input.asm \.: Invalid 'right' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
-    ; Load input that was released last frame but is now pressed
-    input.loadAPressed
+    utils.clobbers.withBranching "af"
+        ; Load input that was released last frame but is now pressed
+        input.loadAPressed
 
-    ; Jump to the relevant label
-    input._jpIfDirection input.LEFT input.RIGHT left right else
+        ; Jump to the relevant label
+        input._jpIfDirection input.LEFT input.RIGHT left right else
+    utils.clobbers.end
 .endm
 
 ;====
@@ -494,11 +538,13 @@
     utils.assert.label right "input.asm \.: Invalid 'right' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
-    ; Load input that was pressed last frame but has just been released
-    input.loadAReleased
+    utils.clobbers.withBranching "af"
+        ; Load input that was pressed last frame but has just been released
+        input.loadAReleased
 
-    ; Jump to the relevant label
-    input._jpIfDirection input.LEFT input.RIGHT left right else
+        ; Jump to the relevant label
+        input._jpIfDirection input.LEFT input.RIGHT left right else
+    utils.clobbers.end
 .endm
 
 ;====
@@ -515,8 +561,10 @@
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
     ; Load currently pressed direction and jump to the relevant label
-    ld a, (input.ram.activePort.current)
-    input._jpIfDirection input.UP input.DOWN up down else
+    utils.clobbers.withBranching "af"
+        ld a, (input.ram.activePort.current)
+        input._jpIfDirection input.UP input.DOWN up down else
+    utils.clobbers.end
 .endm
 
 ;====
@@ -534,8 +582,10 @@
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
     ; Load held buttons and jump to the relevant label
-    input.loadAHeld
-    input._jpIfDirection input.UP input.DOWN up down else
+    utils.clobbers.withBranching "af"
+        input.loadAHeld
+        input._jpIfDirection input.UP input.DOWN up down else
+    utils.clobbers.end
 .endm
 
 ;====
@@ -552,11 +602,13 @@
     utils.assert.label down "input.asm \.: Invalid 'down' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
-    ; Load input that was released last frame but is now pressed
-    input.loadAPressed
+    utils.clobbers.withBranching "af"
+        ; Load input that was released last frame but is now pressed
+        input.loadAPressed
 
-    ; Jump to the relevant label
-    input._jpIfDirection input.UP input.DOWN up down else
+        ; Jump to the relevant label
+        input._jpIfDirection input.UP input.DOWN up down else
+    utils.clobbers.end
 .endm
 
 ;====
@@ -573,11 +625,13 @@
     utils.assert.label down "input.asm \.: Invalid 'down' argument"
     utils.assert.label else "input.asm \.: Invalid 'else' argument"
 
-    ; Load input that was pressed but has just been released
-    input.loadAReleased
+    utils.clobbers.withBranching "af"
+        ; Load input that was pressed but has just been released
+        input.loadAReleased
 
-    ; Jump to the relevant label
-    input._jpIfDirection input.UP input.DOWN up down else
+        ; Jump to the relevant label
+        input._jpIfDirection input.UP input.DOWN up down else
+    utils.clobbers.end
 .endm
 
 ;====
