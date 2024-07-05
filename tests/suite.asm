@@ -110,3 +110,30 @@
     .include "sprites/copyToVram.test.asm"
     .include "sprites/init.test.asm"
 .ends
+
+; Tilemap
+.section "tilemap.asm tests" appendto zest.suiteBank5
+    .include "tilemap/adjustXPixels.test.asm"
+    .include "tilemap/adjustYPixels.test.asm"
+    .include "tilemap/calculateScroll.test.asm"
+    .include "tilemap/ifColScroll.test.asm"
+    .include "tilemap/ifColScrollElseRet.test.asm"
+    .include "tilemap/ifRowScroll.test.asm"
+    .include "tilemap/ifRowScrollElseRet.test.asm"
+    .include "tilemap/loadHLWriteAddress.test.asm"
+    .include "tilemap/reset.test.asm"
+    .include "tilemap/setColRow.test.asm"
+    .include "tilemap/setIndex.test.asm"
+    .include "tilemap/stopDownRowScroll.test.asm"
+    .include "tilemap/stopLeftColScroll.test.asm"
+    .include "tilemap/stopRightColScroll.test.asm"
+    .include "tilemap/stopUpRowScroll.test.asm"
+    .include "tilemap/writeBytes.test.asm"
+    .include "tilemap/writeBytesUntil.test.asm"
+    .include "tilemap/writeRow.test.asm"
+    .include "tilemap/writeRows.test.asm"
+    .include "tilemap/writeScrollBuffers.test.asm"
+    .include "tilemap/writeScrollRegisters.test.asm"
+    .include "tilemap/writeTile.test.asm"
+    .include "tilemap/writeTiles.test.asm"
+.ends

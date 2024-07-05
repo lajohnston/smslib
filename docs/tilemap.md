@@ -95,7 +95,7 @@ ld hl, myRow            ; point to data
 tilemap.writeRow        ; write data (32 tiles)
 ```
 
-### tilemap.writeRows
+### tilemap.writeRows / tilemap.writeRowsThenReturn
 
 Write multiple rows from an uncompressed tilemap. The visible tilemap is 32 tiles wide (columns) by 25 tiles high (rows) but the full map can be larger than the screen.
 
@@ -118,6 +118,8 @@ ld e, tilemap.MAP_COLS * 2      ; number of full map columns * 2 (each tile is 2
 tilemap.writeRows               ; write row data
 ```
 
+`tilemap.writeRowsThenReturn` does the same, but returns to the original caller once done.
+
 ## Scrolling
 
 The tilemap supports 8-direction scrolling. This is a simple but low-level API that handles the fine pixel scroll registers, row/column scroll detection and VRAM write addresses. You will need a scroll handler on top of this which will maintain the position in the world and adjust it based on the scroll direction. It will also need to handle your tile format, whether raw tile data or 'metatiles' that group multiple tiles together to save memory.
@@ -128,11 +130,11 @@ A suggested workflow is to maintain a pointer to the top-left visible tile of yo
 
 1. Adjust the tilemap by x and y number of pixels
 2. If row or column scrolling detected, adjust row/col of the top-left pointer
-    - (Optional) Prevent the pointer going out of bounds
-4. Write the new row and/or column into the RAM buffers
-    - Right edge will be top-left pointer + 31 columns
-    - Bottom edge will be top-left pointer + 24 rows
-5. During VBlank, transfer these changes from the RAM buffer to the VDP
+   - (Optional) Prevent the pointer going out of bounds
+3. Write the new row and/or column into the RAM buffers
+   - Right edge will be top-left pointer + 31 columns
+   - Bottom edge will be top-left pointer + 24 rows
+4. During VBlank, transfer these changes from the RAM buffer to the VDP
 
 ### Adjust position
 
@@ -225,7 +227,7 @@ If a column scroll is detected you can transfer the new column data to the colum
 tilemap.loadDEColBuffer ; point DE to the column buffer
 
 tilemap.loadBColBytes   ; load B with the number of bytes to write to the buffer
-tilemap.loadBCColBytes  ; or, load BC with the value (for use with ldi)
+tilemap.loadBCColBytes  ; or, load BC with the value (for use with ldi/ldir)
 ```
 
 You will need a routine to write sequential tile data for a column from top to bottom. The routine should write a tile, jump to the next row, then write another tile, until the byte counter is 0.
@@ -250,6 +252,7 @@ During VBlank you can safely write the buffered data to VRAM. The easiest way to
 ```asm
 tilemap.writeScrollBuffers
 ```
+
 ### Bounds checking
 
 If you detect a row or column scroll will take the tilemap out of bounds, you can call the following scroll-stop routines to stop the column and/or row scroll from happening. This will set the pixel scroll to the farthest edge of the in-bounds tiles, but later calls to `tilemap.ifRowScroll` and/or `tilemap.ifColScroll` will no longer detect a scroll and thus not trigger out-of-bounds rows or columns to be drawn.
