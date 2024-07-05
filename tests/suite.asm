@@ -95,3 +95,10 @@
     .include "palette/writeRgb.test.asm"
     .include "palette/writeSlice.test.asm"
 .ends
+
+; Patterns
+.section "patterns.asm tests" appendto zest.suiteBank5
+    .include "patterns/setIndex.test.asm"
+    .include "patterns/writeBytes.test.asm"
+    .include "patterns/writeSlice.test.asm"
+.ends
