@@ -87,3 +87,11 @@
     .include "utils/registers/nestedPreserveScopes.test.asm"
     .include "utils/registers/registers.test.asm"
 .ends
+
+; Palette
+.section "palette.asm tests" appendto zest.suiteBank5
+    .include "palette/setIndex.test.asm"
+    .include "palette/writeBytes.test.asm"
+    .include "palette/writeRgb.test.asm"
+    .include "palette/writeSlice.test.asm"
+.ends

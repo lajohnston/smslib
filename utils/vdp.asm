@@ -11,6 +11,10 @@
     .include "utils/assert.asm"
 .endif
 
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
+.endif
+
 .ifndef utils.outiBlock
     .include "utils/outiBlock.asm"
 .endif
@@ -42,27 +46,33 @@
 ;                   cycles)
 ;====
 .macro "utils.vdp.prepWrite" args address setPort
-    ; Output low byte to VDP
-    .ifeq <address 0
-        xor a
-    .else
-        ld a, <address
-    .endif
+    ; Assert address is between 0 and $c021 (16KB + 32 byte color RAM)
+    utils.assert.range address 0 $c020 "\.: Address should be a valid VRAM address"
 
-    out (utils.vdp.COMMAND_PORT), a
-
-    ; Output high byte to VDP with write command set
-    ld a, >address | utils.vdp.commands.WRITE
-    out (utils.vdp.COMMAND_PORT), a
-
-    ; Port to write to
+    ; Default setPort to 1
     .ifndef setPort
         .redefine setPort 1
     .endif
 
-    .if setPort == 1
-        ld c, utils.vdp.DATA_PORT
-    .endif
+    utils.clobbers "af"
+        ; Output low byte to VDP
+        .ifeq <address 0
+            xor a
+        .else
+            ld a, <address
+        .endif
+
+        out (utils.vdp.COMMAND_PORT), a
+
+        ; Output high byte to VDP with write command set
+        ld a, >address | utils.vdp.commands.WRITE
+        out (utils.vdp.COMMAND_PORT), a
+
+        .if setPort == 1
+            ; Port to write to
+            ld c, utils.vdp.DATA_PORT
+        .endif
+    utils.clobbers.end
 .endm
 
 ;====

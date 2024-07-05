@@ -49,6 +49,10 @@
     .include "utils/assert.asm"
 .endif
 
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
+.endif
+
 ;====
 ; Constants
 ;====
@@ -94,6 +98,8 @@
 .macro "utils.outiBlock.write" args bytes
     utils.assert.range bytes 1 16384 "outiBlock.asm \.: Invalid bytes argument"
 
+    utils.clobbers "af", "bc", "hl"
+
     ; Transfer chunks if data exceeds outi block size
     .rept bytes / utils.outiBlock.size
         call utils.outiBlock.block - utils.outiBlock.SIZE_BYTES
@@ -108,17 +114,19 @@
     .else
         call utils.outiBlock.block - (bytes # utils.outiBlock.size) * 2
     .endif
+
+    utils.clobbers.end
 .endm
 
 ;====
-; OUTI between 1-128 bytes
+; (Private) OUTI between 1-128 bytes
 ;
 ; @in   b   the number of bytes to write. Must be greater than 0 and <= 128
 ; @in   c   the port to output the data to
 ; @in   hl  the address of the source data
 ;====
-.section "utils.outiBlock.writeUpTo128Bytes" free
-    utils.outiBlock.writeUpTo128Bytes:
+.section "utils.outiBlock._writeUpTo128Bytes" free
+    utils.outiBlock._writeUpTo128Bytes:
         ; Address of last OUTI instruction
         ld iyh, >(utils.outiBlock.lastOuti) ; high-byte address of last outi
         ld a, <(utils.outiBlock.lastOuti)   ; load low-byte address of last outi
@@ -135,6 +143,29 @@
 .ends
 
 ;====
+; OUTI between 1-128 bytes
+;
+; @in   b   the number of bytes to write. Must be greater than 0 and <= 128
+; @in   c   the port to output the data to
+; @in   hl  the address of the source data
+;====
+.macro "utils.outiBlock.writeUpTo128Bytes"
+    utils.clobbers "af", "bc", "hl", "iy"
+        call utils.outiBlock._writeUpTo128Bytes
+    utils.clobbers.end
+.endm
+
+;====
+; Like utils.outiBlock.writeUpTo128Bytes but 'jp's to the routine then returns
+; to the original caller
+;====
+.macro "utils.outiBlock.writeUpTo128BytesThenReturn"
+    utils.clobbers "af", "bc", "hl", "iy"
+        jp utils.outiBlock._writeUpTo128Bytes
+    utils.clobbers.end
+.endm
+
+;====
 ; Writes elements from an array of data to VRAM using OUTI instructions
 ;
 ; @in   dataAddress the address of the data to transfer
@@ -143,6 +174,8 @@
 ; @in   offset      the first item in the array to copy (0-based)
 ;====
 .macro "utils.outiBlock.writeSlice" args dataAddress elementSize count offset
-    ld hl, dataAddress + (offset * elementSize)
-    utils.outiBlock.write (count * elementSize)
+    utils.clobbers "hl"
+        ld hl, dataAddress + (offset * elementSize)
+        utils.outiBlock.write (count * elementSize)
+    utils.clobbers.end
 .endm
