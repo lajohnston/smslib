@@ -18,6 +18,10 @@
     utils.ram.assertRamSlot
 .endif
 
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
+.endif
+
 ;====
 ; Settings
 ;
@@ -53,6 +57,7 @@
 ; Constants
 ;====
 .define interrupts.VDP_PORT $bf ; read = status; write = command
+.define interrupts.VDP_VERTICAL_COUNTER_PORT $7e
 
 ;====
 ; RAM
@@ -177,9 +182,11 @@
 ; Initialises the interrupt handler in RAM, if necessary
 ;====
 .macro "interrupts.init"
-    ; Set vBlankFlag to 0
-    xor a ; a = 0
-    ld (interrupts.ram.vBlankFlag), a
+    utils.clobbers "af"
+        ; Set vBlankFlag to 0
+        xor a ; a = 0
+        ld (interrupts.ram.vBlankFlag), a
+    utils.clobbers.end
 .endm
 
 ;====
@@ -187,8 +194,10 @@
 ; VDP interrupts that will unexpectedly trigger as soon as 'ei' takes effect
 ;====
 .macro "interrupts.enable"
-    ; Ensure there are no pending interrupts that will trigger unexpectedly
-    in a, (interrupts.VDP_PORT) ; reset status
+    utils.clobbers "af"
+        ; Ensure there are no pending interrupts that will trigger unexpectedly
+        in a, (interrupts.VDP_PORT) ; reset status
+    utils.clobbers.end
 
     ; Enable interrupts on the Z80
     ei
@@ -198,16 +207,18 @@
 ; Waits until a VBlank next occurs before continuing
 ;====
 .macro "interrupts.waitForVBlank"
-    ; Poll VBlank flag in RAM
-    -:
-        halt        ; wait for next interrupt (pause, VBlank, HBlank)
-        ld a, (interrupts.ram.vBlankFlag)  ; load vBlankFlag
-        or a        ; analyze a
-    jp z, -         ; if wasn't VBlank, wait again
+    utils.clobbers "af"
+        ; Poll VBlank flag in RAM
+        -:
+            halt        ; wait for next interrupt (pause, VBlank, HBlank)
+            ld a, (interrupts.ram.vBlankFlag)  ; load vBlankFlag
+            or a        ; analyze a
+        jp z, -         ; if wasn't VBlank, wait again
 
-    ; VBlank occurred - reset flag then continue
-    xor a   ; set a to 0
-    ld (interrupts.ram.vBlankFlag), a
+        ; VBlank occurred - reset flag then continue
+        xor a   ; set a to 0
+        ld (interrupts.ram.vBlankFlag), a
+    utils.clobbers.end
 .endm
 
 ;====
@@ -217,13 +228,15 @@
 ; @in a|value   if using a, 0-based. If using value, 1-based
 ;====
 .macro "interrupts.setLineInterval" args value
-    .ifdef value
-        ld a, value - 1
-    .endif
+    utils.clobbers "af"
+        .ifdef value
+            ld a, value - 1
+        .endif
 
-    out (interrupts.VDP_PORT), a
-    ld a, $8a   ; register 10
-    out (interrupts.VDP_PORT), a
+        out (interrupts.VDP_PORT), a
+        ld a, $8a   ; register 10
+        out (interrupts.VDP_PORT), a
+    utils.clobbers.end
 .endm
 
 ;====
@@ -232,5 +245,5 @@
 ; @out  a   the line that is being/just been drawn (0-based)
 ;====
 .macro "interrupts.getLine"
-    in a, ($7e)
+    in a, (interrupts.VDP_VERTICAL_COUNTER_PORT)
 .endm
