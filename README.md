@@ -60,13 +60,17 @@ Over time the routines will be optimised for speed and size without one aspect a
 
 ### Unsafe Register Preservation
 
-As part of the speed priority the library routines will happily 'clobber' register values without preserving them onto the stack. This is because `push` and `pop` calls on multiple register pairs is expensive, and you may not even need some of them preserved.
+The cost of unecessary `push` and `pop` calls can add up, so for efficiency reasons the library routines will happily clobber registers and rely on the caller to preserve only what it actually needs. In many cases the caller can be refactored to avoid preserving to registers entirely.
 
-The register values before and after a call may therefore change. This shifts the responsibility of preservation to you, mainly for efficiency reasons; you know best what registers you actually care about, so only need to preserve those. The flipside of this is that it is a bit of a 'gotcha' to be aware of.
+View [utils/registerPreservation.md](./docs/utils/registerPreservation.md)) for some alternative strategies, which include:
+
+1. Enabling the `utils.registers.AUTO_PRESERVE` setting to ensure all registers are preserved by default
+2. Wrapping macro calls in `utils.preserve` and `utils.restore` to state which registers the caller wants preserving; only the registers that get clobbered will be `push`/`pop`ped
+3. A combination of the two; enable auto-preserve but override it where possible by using `utils.preserve` and `utils.restore` to only preserve what each caller needs
 
 ### Decoupled
 
-SMSLib modules for the most part are independent of one another so you can pick or choose only the ones you want. For convenience you can just include `smslib.asm` and this will pull the main ones in for you. In either case WLA-DX will only assemble the code you actually use.
+SMSLib modules for the most part are independent of one another so you can pick and choose only the ones you want. For convenience you can just include `smslib.asm` and this will pull the main ones in for you. In either case WLA-DX will only assemble the code you actually use so long as it's not executed with the `-k` (keep) option.
 
 ### Namespaced Prefixes
 

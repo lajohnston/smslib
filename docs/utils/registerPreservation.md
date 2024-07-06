@@ -2,7 +2,7 @@
 
 These utility modules provide a system for efficiently preserving Z80 register states between macro calls, ensuring only the needed registers are preserved.
 
-1. Macros can utilise [utils.clobbers](#utilsclobbers) to declare which registers they clobber (in lieu of push/pop calls)
+1. The internal macros use [utils.clobbers](#utilsclobbers) to declare which registers they clobber (in lieu of push/pop calls). You can utilise them too
 2. The caller can utilise [utils.preserve](#utilspreserve) to wrap the calls and declare which registers should not be clobbered
 3. The utilities will work together to ensure only the clobbered AND protected registers get preserved
 
@@ -19,9 +19,9 @@ This provides the following advantages:
 
 3. Allows an optional [auto-preserve](#automatic-registers-preseveration) mode to make this process easier (at the cost of efficiency)
 
-## Automatic registers preseveration
+## Automatic registers preservation
 
-To automatically preserve all registers by default, consider setting the `utils.registers.AUTO_PRESERVE` value. When a clobber scope is encountered it will then automatically preserve all registers that get clobbered.
+To automatically preserve all registers by default, consider enabling the `utils.registers.AUTO_PRESERVE` setting. When a clobber scope is encountered it will then automatically preserve all registers that get clobbered.
 
 ```asm
 .redefine utils.registers.AUTO_PRESERVE 0 ; deactivate (default)
@@ -125,13 +125,17 @@ Callers that rely on register states to be preserved can wrap the macro invokati
 
 ```asm
 .macro "myMacro"
-    ld bc, $1234
+    ld bc, $bc00
+    ld de, $de00
 
-    registers.preserve "bc"
-        macroThatClobsThings
-    utils.restore
+    registers.preserve "bc", "de"
+        ; If either of these clobber BC or DE, they will push them to the stack beforehand
+        macroThatClobsThings        ; might push BC or DE
+        otherMacroThatClobsThings   ; might push BC or DE (if not already pushed)
+    utils.restore                   ; pops BC/DE if they were pushed
 
-    ; bc will still be $1234
+    ; BC will still be $bc00
+    ; DE will still be $de00
 .endm
 ```
 
