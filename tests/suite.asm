@@ -111,6 +111,14 @@
     .include "patterns/writeSlice.test.asm"
 .ends
 
+; Pause
+.section "pause.asm tests" appendto zest.suiteBank5
+    .include "pause/callIfPaused.test.asm"
+    .include "pause/init.test.asm"
+    .include "pause/jpIfPaused.test.asm"
+    .include "pause/waitIfPaused.test.asm"
+.ends
+
 ; Sprites
 .section "sprite.asm tests" appendto zest.suiteBank5
     .include "sprites/add.test.asm"

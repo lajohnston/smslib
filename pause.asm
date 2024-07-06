@@ -7,13 +7,17 @@
 ;====
 ; Dependencies
 ;====
+.ifndef utils.assert
+    .include "utils/assert.asm"
+.endif
+
 .ifndef utils.ram
     .include "utils/ram.asm"
     utils.ram.assertRamSlot
 .endif
 
-.ifndef utils.assert
-    .include "utils/assert.asm"
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
 .endif
 
 ;====
@@ -60,22 +64,26 @@
 ; Initialises the pause handler in RAM
 ;====
 .macro "pause.init"
-    xor a
-    ld (pause.ram.pauseFlag), a
+    utils.clobbers "af"
+        xor a
+        ld (pause.ram.pauseFlag), a
+    utils.clobbers.end
 .endm
 
 ;====
 ; If pause activated, waits until pause button is pressed again before
 ; continuing
 ;====
-.macro "pause.waitIfPaused"
-    -:
-    ld a, (pause.ram.pauseFlag) ; read pauseFlag
-    or a        ; analyse flag
-    jp z, +     ; jp if not paused
-        halt    ; wait for an interrupt (pause, vBlank, hBlank)
-        jp -    ; check again
-    +:
+.macro "pause.waitIfPaused" isolated
+    utils.clobbers "af"
+        -:
+            ld a, (pause.ram.pauseFlag) ; read pauseFlag
+            or a        ; analyse flag
+            jr z, +     ; jp if not paused
+                halt    ; wait for an interrupt (pause, vBlank, hBlank)
+                jr -    ; check again
+            +:
+    utils.clobbers.end
 .endm
 
 ;====
