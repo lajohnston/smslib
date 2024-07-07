@@ -441,6 +441,23 @@
 .endm
 
 ;====
+; Returns the protected registers that have been preserved within the current
+; preserve scope
+;
+; @out  utils.registers.getPreserved.returnValue
+;           the registers (i.e. utils.registers.AF) ORed into a single value
+;====
+.macro "utils.registers.getPreserved"
+    .if utils.registers.preserveIndex == -1
+        .redefine utils.registers.getPreserved.returnValue 0
+    .else
+        .redefine \.doNotClobber (utils.registers.doNotClobber{utils.registers.preserveIndex})
+        .redefine \.preserved (utils.registers.unpreserved{utils.registers.preserveIndex}) ~ $ff
+        .redefine utils.registers.getPreserved.returnValue (\.doNotClobber & \.preserved)
+    .endif
+.endm
+
+;====
 ; Returns the registers that are protected within the current preserve scope
 ; or its ancestors
 ;

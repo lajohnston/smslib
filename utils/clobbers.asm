@@ -198,8 +198,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jp c, label
     .else
@@ -223,8 +223,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jp nc, label
     .else
@@ -248,8 +248,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jr c, label
     .else
@@ -273,8 +273,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jr nc, label
     .else
@@ -298,8 +298,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jp pe, label
     .else
@@ -323,8 +323,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jp po, label
     .else
@@ -348,8 +348,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jp p, label
     .else
@@ -373,8 +373,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jp m, label
     .else
@@ -398,8 +398,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jp z, label
     .else
@@ -423,8 +423,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jp nz, label
     .else
@@ -448,8 +448,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jr z, label
     .else
@@ -473,8 +473,8 @@
     utils.assert.label label "\.: Argument should be a label"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ; No registers to restore - just generate jump
         jr nz, label
     .else
@@ -494,8 +494,8 @@
     utils.assert.equals NARGS 0 "\.: Expected no arguments"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ret c   ; no registers to restore
     .else
         jr nc, _\@_\.
@@ -514,8 +514,8 @@
     utils.assert.equals NARGS 0 "\.: Expected no arguments"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ret nc  ; no registers to restore
     .else
         jr c, _\@_\.
@@ -534,8 +534,8 @@
     utils.assert.equals NARGS 0 "\.: Expected no arguments"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ret z   ; no registers to restore
     .else
         jr nz, _\@_\.
@@ -554,8 +554,8 @@
     utils.assert.equals NARGS 0 "\.: Expected no arguments"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ret nz  ; no registers to restore
     .else
         jr z, _\@_\.
@@ -574,8 +574,8 @@
     utils.assert.equals NARGS 0 "\.: Expected no arguments"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ret pe   ; no registers to restore
     .else
         jp po, _\@_\.
@@ -594,8 +594,8 @@
     utils.assert.equals NARGS 0 "\.: Expected no arguments"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ret po  ; no registers to restore
     .else
         jp pe, _\@_\.
@@ -614,8 +614,8 @@
     utils.assert.equals NARGS 0 "\.: Expected no arguments"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ret m   ; no registers to restore
     .else
         jp p, _\@_\.
@@ -634,8 +634,8 @@
     utils.assert.equals NARGS 0 "\.: Expected no arguments"
 
     ; Check if there are any registers to restore within this scope
-    utils.registers.getProtected
-    .if utils.registers.getProtected.returnValue == 0
+    utils.registers.getPreserved
+    .if utils.registers.getPreserved.returnValue == 0
         ret p   ; no registers to restore
     .else
         jp m, _\@_\.
