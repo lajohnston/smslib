@@ -368,16 +368,6 @@
 .endm
 
 ;====
-; The same as tilemap.writeRows but jumps to the routine so the 'ret' returns
-; to the original caller
-;====
-.macro "tilemap.writeRowsThenReturn"
-    utils.clobbers "af", "bc", "de"
-        jp tilemap._writeRows
-    utils.clobbers.end
-.endm
-
-;====
 ; Private (see macro)
 ;====
 .section "tilemap._writeRows"

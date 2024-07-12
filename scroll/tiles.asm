@@ -153,7 +153,8 @@
         ld e, a                             ; set E to bytesPerRow
 
         ; Write rows of tiles into VRAM
-        tilemap.writeRowsThenReturn         ; jp to writeRows, which returns
+        tilemap.writeRows
+        ret
 .ends
 
 ;====

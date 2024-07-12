@@ -95,7 +95,7 @@ ld hl, myRow            ; point to data
 tilemap.writeRow        ; write data (32 tiles)
 ```
 
-### tilemap.writeRows / tilemap.writeRowsThenReturn
+### tilemap.writeRows
 
 Write multiple rows from an uncompressed tilemap. The visible tilemap is 32 tiles wide (columns) by 25 tiles high (rows) but the full map can be larger than the screen.
 
@@ -117,8 +117,6 @@ ld e, tilemap.MAP_COLS * 2      ; number of full map columns * 2 (each tile is 2
 
 tilemap.writeRows               ; write row data
 ```
-
-`tilemap.writeRowsThenReturn` does the same, but returns to the original caller once done.
 
 ## Scrolling
 
