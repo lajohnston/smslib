@@ -17,6 +17,10 @@
     .fail
 .endif
 
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
+.endif
+
 .ifndef utils.math
     .include "utils/math.asm"
 .endif
@@ -251,7 +255,9 @@
 ; Alias to call scroll.metatiles.init
 ;====
 .macro "scroll.metatiles.init"
-    call scroll.metatiles.init
+    utils.clobbers "af", "bc", "de", "hl", "ix", "iy", "i"
+        call scroll.metatiles.init
+    utils.clobbers.end
 .endm
 
 ;====
@@ -472,7 +478,9 @@
 ; Alias to call scroll.metatiles.update
 ;====
 .macro "scroll.metatiles.update"
-    call scroll.metatiles.update
+    utils.clobbers "af", "bc", "de", "hl", "ix", "iy"
+        call scroll.metatiles.update
+    utils.clobbers.end
 .endm
 
 ;====

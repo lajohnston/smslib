@@ -8,6 +8,8 @@
     .define input.ENABLE_PORT_2
     .include "tests/smslib-zest.asm"
 
+    .define scroll.metatiles.ENFORCE_BOUNDS
+    .include "scroll/metatiles.asm"
     .include "scroll/tiles.asm"
 .incdir "."
 
@@ -119,6 +121,15 @@
     .include "pause/init.test.asm"
     .include "pause/jpIfPaused.test.asm"
     .include "pause/waitIfPaused.test.asm"
+.ends
+
+; scroll/metatiles.asm
+.include "scroll/metatiles/_helpers.asm"
+
+.section "scroll/metatiles tests" appendto zest.suiteBank5
+    .include "scroll/metatiles/init.test.asm"
+    .include "scroll/metatiles/render.test.asm"
+    .include "scroll/metatiles/update.test.asm"
 .ends
 
 ; scroll/tiles.asm
