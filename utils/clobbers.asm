@@ -3,7 +3,7 @@
 ;====
 ; Dependencies
 ;====
-.ifndef utils.registers.ENABLED
+.ifndef utils.registers
     .include "utils/registers.asm"
 .endif
 

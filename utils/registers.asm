@@ -5,7 +5,7 @@
 ; that uses utils.clobbers to state which registers it clobbers will ensure
 ; the protected registers remain unclobbered.
 ;====
-.define utils.registers.ENABLED
+.define utils.registers
 
 ;====
 ; Settings
