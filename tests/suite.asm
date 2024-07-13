@@ -7,6 +7,8 @@
 .incdir ".."
     .define input.ENABLE_PORT_2
     .include "tests/smslib-zest.asm"
+
+    .include "scroll/tiles.asm"
 .incdir "."
 
 ; Test helpers
@@ -117,6 +119,13 @@
     .include "pause/init.test.asm"
     .include "pause/jpIfPaused.test.asm"
     .include "pause/waitIfPaused.test.asm"
+.ends
+
+; scroll/tiles.asm
+.section "scroll/tiles tests" appendto zest.suiteBank5
+    .include "scroll/tiles/init.test.asm"
+    .include "scroll/tiles/render.test.asm"
+    .include "scroll/tiles/update.test.asm"
 .ends
 
 ; Sprites

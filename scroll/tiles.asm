@@ -11,6 +11,10 @@
     .fail
 .endif
 
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
+.endif
+
 .ifndef utils.math
     .include "utils/math.asm"
 .endif
@@ -63,6 +67,8 @@
 ;                           and you should also offset topLeftPointer accordingly
 ;====
 .macro "scroll.tiles.init" args topLeftPointer mapCols mapRows colOffset rowOffset
+    utils.clobbers "af", "bc", "de", "hl"
+
     .if NARGS > 0
         .define \.\@topLeft topLeftPointer
 
@@ -97,6 +103,8 @@
     .endif
 
     call scroll.tiles.init
+
+    utils.clobbers.end
 .endm
 
 ;====
@@ -183,7 +191,9 @@
 ; Alias to call scroll.tiles.update
 ;====
 .macro "scroll.tiles.update"
-    call scroll.tiles.update
+    utils.clobbers "af", "bc", "de", "hl", "ix"
+        call scroll.tiles.update
+    utils.clobbers.end
 .endm
 
 ;====
