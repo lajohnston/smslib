@@ -8,7 +8,7 @@
 ;====
 ; Import smslib
 ;====
-.incdir "../../"            ; back to smslib directory
+.incdir "../../src"         ; back to smslib directory
 .include "smslib.asm"       ; base library
 .incdir "."                 ; back to current directory
 

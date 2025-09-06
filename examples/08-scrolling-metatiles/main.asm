@@ -14,7 +14,7 @@
 ;====
 ; Import smslib
 ;====
-.incdir "../../"                        ; point to smslib directory
+.incdir "../../src"                     ; point to smslib directory
     .define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
     .include "smslib.asm"
 

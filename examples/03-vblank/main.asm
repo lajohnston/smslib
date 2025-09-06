@@ -21,7 +21,7 @@
 
 ; Import smslib
 .define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
-.incdir "../../"                    ; back to smslib directory
+.incdir "../../src"                 ; back to smslib directory
 .include "smslib.asm"               ; base library
 .incdir "."                         ; return to current directory
 

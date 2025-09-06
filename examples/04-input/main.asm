@@ -9,7 +9,7 @@
 ; Import smslib
 .define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
 .define input.ENABLE_PORT_2         ; enable reading port 2
-.incdir "../../"                    ; point to smslib directory
+.incdir "../../src"                 ; point to smslib directory
 .include "smslib.asm"               ; base library
 .incdir "."                         ; return to current directory
 

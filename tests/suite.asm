@@ -4,9 +4,9 @@
 .include "zest.asm"     ; include the zest.asm library
 
 ; Import smslib (via smslib-zest helper)
-.incdir ".."
+.incdir "../src"
     .define input.ENABLE_PORT_2
-    .include "tests/smslib-zest.asm"
+    .include "smslib-zest.asm"
 
     .define scroll.metatiles.ENFORCE_BOUNDS
     .include "scroll/metatiles.asm"

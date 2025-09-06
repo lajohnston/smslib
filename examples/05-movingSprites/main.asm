@@ -15,7 +15,7 @@
 .define interrupts.HANDLE_VBLANK 1
 
 ; Import smslib
-.incdir "../../"            ; back to smslib directory
+.incdir "../../src"         ; back to smslib directory
 .include "smslib.asm"       ; base library
 .incdir "."                 ; return to current directory
 

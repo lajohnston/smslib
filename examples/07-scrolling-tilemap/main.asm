@@ -11,7 +11,7 @@
 ; Import smslib
 ;====
 .define interrupts.HANDLE_VBLANK 1  ; enable VBlanks (see VBlank example)
-.incdir "../../"                    ; point to smslib directory
+.incdir "../../src"                 ; point to smslib directory
 .include "smslib.asm"
 
 ; Include a scroll handler that uses raw tile data

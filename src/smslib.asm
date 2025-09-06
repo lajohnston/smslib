@@ -7,8 +7,8 @@
 ;
 ; Usage:
 ;
-; .incdir "./lib/smslib"    ; path to SMSLib directory
-; .include "smslib.asm"     ; import this file
+; .incdir "./lib/smslib/src"    ; path to SMSLib directory
+; .include "smslib.asm"         ; import this file
 ;
 ; See README.md for documentation regarding each module
 ;====
