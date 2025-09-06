@@ -1,4 +1,3 @@
-[submodule "lib/zest"]
-	path = tests/zest
+[submodule "tests/lib/zest"]
+	path = tests/lib/zest
 	url = https://github.com/lajohnston/zest
-	branch = main

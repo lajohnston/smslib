@@ -1,6 +1,6 @@
 ; Include Zest library
 .define zest.SUITE_BANKS 5
-.incdir "./zest"        ; point to zest directory
+.incdir "./lib/zest"    ; point to zest directory
 .include "zest.asm"     ; include the zest.asm library
 
 ; Import smslib (via smslib-zest helper)
