@@ -44,7 +44,7 @@
         palette.writeRgb 0, 0, 0    ; black
 
         ; Load sprite palette
-        palette.setIndex palette.SPRITE_PALETTE
+        palette.setIndex palette.SPRITE
         palette.writeSlice bubblePalette, 6
 
         ; Load pattern data into indices 256+ (used for sprites, by default)

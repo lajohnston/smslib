@@ -31,7 +31,8 @@
 ; Constants
 ;====
 .define palette.ELEMENT_SIZE_BYTES 1
-.define palette.SPRITE_PALETTE 16
+.define palette.BACKGROUND 0
+.define palette.SPRITE 16
 .define palette.VRAM_ADDR $c000
 
 ;====

@@ -36,9 +36,14 @@ You can then write these into the VDP VRAM the following macros.
 Set the color palette index ready to write to:
 
 ```asm
-palette.setIndex 0                          ; set the first color index
-palette.setIndex palette.SPRITE_PALETTE     ; first color in 'sprite' palette
-palette.setIndex palette.SPRITE_PALETTE + 1 ; second color in 'sprite' palette
+palette.setIndex 0                      ; set the first color index
+palette.setIndex 31                     ; set the last color index
+
+palette.setIndex palette.BACKGROUND     ; 1st color in background palette (index 0)
+palette.setIndex palette.BACKGROUND + 1 ; 2nd color in background palette (index 1)
+
+palette.setIndex palette.SPRITE         ; 1st color in sprite palette (index 16)
+palette.setIndex palette.SPRITE + 1     ; 2nd color in sprite palette (index 17)
 ```
 ### palette.writeBytes
 

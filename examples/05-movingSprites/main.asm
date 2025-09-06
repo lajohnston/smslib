@@ -39,7 +39,7 @@
         palette.writeRgb 0, 0, 0    ; black
 
         ; Load sprite palette
-        palette.setIndex palette.SPRITE_PALETTE
+        palette.setIndex palette.SPRITE
         palette.writeBytes bubble.palette, bubble.paletteSize
 
         ; Load pattern data to draw sprites. Sprites use indices 256+ by default
