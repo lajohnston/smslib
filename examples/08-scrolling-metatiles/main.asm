@@ -133,11 +133,11 @@
         ;===
         input.readPort1                 ; read the state of joypad 1
 
-        input.loadADirX SCROLL_SPEED    ; load A with X direction * scroll speed
-        scroll.metatiles.adjustXPixels  ; adjust tilemap X by that many pixels
+        input.loadDirX "a", SCROLL_SPEED    ; load A with X direction * scroll speed
+        scroll.metatiles.adjustXPixels      ; adjust tilemap X by that many pixels
 
-        input.loadADirY SCROLL_SPEED    ; load A with Y direction * scroll speed
-        scroll.metatiles.adjustYPixels  ; adjust tilemap Y by that many pixels
+        input.loadDirY "a", SCROLL_SPEED    ; load A with Y direction * scroll speed
+        scroll.metatiles.adjustYPixels      ; adjust tilemap Y by that many pixels
 
         ; Update RAM buffers (doesn't update VDP/VRAM yet)
         scroll.metatiles.update

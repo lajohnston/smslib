@@ -19,16 +19,24 @@
 ; Dependencies
 ;====
 .ifndef utils.assert
-    .include "./utils/assert.asm"
+    .include "utils/assert.asm"
+.endif
+
+.ifndef utils.clobbers
+    .include "utils/clobbers.asm"
 .endif
 
 .ifndef utils.port
-    .include "./utils/port.asm"
+    .include "utils/port.asm"
 .endif
 
 .ifndef utils.ram
     .include "utils/ram.asm"
     utils.ram.assertRamSlot
+.endif
+
+.ifndef utils.registers
+    .include "utils/registers.asm"
 .endif
 
 ;====
@@ -635,22 +643,29 @@
 .endm
 
 ;====
-; Load the X direction (left/right) into register A. By default, -1 = left,
+; Load the X direction (left/right) into the given register. By default, -1 = left,
 ; 1 = right, 0 = none. The result is multiplied by the optional multiplier
 ; at assemble time
 ;
 ; Ensure you have called input.readPort1 or input.readPort2
 ;
+; @in   register        the register/pair to load the value into (a, b, c, d, e, hl, de etc.)
 ; @in   [multiplier]    optional multiplier for the result (default 1)
 ; @out  a               -1 = left, 1 = right, 0 = none. This value will be
 ;                       multiplied by the multiplier at assemble time
 ;====
-.macro "input.loadADirX" isolated args multiplier
+.macro "input.loadDirX" isolated args register multiplier
     .ifndef multiplier
         .redefine multiplier 1
     .endif
 
+    utils.assert.string register, "input.asm \.: Expected register to be a string"
     utils.assert.number multiplier, "input.asm \.: Expected multiplier to be a number"
+
+    ; If return register isn't A, mark it as clobbered
+    .if register != "a"
+        utils.clobbers "af"
+    .endif
 
     ; Read current input data
     ld a, (input.ram.activePort.current)
@@ -659,7 +674,7 @@
     bit input.LEFT_BIT, a
     jp z, +
         ; Left is pressed
-        ld a, -1 * multiplier
+        utils.registers.load register, -1 * multiplier
         jp \.\@end
     +:
 
@@ -667,14 +682,23 @@
     bit input.RIGHT_BIT, a
     jp z, +
         ; Right is pressed
-        ld a, 1 * multiplier
+        utils.registers.load register, 1 * multiplier
         jp \.\@end
     +:
 
     ; Nothing pressed
-    xor a   ; a = 0
+    .if register == "a"
+        xor a   ; a = 0
+    .else
+        utils.registers.load register, 0
+    .endif
 
     \.\@end:
+
+    ; If return register wasn't A, mark the end of the clobber scope
+    .if register != "a"
+        utils.clobbers.end
+    .endif
 .endm
 
 ;====
@@ -682,18 +706,23 @@
 ; 1 = down, 0 = none. The result is multiplied by the optional multiplier
 ; at assemble time
 ;
-; Ensure you have called input.readPort1 or input.readPort2
-;
+; @in   register        the register/pair to load the value into (a, b, c, d, e, hl, de etc.)
 ; @in   [multiplier]    optional multiplier for the result (default 1)
-; @out  a               -1 = up, 1 = down, 0 = none. This will be multiplied
-;                       by the multiplier at assemble time
+; @out  a               -1 = left, 1 = right, 0 = none. This value will be
+;                       multiplied by the multiplier at assemble time
 ;====
-.macro "input.loadADirY" isolated args multiplier
+.macro "input.loadDirY" isolated args register multiplier
     .ifndef multiplier
         .redefine multiplier 1
     .endif
 
+    utils.assert.string register, "input.asm \.: Expected register to be a string"
     utils.assert.number multiplier, "input.asm \.: Expected multiplier to be a number"
+
+    ; If return register isn't A, mark it as clobbered
+    .if register != "a"
+        utils.clobbers "af"
+    .endif
 
     ; Read current input data
     ld a, (input.ram.activePort.current)
@@ -702,7 +731,7 @@
     bit input.UP_BIT, a
     jp z, +
         ; Up is pressed
-        ld a, -1 * multiplier
+        utils.registers.load register, -1 * multiplier
         jp \.\@end
     +:
 
@@ -710,12 +739,21 @@
     bit input.DOWN_BIT, a
     jp z, +
         ; Down is pressed
-        ld a, 1 * multiplier
+        utils.registers.load register, 1 * multiplier
         jp \.\@end
     +:
 
     ; Nothing pressed
-    xor a   ; a = 0
+    .if register == "a"
+        xor a   ; a = 0
+    .else
+        utils.registers.load register, 0
+    .endif
 
     \.\@end:
+
+    ; If return register wasn't A, mark the end of the clobber scope
+    .if register != "a"
+        utils.clobbers.end
+    .endif
 .endm

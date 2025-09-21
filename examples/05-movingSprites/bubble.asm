@@ -35,10 +35,10 @@
         input.readPort1
 
         ; Set movement vectors based on input
-        input.loadADirX 2           ; left = -2; right = 2; none = 0
+        input.loadDirX, "a", 2      ; left = -2; right = 2; none = 0
         ld (ix + Bubble.xVec), a    ; update x movement based on input
 
-        input.loadADirY 2           ; up = -2; down = 2; none = 0
+        input.loadDirY "a", 2       ; up = -2; down = 2; none = 0
         ld (ix + Bubble.yVec), a    ; update y movement based on input
 
         ret

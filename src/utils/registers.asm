@@ -1,5 +1,6 @@
 ;====
-; Utilities to handle efficient register preservation on the stack.
+; Utilities to handle registers including efficient register preservation on
+; the stack.
 ;
 ; Wrap macro calls within a preserve scope (utils.registers.preserve). Code
 ; that uses utils.clobbers to state which registers it clobbers will ensure
@@ -509,5 +510,50 @@
     .if utils.registers.preserveIndex > -1 && utils.registers.preserveIndex == utils.registers.autoPreserveIndex
         utils.registers.restore
         .redefine utils.registers.autoPreserveIndex -1
+    .endif
+.endm
+
+;====
+; Loads the given value into the given register
+;
+; @in   register    <string> one of 'a', 'b', 'c', 'd', 'e', 'h', 'l', 'ixh',
+;                   'ixl', 'bc', 'de', 'hl', 'ix', 'iy'
+; @in   value       the value to load into the register
+;====
+.macro "utils.registers.load" args register value
+    .if register == "a"
+        ld a, value
+    .elif register == "b"
+        ld b, value
+    .elif register == "c"
+        ld c, value
+    .elif register == "d"
+        ld d, value
+    .elif register == "e"
+        ld e, value
+    .elif register == "h"
+        ld h, value
+    .elif register == "l"
+        ld l, value
+    .elif register == "ixh"
+        ld ixh, value
+    .elif register == "ixl"
+        ld ixl, value
+    .elif register == "iyh"
+        ld iyh, value
+    .elif register == "iyl"
+        ld iyl, value
+    .elif register == "bc"
+        ld bc, value
+    .elif register == "de"
+        ld de, value
+    .elif register == "hl"
+        ld hl, value
+    .elif register == "ix"
+        ld ix, value
+    .elif register == "iy"
+        ld iy, value
+    .else
+        utils.assert.fail "\.: Unsupported register", register, "<string> (one of) 'a', 'b', 'c', 'd', 'e', 'h', 'l', 'ixh', 'ixl', 'bc', 'de', 'hl', 'ix', 'iy'"
     .endif
 .endm

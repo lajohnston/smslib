@@ -213,30 +213,45 @@ input.ifYDirReleased, up, down, +
 +:
 ```
 
-### input.loadADirX
+### input.loadDirX
 
-Loads register A with the directional x-axis: -1 = left, 1 = right, none = 0. An optional multiplier multiplies this result at assemble time.
+Loads the given register with the directional x-axis: -1 = left, 1 = right, none = 0. An optional multiplier multiplies this result at assemble time.
 
 ```asm
 input.readPort1
 
-input.loadADirX     ; left = -1, right =  1, none = 0
-input.loadADirX 5   ; left = -5, right =  5, none = 0
+input.loadDirX "a"      ; left = -1, right =  1, none = 0
+input.loadDirX "a", 5   ; left = -5, right =  5, none = 0
 
 ; Reverse with a negative multiplier
-input.loadADirX -1  ; left =  1, right = -1, none = 0
+input.loadDirX "a" -1   ; left =  1, right = -1, none = 0
+
+; Load a different register
+input.loadDirX "b"
+input.loadDirX "c"
+input.loadDirX "bc"
+input.loadDirX "de"
+input.loadDirX "hl", 6
+; etc.
 ```
 
-### input.loadADirY
+### input.loadDirY
 
-Loads register A with the directional y-axis: -1 = up, 1 = down, none = 0. An optional multiplier multiplies this result at assemble time.
+Loads the given register with the directional y-axis: -1 = up, 1 = down, none = 0. An optional multiplier multiplies this result at assemble time.
 
 ```asm
 input.readPort1
 
-input.loadADirX     ; up = -1, down = 1, none = 0
-input.loadADirX 4   ; up = -4, down = 4, none = 0
+input.loadDirY "a"      ; up = -1, down = 1, none = 0
+input.loadDirY "a", 4   ; up = -4, down = 4, none = 0
 
 ; Reverse with a negative multiplier
-input.loadADirX -1  ; up =  1, down = -1, none = 0
+input.loadDirY "a", -1  ; up =  1, down = -1, none = 0
+
+; Load a different register
+input.loadDirY "b"
+input.loadDirY "c"
+input.loadDirY "bc"
+input.loadDirY "de", 10
+; etc.
 ```

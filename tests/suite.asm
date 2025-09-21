@@ -39,8 +39,8 @@
     .include "input/ifYDirPressed.test.asm"
     .include "input/ifYDirReleased.test.asm"
 
-    .include "input/loadADirX.test.asm"
-    .include "input/loadADirY.test.asm"
+    .include "input/loadDirX.test.asm"
+    .include "input/loadDirY.test.asm"
 
     .include "input/init.test.asm"
     .include "input/readPort1.test.asm"

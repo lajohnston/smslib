@@ -81,11 +81,11 @@
         ; Adjust tilemap based on joypad input direction
         input.readPort1             ; read the state of joypad 1
 
-        input.loadADirX SCROLL_SPEED; load A with X direction * scroll speed
-        scroll.tiles.adjustXPixels  ; adjust tilemap X by that many pixels
+        input.loadDirX "a", SCROLL_SPEED    ; load A with X direction * scroll speed
+        scroll.tiles.adjustXPixels          ; adjust tilemap X by that many pixels
 
-        input.loadADirY SCROLL_SPEED; load A with Y direction * scroll speed
-        scroll.tiles.adjustYPixels  ; adjust tilemap Y by that many pixels
+        input.loadDirY "a", SCROLL_SPEED    ; load A with Y direction * scroll speed
+        scroll.tiles.adjustYPixels          ; adjust tilemap Y by that many pixels
 
         ; Buffer changes in RAM (doesn't update VDP/VRAM yet)
         scroll.tiles.update
