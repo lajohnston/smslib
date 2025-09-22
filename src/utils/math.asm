@@ -332,7 +332,7 @@
 ;
 ; @source https://www.plutiedev.com/z80-add-8bit-to-16bit#add-signed
 ;====
-.macro "utils.math.addSignedHLA"
+.macro "utils.math.addSignedHLA" isolated
     or a        ; evaluate A
     jp p, +     ; jp if A is not signed
         ; A is signed
