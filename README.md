@@ -5,18 +5,20 @@ Low-level Sega Master System libs for the WLA-DX Z80 assembler (v10.3+). Its aim
 ## Quick Start
 
 ```asm
-.incdir "lib/smslib"    ; set the working directory to the smslib directory
-.include "smslib.asm"   ; include the libs
+.incdir "lib/smslib/src"    ; set the working directory to the smslib src directory
+.include "smslib.asm"       ; include the libs
 
 ; SMSLib will jump to the 'init' label once it has booted the system
-init:
-    ; Write palette colors
-    palette.setIndex 0
-    palette.writeBytes myPalette, myPaletteSize
+.section "init" free
+    init:
+        ; Write palette colors
+        palette.setIndex 0
+        palette.writeBytes myPalette, myPaletteSize
 
-    ; Load patterns (tile graphics)
-    patterns.setIndex 0
-    patterns.writeBytes myPatterns, myPatternsSize
+        ; Load patterns (tile graphics)
+        patterns.setIndex 0
+        patterns.writeBytes myPatterns, myPatternsSize
+.ends
 ```
 
 Each module is decoupled from the others and can be imported individually. `smslib.asm` is just a file that pulls in all the modules for convenience.
@@ -49,7 +51,9 @@ See example programs in the `examples` directory. Build the examples using the `
 
 ### Low level
 
-The modules in the root directory act as a thin layer to the Master System chips to ensure they are applicable across many projects and engines. They provide macros and routines to abstract many of the nuances of Master System development so you can build a more fuller-blown engine on top of them. The repo does though include additional modules that provide some higher level functionality such as scroll handling that build upon these lower level libs.
+The modules in the root of the `src` directory act as a thin layer to the Master System chips to ensure they are applicable across many projects and engines. They provide macros and routines to abstract many of the nuances of Master System development so you can build your custom engine on top of them.
+
+The repo does though include additional modules that provide some higher level functionality such as scroll handling that build upon these lower level libs.
 
 ### Priorities: Speed > Ease > Size
 
@@ -62,7 +66,7 @@ Over time the routines will be optimised for speed and size without one aspect a
 
 The cost of unecessary `push` and `pop` calls can add up, so for efficiency reasons the library routines will happily clobber registers and rely on the caller to preserve only what it actually needs. In many cases the caller can be refactored to avoid preserving to registers entirely.
 
-View [utils/registerPreservation.md](./docs/utils/registerPreservation.md)) for some alternative strategies, which include:
+View [utils/registerPreservation.md](./docs/utils/registerPreservation.md) for some alternative strategies, which include:
 
 1. Enabling the `utils.registers.AUTO_PRESERVE` setting to ensure all registers are preserved by default
 2. Wrapping macro calls in `utils.preserve` and `utils.restore` to state which registers the caller wants preserving; only the registers that get clobbered will be `push`/`pop`ped
