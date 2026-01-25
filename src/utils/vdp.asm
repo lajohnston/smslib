@@ -46,10 +46,11 @@
 ; @in   [setPort]   if 1 (the default) then the c register will be loaded with
 ;                   the VDP data. Set to 0 if the port is already set (saves 7
 ;                   cycles)
+; @out  c           data port, ready to output data to with out, outi etc.
 ;====
 .macro "utils.vdp.prepVramWrite" args address setPort
-    ; Assert address is between 0 and $c021 (16KB + 32 byte color RAM)
-    utils.assert.range address 0 $c020 "\.: Address should be a valid VRAM address"
+    ; Assert address is in VRAM range
+    utils.assert.range address 0 $3fff "\.: Address should be a valid VRAM address"
 
     ; Default setPort to 1
     .ifndef setPort
@@ -74,6 +75,35 @@
             ; Port to write to
             ld c, utils.vdp.DATA_PORT
         .endif
+    utils.clobbers.end
+.endm
+
+;====
+; Prepares the VDP to write to the given Color RAM (CRAM) address
+;
+; @in   address     the CRAM write address (0-31)
+; @out  c           data port, ready to output data to with out, outi etc.
+;====
+.macro "utils.vdp.prepCramWrite" args address
+    utils.assert.range address 0, 31, "\.: Address must be between 0-31"
+
+    utils.clobbers "af"
+        ; Load address
+        .ifeq address 0
+            xor a
+        .else
+            ld a, address
+        .endif
+
+        ; Output address
+        out (utils.vdp.COMMAND_PORT), a
+
+        ; Output CRAM write command
+        ld a, utils.vdp.commands.WRITE_CRAM
+        out (utils.vdp.COMMAND_PORT), a
+
+        ; Set port, ready for data output
+        ld c, utils.vdp.DATA_PORT
     utils.clobbers.end
 .endm
 

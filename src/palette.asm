@@ -33,7 +33,6 @@
 .define palette.ELEMENT_SIZE_BYTES 1
 .define palette.BACKGROUND 0
 .define palette.SPRITE 16
-.define palette.VRAM_ADDR $c000
 
 ;====
 ; Procedures
@@ -133,10 +132,11 @@
 ; Set the current palette index (0-31) ready to write data into
 ;
 ; @in   index   the palette index (0-31)
+; @out  c       data port ready to write data to
 ;====
 .macro "palette.setIndex" args index
     utils.assert.equals NARGS, 1, "palette.asm \. received the wrong number of arguments"
     utils.assert.range index, 0, 31, "palette.asm \.: Invalid index argument"
 
-    utils.vdp.prepVramWrite (palette.VRAM_ADDR + index)
+    utils.vdp.prepCramWrite index
 .endm
