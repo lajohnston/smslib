@@ -175,7 +175,7 @@
 
         ; Low byte of base address is 0, so we just need to manipulate high byte
         ; Set A to high byte of base address with the write command set
-        ld a, >tilemap.VRAM_ADDRESS | utils.vdp.commands.WRITE
+        ld a, >tilemap.VRAM_ADDRESS | utils.vdp.commands.WRITE_VRAM
         or h        ; combine bits with high byte of relative address
         ld h, a     ; set HL to the full address
     utils.clobbers.end
@@ -791,7 +791,7 @@
 ;====
 .macro "tilemap._setRowScrollIndex"
     ld hl, (tilemap.ram.vramRowWrite)
-    utils.vdp.setCommandHL utils.vdp.commands.WRITE
+    utils.vdp.setCommandHL utils.vdp.commands.WRITE_VRAM
     ld c, utils.vdp.DATA_PORT
 .endm
 

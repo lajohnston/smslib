@@ -34,8 +34,10 @@
 .define utils.vdp.LINE_COUNTER_REGISTER 10
 
 ; Commands
-.define utils.vdp.commands.READ     %00111111   ; AND mask
-.define utils.vdp.commands.WRITE    %01000000   ; OR mask
+.define utils.vdp.commands.READ_VRAM        %00111111   ; AND mask
+.define utils.vdp.commands.WRITE_VRAM       %01000000   ; OR mask
+.define utils.vdp.commands.WRITE_REGISTER   %10000000   ; OR mask
+.define utils.vdp.commands.WRITE_CRAM       %11000000   ; Constant
 
 ;====
 ; Prepares the VDP to write to the given VRAM write address
@@ -65,7 +67,7 @@
         out (utils.vdp.COMMAND_PORT), a
 
         ; Output high byte to VDP with write command set
-        ld a, >address | utils.vdp.commands.WRITE
+        ld a, >address | utils.vdp.commands.WRITE_VRAM
         out (utils.vdp.COMMAND_PORT), a
 
         .if setPort == 1
@@ -82,14 +84,14 @@
 ; @in   a   high byte of the address with the command bits set
 ;====
 .macro "utils.vdp._setCommand" args command
-    utils.assert.oneOf command, utils.vdp.commands.READ, utils.vdp.commands.WRITE, "utils/vdp.asm \.: Invalid command argument"
+    utils.assert.oneOf command, utils.vdp.commands.READ_VRAM, utils.vdp.commands.WRITE_VRAM, "\.: Invalid command argument"
 
-    .if command == utils.vdp.commands.READ
+    .if command == utils.vdp.commands.READ_VRAM
         ; Reset high bits
-        and utils.vdp.commands.READ
-    .elif command == utils.vdp.commands.WRITE
+        and utils.vdp.commands.READ_VRAM
+    .elif command == utils.vdp.commands.WRITE_VRAM
         ; Set bit 6; if address is correct bit 7 should already by reset
-        or utils.vdp.commands.WRITE
+        or utils.vdp.commands.WRITE_VRAM
     .endif
 .endm
 
@@ -106,7 +108,7 @@
 ;====
 .macro "utils.vdp.setCommandHL" args command
     .ifdef command
-        utils.assert.oneOf command, utils.vdp.commands.READ, utils.vdp.commands.WRITE, "utils/vdp.asm \.: Invalid command argument"
+        utils.assert.oneOf command, utils.vdp.commands.READ_VRAM, utils.vdp.commands.WRITE_VRAM, "\.: Invalid command argument"
     .endif
 
     ; Output low byte to VDP
@@ -137,7 +139,7 @@
 ;====
 .macro "utils.vdp.setCommandDE" args command
     .ifdef command
-        utils.assert.oneOf command, utils.vdp.commands.READ, utils.vdp.commands.WRITE, "utils/vdp.asm \.: Invalid command argument"
+        utils.assert.oneOf command, utils.vdp.commands.READ_VRAM, utils.vdp.commands.WRITE_VRAM, "\.: Invalid command argument"
     .endif
 
     ; Output low byte to VDP
@@ -187,11 +189,16 @@
 ; @in   a|registerValue the register value
 ;====
 .macro "utils.vdp.setRegister" args registerNumber registerValue
+    utils.assert.range registerNumber, 0, 10, "\.: Invalid register number"
+
     .ifdef registerValue
-        ld a, registerValue             ; load A with value if one is given
+        ld a, registerValue ; load A with value if one is given
     .endif
 
-    out (utils.vdp.COMMAND_PORT), a     ; send the register value first
-    ld a, %10000000 | registerNumber    ; load write command with register number
-    out (utils.vdp.COMMAND_PORT), a     ; send the register write command
+    ; Send the register value
+    out (utils.vdp.COMMAND_PORT), a
+
+    ; Send register number, ORed with WRITE_REGISTER command
+    ld a, utils.vdp.commands.WRITE_REGISTER | registerNumber
+    out (utils.vdp.COMMAND_PORT), a
 .endm
