@@ -270,7 +270,7 @@
 .section "sprites._copyToVram"
     sprites._copyToVram:
         ; Set VDP write address to y positions
-        utils.vdp.prepWrite sprites.VRAM_ADDRESS
+        utils.vdp.prepVramWrite sprites.VRAM_ADDRESS
 
         ; Load number of sprites set
         ld hl, sprites.ram.buffer.nextIndex
@@ -293,8 +293,8 @@
         +:
 
         ; Point to x positions in VRAM and buffer
-        utils.vdp.prepWrite (sprites.VRAM_ADDRESS + 128) 0  ; vram
-        ld l, <(sprites.ram.buffer.xPosAndPattern)          ; buffer
+        utils.vdp.prepVramWrite (sprites.VRAM_ADDRESS + 128) 0  ; vram
+        ld l, <(sprites.ram.buffer.xPosAndPattern)              ; buffer
 
         ; Copy x positions and patterns from buffer to VRAM
         ld b, ixl                       ; restore sprite count

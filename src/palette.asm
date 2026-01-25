@@ -138,5 +138,5 @@
     utils.assert.equals NARGS, 1, "palette.asm \. received the wrong number of arguments"
     utils.assert.range index, 0, 31, "palette.asm \.: Invalid index argument"
 
-    utils.vdp.prepWrite (palette.VRAM_ADDR + index)
+    utils.vdp.prepVramWrite (palette.VRAM_ADDR + index)
 .endm

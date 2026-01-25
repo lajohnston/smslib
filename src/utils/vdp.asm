@@ -45,7 +45,7 @@
 ;                   the VDP data. Set to 0 if the port is already set (saves 7
 ;                   cycles)
 ;====
-.macro "utils.vdp.prepWrite" args address setPort
+.macro "utils.vdp.prepVramWrite" args address setPort
     ; Assert address is between 0 and $c021 (16KB + 32 byte color RAM)
     utils.assert.range address 0 $c020 "\.: Address should be a valid VRAM address"
 
@@ -161,7 +161,7 @@
 .section "utils.vdp.clearVram" free
     utils.vdp.clearVram:
         ; 1. Set VRAM write address to $0000
-        utils.vdp.prepWrite 0
+        utils.vdp.prepVramWrite 0
 
         ; 2. Output 16KB of zeroes
         ld bc, $4000     ; Counter for 16KB of VRAM
