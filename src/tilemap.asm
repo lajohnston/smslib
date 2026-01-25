@@ -42,6 +42,10 @@
     utils.ram.assertRamSlot
 .endif
 
+.ifndef utils.registers
+    .include "utils/registers.asm"
+.endif
+
 .ifndef utils.vdp
     .include "utils/vdp.asm"
 .endif
@@ -232,21 +236,14 @@
 
     utils.clobbers "af"
         ; Load A with low-byte of pattern index
-        .if <(patternIndex) == 0
-            xor a   ; set to 0
-        .else
-            ld a, <(patternIndex)
-        .endif
+        utils.registers.loadA <patternIndex
 
         out (utils.vdp.DATA_PORT), a    ; write pattern index
 
-        ; Load A with attribute byte
-        .if attributes != <(patternIndex)
-            .if attributes == 0
-                xor a   ; set A to 0
-            .else
-                ld a, attributes
-            .endif
+        ; Load A with attribute byte (skip if value happens to be the same
+        ; as patternIndex)
+        .if attributes != <patternIndex
+            utils.registers.loadA attributes
         .endif
 
         out (utils.vdp.DATA_PORT), a    ; write tile attributes

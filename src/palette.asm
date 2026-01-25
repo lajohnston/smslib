@@ -23,6 +23,10 @@
     .include "utils/outiBlock.asm"
 .endif
 
+.ifndef utils.registers
+    .include "utils/registers.asm"
+.endif
+
 .ifndef utils.vdp
     .include "utils/vdp.asm"
 .endif
@@ -81,7 +85,7 @@
 
     ; Convert to --bbggrr
     utils.clobbers "af"
-        ld a, (\.\@blue * 16) + (\.\@green * 4) + \.\@red
+        utils.registers.loadA (\.\@blue * 16) + (\.\@green * 4) + \.\@red
         out (c), a  ;   write color
     utils.clobbers.end
 .endm

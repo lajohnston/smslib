@@ -557,3 +557,19 @@
         utils.assert.fail "\.: Unsupported register", register, "<string> (one of) 'a', 'b', 'c', 'd', 'e', 'h', 'l', 'ixh', 'ixl', 'bc', 'de', 'hl', 'ix', 'iy'"
     .endif
 .endm
+
+;====
+; Loads A with the given constant, using `xor a` if the constant is zero to
+; save a few cycles (warning: this does affect flags)
+;
+; @clobbers f
+;====
+.macro "utils.registers.loadA" args value
+    utils.assert.range value, 0, 255 "\.: Value is out of range"
+
+    .ifeq value 0
+        xor a
+    .else
+        ld a, value
+    .endif
+.endm

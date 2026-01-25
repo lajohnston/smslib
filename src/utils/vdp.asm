@@ -19,6 +19,10 @@
     .include "utils/outiBlock.asm"
 .endif
 
+.ifndef utils.registers
+    .include "utils/registers.asm"
+.endif
+
 ;====
 ; Constants
 ;====
@@ -59,12 +63,7 @@
 
     utils.clobbers "af"
         ; Output low byte to VDP
-        .ifeq <address 0
-            xor a
-        .else
-            ld a, <address
-        .endif
-
+        utils.registers.loadA <address
         out (utils.vdp.COMMAND_PORT), a
 
         ; Output high byte to VDP with write command set
@@ -88,14 +87,8 @@
     utils.assert.range address 0, 31, "\.: Address must be between 0-31"
 
     utils.clobbers "af"
-        ; Load address
-        .ifeq address 0
-            xor a
-        .else
-            ld a, address
-        .endif
-
         ; Output address
+        utils.registers.loadA address
         out (utils.vdp.COMMAND_PORT), a
 
         ; Output CRAM write command
@@ -224,11 +217,7 @@
     utils.clobbers "af"
         ; Load A with value if one is given
         .ifdef registerValue
-            .ifeq registerValue 0
-                xor a
-            .else
-                ld a, registerValue
-            .endif
+            utils.registers.loadA registerValue
         .endif
 
         ; Send the register value
