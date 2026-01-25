@@ -191,14 +191,21 @@
 .macro "utils.vdp.setRegister" args registerNumber registerValue
     utils.assert.range registerNumber, 0, 10, "\.: Invalid register number"
 
-    .ifdef registerValue
-        ld a, registerValue ; load A with value if one is given
-    .endif
+    utils.clobbers "af"
+        ; Load A with value if one is given
+        .ifdef registerValue
+            .ifeq registerValue 0
+                xor a
+            .else
+                ld a, registerValue
+            .endif
+        .endif
 
-    ; Send the register value
-    out (utils.vdp.COMMAND_PORT), a
+        ; Send the register value
+        out (utils.vdp.COMMAND_PORT), a
 
-    ; Send register number, ORed with WRITE_REGISTER command
-    ld a, utils.vdp.commands.WRITE_REGISTER | registerNumber
-    out (utils.vdp.COMMAND_PORT), a
+        ; Send register number, ORed with WRITE_REGISTER command
+        ld a, utils.vdp.commands.WRITE_REGISTER | registerNumber
+        out (utils.vdp.COMMAND_PORT), a
+    utils.clobbers.end
 .endm
