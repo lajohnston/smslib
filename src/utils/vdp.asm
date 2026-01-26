@@ -211,8 +211,10 @@
         utils.assert.range bytes 0, $4000, "\.: bytes out of VRAM range"
     .endif
 
-    ld bc, bytes
-    call utils.vdp.writeZeroes
+    utils.clobbers "bc"
+        ld bc, bytes
+        call utils.vdp.writeZeroes
+    utils.clobbers.end
 .endm
 
 ;====
