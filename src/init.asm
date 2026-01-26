@@ -57,42 +57,42 @@
 ; Initialise any SMSLib modules that are activated
 ;====
 .macro "init.smslibModules"
-    ; initialise paging registers
+    ; Initialise paging registers
     .ifdef mapper.ENABLED
         .ifeq mapper.ENABLED 1
             mapper.init
         .endif
     .endif
 
-    ; initialise vdp registers
+    ; Initialise vdp registers
     .ifdef vdp.ENABLED
         .ifeq vdp.ENABLED 1
             vdp.init
         .endif
     .endif
 
-    ; initialise pause handler
+    ; Initialise pause handler
     .ifdef pause.ENABLED
         .ifeq pause.ENABLED 1
             pause.init
         .endif
     .endif
 
-    ; initialise sprite buffer
+    ; Initialise sprite buffer
     .ifdef sprites.ENABLED
         .ifeq sprites.ENABLED 1
             sprites.init
         .endif
     .endif
 
-    ; initialise input handler
+    ; Initialise input handler
     .ifdef input.ENABLED
         .ifeq input.ENABLED 1
             input.init
         .endif
     .endif
 
-    ; initialise interrupt handler
+    ; Initialise interrupt handler
     .ifdef interrupts.ENABLED
         .ifeq interrupts.ENABLED 1
             interrupts.init
@@ -102,11 +102,11 @@
 
 .section "init.smslibModules" free
     init.smslibModules:
+        ; Zero VRAM
+        utils.vdp.prepVramWrite 0 0
+        utils.vdp.writeZeroes
+
         ; Initialise modules
         init.smslibModules
-
-        ; Zero VRAM
-        utils.vdp.prepVramWrite 0
-        utils.vdp.writeZeroes
         ret
 .ends
