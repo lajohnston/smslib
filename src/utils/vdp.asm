@@ -240,3 +240,25 @@
         out (utils.vdp.COMMAND_PORT), a
     utils.clobbers.end
 .endm
+
+;====
+; Writes a byte to the data port and increments the write address
+;
+; @in   value   the value to write
+; @in   VRAM    pointer to address (with write command set)
+; @out  VRAM    pointer to given address + 1
+;====
+.macro "utils.vdp.writeByte" args value
+    .ifndef value
+        out (utils.vdp.DATA_PORT), a
+    .else
+        utils.assert.range value, 0, 255, "\.: Value out of byte range"
+
+        utils.clobbers "af"
+            utils.registers.loadA value
+
+            ; Output and increment VRAM address
+            out (utils.vdp.DATA_PORT), a
+        utils.clobbers.end
+    .endif
+.endm
