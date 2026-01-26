@@ -246,21 +246,30 @@
 .endm
 
 ;====
-; Initialises a sprite buffer in RAM
+; Initialises an empty sprite table in VRAM and a buffer in RAM
 ;====
 .macro "sprites.init"
+    \@_\.:
+
+    utils.clobbers "af"
+        ; Init VRAM
+        utils.vdp.prepVramWrite sprites.VRAM_ADDRESS 0
+        utils.vdp.writeByte sprites.Y_TERMINATOR
+
+        ; Init RAM buffer
+        sprites.reset
+    utils.clobbers.end
+.endm
+
+;====
+; Reset sprite buffer back to default
+;====
+.macro "sprites.reset"
     utils.clobbers "af"
         ; Set nextIndex to index 0
         ld a, <(sprites.ram.buffer) + sprites.Buffer.yPos   ; low byte of index 0
         ld (sprites.ram.buffer.nextIndex), a                ; store in nextIndex
     utils.clobbers.end
-.endm
-
-;====
-; Reset sprite buffer back to default. Alias for sprites.init
-;====
-.macro "sprites.reset"
-    sprites.init
 .endm
 
 ;====
