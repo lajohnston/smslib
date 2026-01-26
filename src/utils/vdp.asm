@@ -123,7 +123,7 @@
 ; to utils.vdp.DATA_PORT before you can read or write the data
 ;
 ; @in   hl                  VRAM address ($0000 - $3FFF)
-; @in   [command]           utils.vdp.command.READ or utils.vdp.command.WRITE
+; @in   [command]           utils.vdp.command.READ_VRAM or utils.vdp.command.WRITE_VRAM
 ;                           if not present, H should already have the correct
 ;                           command bits (6th and 7th) set or reset.
 ;                           (%00 = read; %01 = write)
@@ -154,7 +154,7 @@
 ; to utils.vdp.DATA_PORT before you can read or write the data
 ;
 ; @in   de                  VRAM address ($0000 - $3FFF)
-; @in   [command]           utils.vdp.command.READ or utils.vdp.command.WRITE
+; @in   [command]           utils.vdp.command.READ_VRAM or utils.vdp.command.WRITE_VRAM
 ;                           if not present, D should already have the correct
 ;                           command bits (6th and 7th) set or reset.
 ;                           (%00 = read; %01 = write)
