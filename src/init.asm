@@ -105,6 +105,8 @@
         ; Initialise modules
         init.smslibModules
 
-        ; Zeroes VRAM, then returns
-        jp utils.vdp.clearVram
+        ; Zero VRAM
+        utils.vdp.prepVramWrite 0
+        utils.vdp.writeZeroes
+        ret
 .ends
