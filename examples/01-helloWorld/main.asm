@@ -57,5 +57,5 @@
         vdp.enableDisplay
 
         ; End program with infinite loop
-        -: jr -
+        halt
 .ends

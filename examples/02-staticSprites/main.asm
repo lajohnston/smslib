@@ -82,5 +82,5 @@
 
         ; Enable the display then stop
         vdp.enableDisplay
-        -: jr -
+        halt
 .ends
