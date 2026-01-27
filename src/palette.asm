@@ -7,6 +7,7 @@
 ; Background tiles/patterns can use either the first 16 indices (0-15), or the
 ; last 16 (16-31). Sprites can only use the last 16 (16-31).
 ;====
+.define palette.ENABLED 1
 
 ;====
 ; Dependencies
@@ -41,6 +42,14 @@
 ;====
 ; Procedures
 ;====
+
+;====
+; Clears the 32-color palette with the color black
+;====
+.macro "palette.init"
+    utils.vdp.prepCramWrite 0
+    utils.vdp.writeZeroes 32
+.endm
 
 ;====
 ; Defines a byte with an approximate RGB value. Each color component is rounded

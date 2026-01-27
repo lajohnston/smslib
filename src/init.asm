@@ -71,6 +71,13 @@
         .endif
     .endif
 
+    ; Initialise palette
+    .if palette.ENABLED
+        .ifeq palette.ENABLED 1
+            palette.init
+        .endif
+    .endif
+
     ; Initialise pause handler
     .ifdef pause.ENABLED
         .ifeq pause.ENABLED 1
