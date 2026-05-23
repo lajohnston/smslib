@@ -4,16 +4,16 @@ This directory contains the library's internal tests, which use the [Zest](https
 
 ## smslib-zest.asm
 
-The `tests/smslib-zest.asm` file imports the full smslib library with a set of options to aid with testing your code using the [Zest](https://github.com/lajohnston/zest) testing framework. The aim is to only stub out/disable the minimal amount of functionality needed to provide an accurate simulation.
+The `src/smslib-zest.asm` file imports the full smslib library with a set of options to aid with testing your code using the [Zest](https://github.com/lajohnston/zest) testing framework. The aim is to only stub out/disable the minimal amount of functionality needed to provide an accurate simulation.
 
 ```asm
 ; Import Zest
-.incdir "../zest"                   ; point to Zest directory
-.include "zest.asm"                 ; import Zest
+.incdir "../zest"           ; point to Zest directory
+.include "zest.asm"         ; import Zest
 
 ; Import smslib-zest
-.incdir "../smslib"                 ; point to the root of the smslib directory
-.include "tests/smslib-zest.asm"    ; import tests/smslib-zest.asm
+.incdir "../smslib/src"     ; point to the smslib src directory
+.include "smslib-zest.asm"  ; import smslib-zest.asm
 ```
 
 The file performs the following:
