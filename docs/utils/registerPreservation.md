@@ -1,38 +1,84 @@
 # Register preservation (utils.clobbers, utils.preserve, utils.restore)
 
+It costs 21 cycles to `push/pop` registers to the stack to preserve them (and 28 for IX, IY), which can quickly add up if several pairs need to be preserved.
+
+As the library prioritises efficiency, by default the routines won't preserve any registers and will leave the caller to remember to preserve only the ones it cares about. While efficient, this can be bug prone and still lead to waste if the caller pushes a register pair the routine doesn't even clobber.
+
 These utility modules provide a system for efficiently preserving Z80 register states between macro calls, ensuring only the needed registers are preserved.
 
-1. The internal macros use [utils.clobbers](#utilsclobbers) to declare which registers they clobber (in lieu of push/pop calls). You can utilise them too
-2. The caller can utilise [utils.preserve](#utilspreserve) to wrap the calls and declare which registers should not be clobbered
-3. The utilities will work together to ensure only the clobbered AND protected registers get preserved
+The system works as follows:
 
-This provides the following advantages:
+1. Macros declare which registers they clobber using [utils.clobbers](#utilsclobbers)
+2. Code calling these macros can declare which registers it is actually relying on to be preserved, using [utils.preserve](#utilspreserve) or by enabling [Automatic register preservation](#automatic-register-preservation)
+3. When a macro is about to clobber a register pair the caller cares about, it will ensure it is preserved on the stack. If the caller doesn't care about a register pair it will let it be clobbered, saving cycles.
 
-1. vs the macros manually preserving everything they clobber:
+## Automatic register preservation
 
-- The utilities ensure only the necessary registers are preserved. If the caller doesn't care about them (and they often don't) they won't be push/popped, saving 21-28 cycles for each
-
-2. vs the caller manually preserving the registers it cares about:
-
-- The utilities ensure the caller doesn't need to know which registers will get clobbered
-- If the macros being called are updated and the clobber list ever changes, the new push/pops will be auto-generated without the caller needing to be updated
-
-3. Allows an optional [auto-preserve](#automatic-registers-preseveration) mode to make this process easier (at the cost of efficiency)
-
-## Automatic registers preservation
-
-To automatically preserve all registers by default, consider enabling the `utils.registers.AUTO_PRESERVE` setting. When a clobber scope is encountered it will then automatically preserve all registers that get clobbered.
+If you aren't prioritising maximum performance you can set the `utils.registers.AUTO_PRESERVE` setting to ensure the libraries automatically preserve any registers they clobber.
 
 ```asm
 .redefine utils.registers.AUTO_PRESERVE 0 ; deactivate (default)
 .redefine utils.registers.AUTO_PRESERVE 1 ; activate
 ```
 
-You can opt-out of this on a per-call basis using `utils.preserve` to create more-specific preserve scopes for particular calls.
+You can still wrap individual macro calls with [utils.preserve](#utilspreserve) to ensure only specific registers are preserved for that call.
+
+## utils.preserve
+
+Callers that rely on register states to be preserved can wrap the macro invokation with `utils.preserve` and `utils.restore`. This is referred to as a 'preserve scope'.
+
+The macro being called specifies which registers it will clobber using [utils.clobbers](#utilsclobbers). The two will work together to ensure only the required registers are preserved.
+
+```asm
+.macro "myMacro"
+    ld bc, $bcbc
+    ld de, $dede
+
+    registers.preserve "bc", "de"
+        macroThatClobsThings        ; might push BC or DE
+        otherMacroThatClobsThings   ; might push BC or DE (if not already pushed)
+    utils.restore                   ; pops BC/DE if they were pushed
+
+    ; BC will still be $bcde
+    ; DE will still be $dede
+.endm
+```
+
+Acceptable arguments are (case-insensitive):
+
+- Main registers: `"af"`, `"bc"`, `"de"`, `"hl"`, `"ix"`, `"iy"`, `"i"`
+- Shadow registers: `"af'"`, `"bc'"`, `"de'"`, `"hl'"`
+
+As each clobber scope is encountered in the macro chain, it will now be aware which registers the caller wishes to preserve and so preserves any that match. If the call passes through multiple nested clobber scopes that clobber the same particular register, only the first-encountered (outer) scope will preserve the register rather than it being preserved multiple times.
+
+Calling `utils.preserve` with no arguments will default to ensuring all registers that get clobbered are preserved.
+
+Like clobber scopes, it's possible to nest preserve scopes. Inner scopes are aware of what registers the outer scope needs preserving.
+
+`utils.preserve` can be used within a `section` that calls macros.
+
+### Gotchas and known issues
+
+Routines don't mark their return values as clobbered, as these values are intentional. These will have to be preserved manually outside the code block. Below, `palette.setIndex` returns the VDP port in C, ready to write to, and so BC would need to be preserved manually.
+
+```asm
+push bc ; preserve BC manually
+
+utils.preserve
+    palette.setIndex 0                  ; sets/returns C
+    palette.writeBytes ram.color 1
+utils.restore                           ; won't restore BC
+
+pop bc  ; restore BC ourselves
+```
+
+Your manual push and pop instructions should be outside the `utils.preserve`/`utils.restore` scope so as to not interrupt the preservation order.
 
 ## utils.clobbers
 
 Macros that clobber registers can utilise `utils.clobbers` and `utils.clobbers.end` in place of the `push`/`pop` calls they would normally make. This is referred to as a 'clobber scope'.
+
+The internal libraries utilise this module to mark which registers they clobber. You can also use it in your own code but it can get quite complicated so you don't necessarily need to.
 
 ```asm
 .macro "normal way"
@@ -118,36 +164,3 @@ utils.clobbers.withBranching "af"
     jp somewhere                ; unconditional jump
 utils.clobbers.closeBranch      ; close off branching clobber scope without restoring
 ```
-
-## utils.preserve
-
-Callers that rely on register states to be preserved can wrap the macro invokation with `utils.preserve` and `utils.restore`. This is referred to as a 'preserve scope'.
-
-```asm
-.macro "myMacro"
-    ld bc, $bc00
-    ld de, $de00
-
-    registers.preserve "bc", "de"
-        ; If either of these clobber BC or DE, they will push them to the stack beforehand
-        macroThatClobsThings        ; might push BC or DE
-        otherMacroThatClobsThings   ; might push BC or DE (if not already pushed)
-    utils.restore                   ; pops BC/DE if they were pushed
-
-    ; BC will still be $bc00
-    ; DE will still be $de00
-.endm
-```
-
-Acceptable arguments are (case-insensitive):
-
-- Main registers: `"af"`, `"bc"`, `"de"`, `"hl"`, `"ix"`, `"iy"`, `"i"`
-- Shadow registers: `"af'"`, `"bc'"`, `"de'"`, `"hl'"`
-
-As each clobber scope is encountered in the macro chain, it will now be aware which registers the caller wishes to preserve and so preserves any that match. If the call passes through multiple nested clobber scopes that clobber the same particular register, only the first-encountered (outer) scope will preserve the register rather than it being preserved multiple times.
-
-Calling `utils.preserve` with no arguments will default to ensuring all registers that get clobbered are preserved.
-
-Like clobber scopes, it's possible to nest preserve scopes. Inner scopes are aware of what registers the outer scope needs preserving.
-
-`utils.preserve` can be used within a `section` that calls macros.
