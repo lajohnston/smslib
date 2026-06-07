@@ -29,7 +29,7 @@
                                 ;|`-------  Horizontal scroll lock
                                 ;`--------  Vertical scroll lock
 
-.define vdp.REGISTER_1_DEFAULT  %10000000;  Mode control 2
+.define vdp.REGISTER_1_DEFAULT  %10100000;  Mode control 2
                                 ;|||||||`-  Zoomed sprites -> 16x16 pixels
                                 ;||||||`--  Tall sprites -> 2 tiles per sprite, 8x16
                                 ;|||||`---  Mega Drive mode 5 enable

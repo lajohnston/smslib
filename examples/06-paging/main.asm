@@ -97,11 +97,8 @@
         mapper.pageBank :instructions       ; ensure instructions is visible
         tilemap.writeBytesUntil $ff instructions
 
-        ; Enable the display and VBlank
-        vdp.startBatch
-            vdp.enableDisplay
-            vdp.enableVBlank
-        vdp.endBatch
+        ; Enable the display
+        vdp.enableDisplay
 
         ; Enable interrupts
         interrupts.enable

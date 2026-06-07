@@ -23,10 +23,7 @@
     init:
         call table.draw
 
-        vdp.startBatch
-            vdp.enableDisplay
-            vdp.enableVBlank
-        vdp.endBatch
+        vdp.enableDisplay
 
         interrupts.enable
 

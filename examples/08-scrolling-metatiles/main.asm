@@ -106,10 +106,13 @@
         ld c, 0                             ; metatile row offset (0 = top)
         scroll.metatiles.init               ; draw the inital screen
 
+        ;====
         ; Enable the display
+        ; When changing multiple vdp settings it's usually more efficient
+        ; (but optional) to specify changes within a 'batch'
+        ;====
         vdp.startBatch
             vdp.enableDisplay
-            vdp.enableVBlank
 
             ; Left column gets filled with junk when scrolling, so best hide it
             vdp.hideLeftColumn

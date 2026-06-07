@@ -47,15 +47,8 @@
         ld (ram.counter), a ; set counter to 0
         ld (ram.color), a   ; set color to 0 (black)
 
-        ;====
-        ; Enable the display and interrupts
-        ; When changing multiple vdp settings it's more efficient (but optional)
-        ; to specify changes within a 'batch'
-        ;====
-        vdp.startBatch
-            vdp.enableDisplay
-            vdp.enableVBlank
-        vdp.endBatch
+        ; Enable the display
+        vdp.enableDisplay
 
         ; Now we've finished initialising, enable interrupts on the Z80
         interrupts.enable

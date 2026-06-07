@@ -51,13 +51,12 @@
         bubble.init
 
         ;====
-        ; Enable the display and interrupts
-        ; When changing multiple vdp settings it's more efficient (but optional)
-        ; to specify changes within a 'batch'
+        ; Enable the display
+        ; When changing multiple vdp settings it's usually more efficient
+        ; (but optional) to specify changes within a 'batch'
         ;====
         vdp.startBatch
             vdp.enableDisplay
-            vdp.enableVBlank
 
             ; hide the left-most column - allows sprites to scroll more smoothly
             ; off the left side of the screen

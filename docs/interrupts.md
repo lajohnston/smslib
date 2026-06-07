@@ -1,22 +1,24 @@
 # Interrupts (interrupts.asm)
 
-Handles VBlank and/or HBlank interrupts. When enabled, these interrupts allow the VDP to send a signal to the Z80 processor when it has finished drawing certain lines on the screen (HBlanks) and each time it's finished drawing the whole screen/frame (VBlanks). You can use these to time your game logic or add screen effects, such as changing the color palette for a portion of the screen.
+Handles VBlank and/or HBlank interrupts. When enabled, these will interrupt the current program flow when the VDP has finished drawing certain lines on the screen, allowing for screen effects such as changing the color palette for a portion of the screen. VBlank occurs when the last line has been drawn.
 
-## Enabling interrupts
+## Enabling interrupts in VDP
 
-You will need to enable interrupts in both the VDP and Z80. After you initialise your game you can enable VBlanks and HBlanks in the VDP using registers 0 and 1:
+You will need to enable interrupts in both the VDP and Z80. After you initialise your game you can enable VBlanks and HBlanks in the VDP using registers 0 and 1, taking care not to overwrite any other flags that are also stored within these registers.
 
 - Enable HBlank - VDP register 0, bit 4
 - Enable VBlank - VDP register 1, bit 5
 
-You can use [vdp.asm](./vdp.md) for this, taking care not to overwrite any other flags that are also stored within these registers (see `vdp.asm` file for documentation):
+You can use [vdp.asm](./vdp.md) for this:
 
 ```asm
+vdp.enableVBlank    ; (already enabled by default)
 vdp.enableHBlank
-vdp.enableVBlank
 ```
 
-You also need to enable interrupts within the Z80 CPU:
+## Enabling interrupts in the Z80
+
+After your initialisation code you can use the following to enable interrupts on the Z80 from the next interrupt onwards. If the VDP flagged one prior to this (such as during your initialisation code) it will be ignored, unlike `ei` by itself which would trigger a 'late' interrupt straightaway.
 
 ```asm
 interrupts.enable
@@ -24,7 +26,7 @@ interrupts.enable
 
 ## VBlanks (frame interrupts)
 
-VBlanks occur each time the VDP has finished drawing a frame (50 times a second in PAL, 60 times a second in NTSC). It's a small window of opportunity to blast data to the VDP before it starts drawing the next frame. Sending data to the VDP outside this window can result in missed writes and graphical corruption. The only other safe time to write to the VDP is when the display is off.
+VBlanks occur each time the VDP has finished drawing a frame. They occur 50 times a second in PAL and 60 times a second in NTSC, providing a reliable means to time your game logic loop. The VBlank period is also a small window of opportunity to blast data to the VDP before it starts drawing the next frame, as sending data during 'active display' can result in missed writes and graphical corruption. The only other safe times to write to the VDP is when the display is off or by spacing each byte written with a 26-cycle.
 
 Enable the VBlank handler by defining `interrupts.HANDLE_VBLANK` setting before including `interrupts.asm`:
 
@@ -41,12 +43,15 @@ interrupts.onVBlank:
     interrupts.endVBlank    ; return from VBlank
 ```
 
-VBlanks can also be used to regulate the speed of your game logic. Place `interrupts.waitForVBlank` in your game loop to ensure the logic doesn't update too quickly.
+### interrupts.waitForVBlank
+
+Waits for the `interrupts.onVBlank` handler to return before continuing the code flow. This is useful for timing your game loop.
 
 ```asm
 gameLoop:
     interrupts.waitForVBlank
-    ... update logic
+    ; resume after the onVBlank handler has returned
+    ; update logic
     jp gameLoop         ; run loop again
 ```
 
@@ -87,7 +92,7 @@ interrupts.setLineInterval
 
 Please note that if you change the interval during active screen time, the new interval won't take effect until the next HBlank has occurred. This means that each interval you specify will trigger a minimum of 2 times, i.e. an interval every 10 lines will trigger for lines 9 (0-based) and line 19 even if you change it after line 9.
 
-You can read the current line being drawn. The value will be loaded into `a`
+You can read the current line being drawn. The value will be loaded into `a`. However, the value returned isn't a simple 0-192 number and requires some processing. Read Charles MacDonald's [VDP documentation](https://www.smspower.org/uploads/Development/msvdp-20021112.txt) for more information.
 
 ```asm
 interrupts.getLine

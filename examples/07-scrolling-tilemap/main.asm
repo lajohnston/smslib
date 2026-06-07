@@ -59,7 +59,6 @@
         ; Enable the display
         vdp.startBatch
             vdp.enableDisplay
-            vdp.enableVBlank
 
             ; Left column gets filled with junk when scrolling, so best to hide it
             vdp.hideLeftColumn
