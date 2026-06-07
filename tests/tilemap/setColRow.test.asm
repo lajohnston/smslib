@@ -1,6 +1,7 @@
 describe "tilemap.setColRow"
     test "sets C to the VDP data port but does not clobber other registers"
         zest.initRegisters
+        zest.waitForVBlank
 
         utils.preserve
             tilemap.setColRow 0 0
@@ -10,9 +11,11 @@ describe "tilemap.setColRow"
         expect.c.toBe $be   ; vdp data port
 
     test "allows the column to be set from 0-31"
+        zest.waitForVBlank
         tilemap.setColRow 0 0
         tilemap.setColRow 31 0
 
     test "allows the row to be set from 0-27"
+        zest.waitForVBlank
         tilemap.setColRow 0 0
         tilemap.setColRow 0 27

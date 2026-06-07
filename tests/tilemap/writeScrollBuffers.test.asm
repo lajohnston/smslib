@@ -22,6 +22,8 @@ describe "tilemap.writeScrollBuffers"
     it "preserves the registers when no scroll needed"
         zest.initRegisters
 
+        zest.waitForVBlank
+
         utils.preserve
             tilemap.writeScrollBuffers
         utils.restore
@@ -35,6 +37,8 @@ describe "tilemap.writeScrollBuffers"
         tilemap.calculateScroll
 
         zest.initRegisters
+
+        zest.waitForVBlank
 
         utils.preserve
             tilemap.writeScrollBuffers
@@ -50,6 +54,8 @@ describe "tilemap.writeScrollBuffers"
 
         zest.initRegisters
 
+        zest.waitForVBlank
+
         utils.preserve
             tilemap.writeScrollBuffers
         utils.restore
@@ -63,6 +69,8 @@ describe "tilemap.writeScrollBuffers"
         tilemap.calculateScroll
 
         zest.initRegisters
+
+        zest.waitForVBlank
 
         utils.preserve
             tilemap.writeScrollBuffers

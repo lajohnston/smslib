@@ -4,6 +4,8 @@ describe "tilemap.writeScrollRegisters"
     it "preserves the registers"
         zest.initRegisters
 
+        zest.waitForVBlank
+
         utils.preserve
             tilemap.writeScrollRegisters
         utils.restore
