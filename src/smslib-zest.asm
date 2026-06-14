@@ -19,11 +19,7 @@
     .define utils.port 1
 
     .macro "utils.port.read" args portNumber
-        .if portNumber == $dc
-            zest.loadFakePortDC
-        .elif portNumber == $dd
-            zest.loadFakePortDD
-        .endif
+        zest.ports.loadA portNumber
     .endm
 .endif
 
