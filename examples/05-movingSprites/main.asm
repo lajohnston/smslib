@@ -6,14 +6,6 @@
 ;====
 .sdsctag 1.10, "smslib sprites", "smslib moving sprites tutorial", "lajohnston"
 
-;====
-; Tell smslib interrupts module to handle frame (VBlank) interrupts. This will
-; call the interrupts.onVBlank label each time a frame has finished being drawn.
-; This occurs 50 times a second for PAL and 60 times per second for NTSC and can
-; be used to regulate the logic speed
-;====
-.define interrupts.HANDLE_VBLANK 1
-
 ; Import smslib
 .incdir "../../src"         ; back to smslib directory
 .include "smslib.asm"       ; base library
@@ -63,9 +55,6 @@
             vdp.hideLeftColumn
         vdp.endBatch
 
-        ; Now we've finished initialising, enable interrupts
-        interrupts.enable
-
         ; Begin
         jp mainLoop
 .ends
@@ -75,9 +64,6 @@
 ;====
 .section "mainLoop" free
     mainLoop:
-        ; Wait for frame interrupt handler to finish before continuing
-        interrupts.waitForVBlank
-
         ; Update bubble instance
         ld ix, bubbleInstance
         call bubble.updateInput
@@ -87,25 +73,12 @@
         sprites.reset               ; reset buffer
         call bubble.updateSprite    ; add sprites
 
-        ; Next loop
-        jp mainLoop
-.ends
+        ; Wait for VBlank before continuing
+        interrupts.waitForVBlank
 
-;====
-; VBlank routine called by interrupts.asm after each frame is drawn.
-;
-; This is a good time to write data to VRAM before it starts drawing the
-; next frame.
-;
-; When this has finished, interrupts.waitForVBlank in the main loop will be
-; satisfied and the rest of the loop will continue
-;====
-.section "vBlankHandler" free
-    ; This is called by interrupts.asm
-    interrupts.onVBlank:
-        ; Copy buffer to VRAM
+        ; Copy the sprite buffer to VRAM
         sprites.copyToVram
 
-        ; End vBlank handler
-        interrupts.endVBlank
+        ; Next loop
+        jp mainLoop
 .ends

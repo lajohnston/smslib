@@ -7,7 +7,6 @@
 .sdsctag 1.10, "smslib input", "smslib input tutorial", "lajohnston"
 
 ; Import smslib
-.define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
 .define input.ENABLE_PORT_2         ; enable reading port 2
 .incdir "../../src"                 ; point to smslib directory
 .include "smslib.asm"               ; base library
@@ -25,11 +24,7 @@
 
         vdp.enableDisplay
 
-        interrupts.enable
-
-        -:
-            halt    ; wait for next VBlank
-        jp -        ; infinite loop
+        jp update
 .ends
 
 ;====
@@ -37,8 +32,11 @@
 ; We'll check the input each time and update the display accordingly
 ; (see vblank example)
 ;====
-.section "vBlank" free
-    interrupts.onVBlank:
+.section "update" free
+    update:
+        ; Wait for the next VBlank, where we can safely write to the VDP
+        interrupts.waitForVBlank
+
         ; Read input from port 1
         ; You can also try this with input.readPort2
         input.readPort1
@@ -55,8 +53,8 @@
         call detectHeld     ; indicate buttons that were pressed last frame and this frame
         call detectReleased ; indicate buttons that were pressed last frame but have just been released
 
-        ; End VBlank handler
-        interrupts.endVBlank
+        ; Next update loop
+        jp update
 .ends
 
 ;====

@@ -14,8 +14,7 @@
 ;====
 ; Import smslib
 ;====
-.incdir "../../src"                     ; point to smslib directory
-    .define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
+.incdir "../../src"                         ; point to smslib directory
     .include "smslib.asm"
 
     ; Set the size of the metatiles. Each value can be 2, 4, 8 or 16
@@ -118,8 +117,7 @@
             vdp.hideLeftColumn
         vdp.endBatch
 
-        ; Enable interrupts then start the update loop
-        interrupts.enable
+        ; Start the update loop
         jp update
 .ends
 
@@ -128,9 +126,6 @@
 ;====
 .section "update" free
     update:
-        ; Wait for the next VBlank to finish
-        interrupts.waitForVBlank
-
         ;===
         ; Adjust tilemap based on joypad input direction
         ;===
@@ -145,17 +140,11 @@
         ; Update RAM buffers (doesn't update VDP/VRAM yet)
         scroll.metatiles.update
 
-        jp update   ; start loop again
-.ends
+        ; Wait for the next VBlank, where we can safely write to the VDP
+        interrupts.waitForVBlank
 
-;====
-; The VBlank routine where we'll apply changes to the VDP
-;====
-.section "render" free
-    interrupts.onVBlank:
         ; Apply scroll changes to the VDP/VRAM
         scroll.metatiles.render
 
-        ; Mark the end of the VBlank handler
-        interrupts.endVBlank
+        jp update   ; start loop again
 .ends

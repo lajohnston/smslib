@@ -98,13 +98,6 @@
             input.init
         .endif
     .endif
-
-    ; Initialise interrupt handler
-    .ifdef interrupts.ENABLED
-        .ifeq interrupts.ENABLED 1
-            interrupts.init
-        .endif
-    .endif
 .endm
 
 .section "init.smslibModules" free

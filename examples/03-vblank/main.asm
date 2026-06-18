@@ -20,7 +20,6 @@
 .sdsctag 1.10, "smslib vblank", "smslib vblank tutorial", "lajohnston"
 
 ; Import smslib
-.define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
 .incdir "../../src"                 ; back to smslib directory
 .include "smslib.asm"               ; base library
 .incdir "."                         ; return to current directory
@@ -45,34 +44,15 @@
         ; Initialise variables in RAM
         xor a               ; set a to 0
         ld (ram.counter), a ; set counter to 0
-        ld (ram.color), a   ; set color to 0 (black)
+
+        ld a, 1
+        ld (ram.color), a   ; set color to 1 (red)
 
         ; Enable the display
         vdp.enableDisplay
 
-        ; Now we've finished initialising, enable interrupts on the Z80
-        interrupts.enable
-
         ; Begin
         jp update
-.ends
-
-;====
-; The VBlank interrupt is triggered after the VDP has finished drawing a frame.
-; Any data we want to write to the VDP should be done here (or while the display
-; is disabled) as writing this data while the VDP is actively rendering a frame
-; can lead to graphical corruption and visual artefacts.
-;====
-.section "render" free
-    ; interrupts.onVBlank is called by interrupts.asm 50/60x a second (PAL/NTSC)
-    interrupts.onVBlank:
-        ; Write ram.color into palette index 0
-        palette.setIndex 0
-        palette.writeBytes ram.color 1
-
-        ; End VBlank handler
-        ; Will return to the code that was interrupted
-        interrupts.endVBlank
 .ends
 
 ;====
@@ -80,35 +60,34 @@
 ;====
 .section "update" free
     update:
-        ; Wait for frame interrupt handler to finish before continuing.
-        ; This lets us regulate the speed of the update loop to running at 50
-        ; or 60 times a second (PAL, NTSC respectively)
+        ; Update the background color every 50 frames
+        ld a, (ram.counter) ; load counter from RAM
+        inc a               ; increment counter
+        ld (ram.counter), a ; store counter back in RAM
+
+        ; If counter is 50, update background color
+        cp 50
+        jp nz, +                ; jump if counter isn't 50 yet
+            xor a               ; reset counter to 0
+            ld (ram.counter), a ; store counter back in RAM
+
+            ld a, (ram.color)   ; load color value from RAM
+            inc a               ; increment color value
+            and %00111111       ; keep in 0-63 range
+            ld (ram.color), a   ; store color value back in RAM
+        +:
+
+        ;====
+        ; Wait for VBlank, when the VDP has drawn the last/bottom line of the
+        ; current frame. This VBlank period is the best time to write data to
+        ; VDP without causing graphical corruption. It also allows us to
+        ; regulate the speed of our update to 50fps (PAL) or 60fps (NTSC)
+        ;====
         interrupts.waitForVBlank
 
-        ; Increment counter
-        ld hl, ram.counter  ; point to counter
-        inc (hl)            ; increment counter
-
-        ; If counter has reached 50...
-        ld a, (hl)          ; load counter
-        cp 50               ; compare it to 50
-        jp nz, +            ; jump to + if it's not 50
-            ; Reset counter
-            ld (hl), 0      ; set ram.counter to 0
-
-            ; Next color
-            ld hl, ram.color    ; point to ram.color
-            ld a, (hl)          ; load color into a
-            inc a               ; increment color value
-
-            ; Colors are 6-bit. If we've overflowed into 7th bit, go back to 0
-            cp %01000000
-            jp nz, +
-                xor a   ; set color to 0
-            +:
-
-            ld (hl), a  ; store new color in ram.color
-        +:
+        ; Write ram.color into palette index 0
+        palette.setIndex 0
+        palette.writeBytes ram.color 1
 
         ; Next loop
         jp update

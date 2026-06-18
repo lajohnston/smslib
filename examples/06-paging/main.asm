@@ -10,7 +10,6 @@
 ;====
 ; Import smslib
 ;====
-.define interrupts.HANDLE_VBLANK 1  ; enable VBlank handling in interrupts.asm
 .define mapper.ENABLE_CARTRIDGE_RAM 1
 
 .incdir "../../src"             ; point to smslib directory
@@ -100,23 +99,17 @@
         ; Enable the display
         vdp.enableDisplay
 
-        ; Enable interrupts
-        interrupts.enable
-
-        ; Infinite loop
-        -:
-            halt
-        jr -
+        ; Start the update loop
+        jp update
 .ends
 
 ;====
-; VBlank Handler
-;
-; This will get called 50 or 60 times a second (PAL/NTSC respectively)
-; We can check the input at each interval
 ;====
-.section "VBlank handler" free
-    interrupts.onVBlank:
+.section "update" free
+    update:
+        ; Wait for the next VBlank, where we can safely write to the VDP
+        interrupts.waitForVBlank
+
         ; Read the input from joypad 1
         input.readPort1
 
@@ -125,7 +118,7 @@
             tilemap.setColRow 0, 10
             mapper.pageBank :lotsOf1s       ; make lotsOf1s available
             tilemap.writeBytes lotsOf1s, 224; write first 224 bytes
-            jp _end
+            jp update                       ; next frame
         +:
 
         ; If button 2 pressed, page-in and display part of lotsOf2s
@@ -135,6 +128,6 @@
             tilemap.writeBytes lotsOf2s, 224; write first 224 bytes
         +:
 
-    _end:
-        interrupts.endVBlank
+        ; Next update loop
+        jp update
 .ends

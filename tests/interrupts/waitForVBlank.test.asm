@@ -1,8 +1,12 @@
 describe "interrupts.waitForVBlank"
     test "does not clobber any registers"
-        ; Set VBlank flag
-        ld a, 1
-        ld (interrupts.ram.vBlankFlag), a
+        zest.mockVdpStatusFlags zest.VDP_NO_STATUS_FLAGS
+
+        ; Will set VBlank flag at next VBlank
+        zest.vblank.start
+            zest.mockVdpStatusFlags zest.VDP_VBLANK_STATUS
+            ret
+        zest.vblank.end
 
         zest.initRegisters
 
@@ -10,4 +14,4 @@ describe "interrupts.waitForVBlank"
             interrupts.waitForVBlank
         utils.restore
 
-        expect.all.toBeUnclobbered
+        expect.all.toBeUnclobberedExcept "af"

@@ -94,8 +94,6 @@
 
 ; Interrupts
 .section "interrupts.asm tests" appendto zest.suiteBank5
-    .include "interrupts/enable.test.asm"
-    .include "interrupts/init.test.asm"
     .include "interrupts/setLineInterval.test.asm"
     .include "interrupts/waitForVBlank.test.asm"
 .ends

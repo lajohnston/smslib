@@ -10,8 +10,7 @@
 ;====
 ; Import smslib
 ;====
-.define interrupts.HANDLE_VBLANK 1  ; enable VBlanks (see VBlank example)
-.incdir "../../src"                 ; point to smslib directory
+.incdir "../../src"                     ; point to smslib directory
 .include "smslib.asm"
 
 ; Include a scroll handler that uses raw tile data
@@ -64,8 +63,7 @@
             vdp.hideLeftColumn
         vdp.endBatch
 
-        ; Enable interrupts then start the update loop
-        interrupts.enable
+        ; Start the update loop
         jp update
 .ends
 
@@ -74,9 +72,6 @@
 ;====
 .section "update" free
     update:
-        ; Wait for the next VBlank to finish
-        interrupts.waitForVBlank
-
         ; Adjust tilemap based on joypad input direction
         input.readPort1             ; read the state of joypad 1
 
@@ -89,17 +84,11 @@
         ; Buffer changes in RAM (doesn't update VDP/VRAM yet)
         scroll.tiles.update
 
-        jp update   ; start loop again
-.ends
+        ; Wait for the next VBlank, where we can safely write to the VDP
+        interrupts.waitForVBlank
 
-;====
-; The VBlank routine where we'll apply changes to the VDP
-;====
-.section "render" free
-    interrupts.onVBlank:
         ; Apply scroll changes to the VDP/VRAM
         scroll.tiles.render
 
-        ; Mark the end of the VBlank handler
-        interrupts.endVBlank
+        jp update   ; start loop again
 .ends
