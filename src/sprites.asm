@@ -39,6 +39,10 @@
     .include "utils/vdp.asm"
 .endif
 
+.ifndef utils.vram
+    .include "utils/vram.asm"
+.endif
+
 ;====
 ; Constants and variables
 ;====
@@ -254,7 +258,7 @@
     utils.clobbers "af"
         ; Init VRAM
         utils.vdp.prepVramWrite sprites.VRAM_ADDRESS 0
-        utils.vdp.writeByte sprites.Y_TERMINATOR
+        utils.vram.writeByte sprites.Y_TERMINATOR
 
         ; Init RAM buffer
         sprites.reset
