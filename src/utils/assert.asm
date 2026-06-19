@@ -170,3 +170,19 @@
         utils.assert.fail message value "<string>"
     .endif
 .endm
+
+;====
+; Assert the given value is a boolean string ("true" or "false"), otherwise fail
+;
+; @in   value       the actual value
+; @in   message     the message to print if the expectation is not met
+;====
+.macro "utils.assert.booleanString" args value message
+    .if \?1 != ARG_STRING
+        utils.assert.fail message value "\"true\" or \"false\""
+    .endif
+
+    .if value != "true" && value != "false"
+        utils.assert.fail message value "\"true\" or \"false\""
+    .endif
+.endm

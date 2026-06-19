@@ -103,7 +103,7 @@
 .section "init.smslibModules" free
     init.smslibModules:
         ; Zero VRAM
-        utils.vram.setWriteAddress 0 0
+        utils.vram.setWriteAddress 0 "false"
         utils.vram.writeZeroes
 
         ; Initialise modules

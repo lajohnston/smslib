@@ -253,7 +253,7 @@
 
     utils.clobbers "af"
         ; Init VRAM
-        utils.vram.setWriteAddress sprites.VRAM_ADDRESS 0
+        utils.vram.setWriteAddress sprites.VRAM_ADDRESS "false"
         utils.vram.writeByte sprites.Y_TERMINATOR
 
         ; Init RAM buffer
@@ -302,8 +302,8 @@
         +:
 
         ; Point to x positions in VRAM and buffer
-        utils.vram.setWriteAddress (sprites.VRAM_ADDRESS + 128) 0   ; vram
-        ld l, <(sprites.ram.buffer.xPosAndPattern)                  ; buffer
+        utils.vram.setWriteAddress (sprites.VRAM_ADDRESS + 128) "false"
+        ld l, <(sprites.ram.buffer.xPosAndPattern)
 
         ; Copy x positions and patterns from buffer to VRAM
         ld b, ixl                       ; restore sprite count

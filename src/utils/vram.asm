@@ -22,8 +22,8 @@
 ; Prepares the VDP to write to the given VRAM write address
 ;
 ; @in   address     the VRAM write address
-; @in   [setPort]   if 1 (the default) then the C register will be loaded with
-;                   the VDP data port. Set to 0 if the port is already set to
+; @in   [setPort]   if "true" (the default) then the C register will be loaded with
+;                   the VDP data port. Set to "false" if the port is already set to
 ;                   saves 7 cycles
 ; @out  c           data port, ready to output data to with out, outi etc.
 ;====
@@ -31,9 +31,11 @@
     ; Assert address is in VRAM range
     utils.assert.range address 0 $3fff "\.: Address should be a valid VRAM address"
 
-    ; Default setPort to 1
     .ifndef setPort
-        .redefine setPort 1
+        ; Default setPort to "true"
+        .define setPort "true"
+    .else
+        utils.assert.booleanString setPort "\.: Invalid setPort parameter"
     .endif
 
     utils.clobbers "af"
@@ -45,7 +47,7 @@
         ld a, >address | utils.vram.WRITE_VRAM_COMMAND
         out (utils.vram.COMMAND_PORT), a
 
-        .if setPort == 1
+        .if setPort == "true"
             ; Port to write to
             ld c, utils.vram.DATA_PORT
         .endif
