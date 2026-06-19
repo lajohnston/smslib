@@ -7,7 +7,9 @@
 ;====
 ; Constants
 ;====
+.define utils.vram.COMMAND_PORT $bf
 .define utils.vram.DATA_PORT $be
+.define utils.vram.WRITE_VRAM_COMMAND%01000000   ; OR mask
 
 ;====
 ; Dependencies
@@ -15,6 +17,40 @@
 .ifndef utils.registers
     .include "utils/registers.asm"
 .endif
+
+;====
+; Prepares the VDP to write to the given VRAM write address
+;
+; @in   address     the VRAM write address
+; @in   [setPort]   if 1 (the default) then the C register will be loaded with
+;                   the VDP data port. Set to 0 if the port is already set to
+;                   saves 7 cycles
+; @out  c           data port, ready to output data to with out, outi etc.
+;====
+.macro "utils.vram.setWriteAddress" args address setPort
+    ; Assert address is in VRAM range
+    utils.assert.range address 0 $3fff "\.: Address should be a valid VRAM address"
+
+    ; Default setPort to 1
+    .ifndef setPort
+        .redefine setPort 1
+    .endif
+
+    utils.clobbers "af"
+        ; Output low byte to VDP
+        utils.registers.loadA <address
+        out (utils.vram.COMMAND_PORT), a
+
+        ; Output high byte to VDP with write command set
+        ld a, >address | utils.vram.WRITE_VRAM_COMMAND
+        out (utils.vram.COMMAND_PORT), a
+
+        .if setPort == 1
+            ; Port to write to
+            ld c, utils.vram.DATA_PORT
+        .endif
+    utils.clobbers.end
+.endm
 
 ;====
 ; Writes a byte to the data port and increments the write address

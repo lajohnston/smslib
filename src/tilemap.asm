@@ -50,6 +50,10 @@
     .include "utils/vdp.asm"
 .endif
 
+.ifndef utils.vram
+    .include "utils/vram.asm"
+.endif
+
 ;====
 ; Tile attributes
 ; Combine using OR (|), i.e. (tilemap.HIGH_BIT | tilemap.FLIP_X)
@@ -148,7 +152,7 @@
 .macro "tilemap.setIndex" args index
     utils.assert.range index 0, 895, "\.: Index should be between 0 and 895"
 
-    utils.vdp.prepVramWrite (tilemap.VRAM_ADDRESS + (index * tilemap.TILE_SIZE_BYTES))
+    utils.vram.setWriteAddress (tilemap.VRAM_ADDRESS + (index * tilemap.TILE_SIZE_BYTES))
 .endm
 
 ;====
