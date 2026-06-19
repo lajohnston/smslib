@@ -181,43 +181,6 @@
 .endm
 
 ;====
-; Zeroes the VRAM
-;
-; @in   vram    address and command set
-; @in   bc      number of bytes to clear
-;====
-.section "utils.vdp.writeZeroes" free
-    utils.vdp.writeZeroes:
-        -:
-            xor a
-            out (utils.vdp.DATA_PORT), a ; output + increment VRAM address
-            dec bc
-            ld a, b
-            or c
-        jp nz, -
-    ret
-.ends
-
-;====
-; Macro alias for call utils.vdp.writeZeroes
-;
-; @in   bytes       number of bytes to clear/set to zero (defaults to $4000 - all VRAM)
-;====
-.macro "utils.vdp.writeZeroes" args bytes
-    ; Default bytes parameter
-    .ifndef bytes
-        .define bytes $4000
-    .else
-        utils.assert.range bytes 0, $4000, "\.: bytes out of VRAM range"
-    .endif
-
-    utils.clobbers "bc"
-        ld bc, bytes
-        call utils.vdp.writeZeroes
-    utils.clobbers.end
-.endm
-
-;====
 ; Sets the value of the given VDP register
 ;
 ; @in   registerNumber  the register number (0-10)

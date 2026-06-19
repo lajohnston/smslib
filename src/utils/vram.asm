@@ -37,3 +37,40 @@
         utils.clobbers.end
     .endif
 .endm
+
+;====
+; Zeroes the VRAM
+;
+; @in   vram    address and command set
+; @in   bc      number of bytes to clear
+;====
+.section "utils.vram._writeZeroes" free
+    utils.vram._writeZeroes:
+        -:
+            xor a
+            out (utils.vram.DATA_PORT), a   ; output + increment VRAM address
+            dec bc
+            ld a, b
+            or c
+        jp nz, -
+    ret
+.ends
+
+;====
+; Zeroes the VRAM from the current write address for a given number of bytes
+;
+; @in   bytes       number of bytes to clear/set to zero (defaults to $4000 - all VRAM)
+;====
+.macro "utils.vram.writeZeroes" args bytes
+    ; Default bytes parameter
+    .ifndef bytes
+        .define bytes $4000
+    .else
+        utils.assert.range bytes 0, $4000, "\.: bytes out of VRAM range"
+    .endif
+
+    utils.clobbers "bc"
+        ld bc, bytes
+        call utils.vram._writeZeroes
+    utils.clobbers.end
+.endm

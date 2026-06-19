@@ -32,6 +32,10 @@
     .include "utils/vdp.asm"
 .endif
 
+.ifndef utils.vram
+    .include "utils/vram.asm"
+.endif
+
 ;====
 ; Constants
 ;====
@@ -48,7 +52,7 @@
 ;====
 .macro "palette.init"
     utils.vdp.prepCramWrite 0
-    utils.vdp.writeZeroes 32
+    utils.vram.writeZeroes 32
 .endm
 
 ;====

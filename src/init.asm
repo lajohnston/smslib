@@ -23,6 +23,10 @@
     .include "utils/vdp.asm"
 .endif
 
+.ifndef utils.vram
+    .include "utils/vram.asm"
+.endif
+
 ;====
 ; Code
 ;====
@@ -104,7 +108,7 @@
     init.smslibModules:
         ; Zero VRAM
         utils.vdp.prepVramWrite 0 0
-        utils.vdp.writeZeroes
+        utils.vram.writeZeroes
 
         ; Initialise modules
         init.smslibModules
