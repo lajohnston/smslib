@@ -13,6 +13,7 @@
 .define utils.vdpCommand.DATA_PORT $be
 
 ; Commands
+.define utils.vdpCommand.READ_VRAM      %00111111   ; AND mask
 .define utils.vdpCommand.WRITE_VRAM     %01000000   ; OR mask
 .define utils.vdpCommand.WRITE_CRAM     %11000000   ; Constant
 .define utils.vdpCommand.WRITE_REGISTER %10000000   ; OR mask
@@ -87,6 +88,105 @@
             ld a, utils.vdpCommand.WRITE_REGISTER | registerNumber
         .endif
 
+        out (utils.vdpCommand.COMMAND_PORT), a
+    utils.clobbers.end
+.endm
+
+;====
+; Sets the command bits on the high byte of the VRAM address
+;
+; @in   a   high byte of the VRAM address ($00 - $3F)
+; @in   a   high byte of the address with the command bits set
+;====
+.macro "utils.vdpCommand._setCommandBits" args command
+    utils.assert.oneOf command, utils.vdpCommand.READ_VRAM, utils.vdpCommand.WRITE_VRAM, utils.vdpCommand.WRITE_CRAM, utils.vdpCommand.WRITE_REGISTER, "\.: Invalid command argument"
+
+    utils.clobbers "af"
+        .if command == utils.vdpCommand.READ_VRAM
+            ; Reset high bits
+            and utils.vdpCommand.READ_VRAM
+        .elif command == utils.vdpCommand.WRITE_VRAM
+            ; Set bit 6; if address is correct, bit 7 should already by reset
+            or utils.vdpCommand.WRITE_VRAM
+        .elif command == utils.vdpCommand.WRITE_CRAM
+            ld a, utils.vdpCommand.WRITE_CRAM
+        .elif command == utils.vdpCommand.WRITE_REGISTER
+            ld a, utils.vdpCommand.WRITE_REGISTER
+        .endif
+    utils.clobbers.end
+.endm
+
+;====
+; Set a VDP operation as stored in HL. The 6th and 7th bits of the high byte
+; should be set to the command (see below), otherwise pass the command argument
+; to have these set at runtime.
+;
+; VRAM read - HL should be set to the VRAM address. The 6th and 7th bits of the
+; high byte should be reset (%00xxxxxx).
+;
+; VRAM write - HL should be set to the VRAM address. The 6th bit of the high
+; byte should be set and the 7th bit should be reset (%01xxxxxx).
+;
+; Register write - L should be set to the register number (0-10). H should be
+; $80.
+;
+; Color RAM write - L is the index (0-31). H should be $c0
+;
+; @in   hl                  the operation to perform
+; @in   [command]           (optional) one of:
+;                               utils.vdpCommand.READ_VRAM
+;                               utils.vdpCommand.WRITE_VRAM
+;                               utils.vdpCommand.WRITE_CRAM
+;                               utils.vdpCommand.WRITE_REGISTER
+;
+;                           if not present, H should already have the correct
+;                           command bits (6th and 7th) set or reset.
+; @out  VDP write address   for VRAM read/write or CRAM write, the VDP write
+;                           address will be set
+;====
+.macro "utils.vdpCommand.setFromHl" args command
+    .ifdef command
+        utils.assert.oneOf command, utils.vdpCommand.READ_VRAM, utils.vdpCommand.WRITE_VRAM, utils.vdpCommand.WRITE_CRAM, utils.vdpCommand.WRITE_REGISTER, "\.: Invalid command argument"
+    .endif
+
+    utils.clobbers "af"
+        ; Output low byte to VDP
+        ld a, l
+        out (utils.vdpCommand.COMMAND_PORT), a  ; output low byte
+
+        ; Load high byte into A
+        ld a, h
+
+        .ifdef command
+            utils.vdpCommand._setCommandBits command
+        .endif
+
+        ; Output high address byte + command
+        out (utils.vdpCommand.COMMAND_PORT), a
+    utils.clobbers.end
+.endm
+
+;====
+; Set a VDP operation as stored in DE (see utils.vdpCommand.setFromHl)
+;====
+.macro "utils.vdpCommand.setFromDe" args command
+    .ifdef command
+        utils.assert.oneOf command, utils.vdpCommand.READ_VRAM, utils.vdpCommand.WRITE_VRAM, utils.vdpCommand.WRITE_CRAM, utils.vdpCommand.WRITE_REGISTER, "\.: Invalid command argument"
+    .endif
+
+    utils.clobbers "af"
+        ; Output low byte to VDP
+        ld a, e
+        out (utils.vdpCommand.COMMAND_PORT), a  ; output low byte
+
+        ; Load high byte into A
+        ld a, d
+
+        .ifdef command
+            utils.vdpCommand._setCommandBits command
+        .endif
+
+        ; Output high address byte + command
         out (utils.vdpCommand.COMMAND_PORT), a
     utils.clobbers.end
 .endm

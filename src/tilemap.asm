@@ -46,8 +46,8 @@
     .include "utils/registers.asm"
 .endif
 
-.ifndef utils.vdp
-    .include "utils/vdp.asm"
+.ifndef utils.vdpCommand
+    .include "utils/vdpCommand.asm"
 .endif
 
 .ifndef utils.vram
@@ -186,7 +186,7 @@
 
         ; Low byte of base address is 0, so we just need to manipulate high byte
         ; Set A to high byte of base address with the write command set
-        ld a, >tilemap.VRAM_ADDRESS | utils.vdp.commands.WRITE_VRAM
+        ld a, >tilemap.VRAM_ADDRESS | utils.vdpCommand.WRITE_VRAM
         or h        ; combine bits with high byte of relative address
         ld h, a     ; set HL to the full address
     utils.clobbers.end
@@ -245,7 +245,7 @@
         ; Load A with low-byte of pattern index
         utils.registers.loadA <patternIndex
 
-        out (utils.vdp.DATA_PORT), a    ; write pattern index
+        out (utils.vdpCommand.DATA_PORT), a    ; write pattern index
 
         ; Load A with attribute byte (skip if value happens to be the same
         ; as patternIndex)
@@ -253,7 +253,7 @@
             utils.registers.loadA attributes
         .endif
 
-        out (utils.vdp.DATA_PORT), a    ; write tile attributes
+        out (utils.vdpCommand.DATA_PORT), a    ; write tile attributes
     utils.clobbers.end
 .endm
 
@@ -307,14 +307,14 @@
 ;====
 .section "tilemap.writeBytes" free
     _nextByte:
-        inc hl                          ; next byte
+        inc hl                                  ; next byte
 
     tilemap.writeBytes:
-        ld a, (hl)                      ; read byte
-        out (utils.vdp.DATA_PORT), a    ; write pattern ref
-        ld a, c                         ; load attributes
-        out (utils.vdp.DATA_PORT), a    ; write attributes
-        djnz _nextByte                  ; repeat until b = 0
+        ld a, (hl)                              ; read byte
+        out (utils.vdpCommand.DATA_PORT), a     ; write pattern ref
+        ld a, c                                 ; load attributes
+        out (utils.vdpCommand.DATA_PORT), a     ; write attributes
+        djnz _nextByte                          ; repeat until b = 0
         ret
 .ends
 
@@ -795,8 +795,8 @@
 ;====
 .macro "tilemap._setRowScrollIndex"
     ld hl, (tilemap.ram.vramRowWrite)
-    utils.vdp.setCommandHL utils.vdp.commands.WRITE_VRAM
-    ld c, utils.vdp.DATA_PORT
+    utils.vdpCommand.setFromHl utils.vdpCommand.WRITE_VRAM
+    ld c, utils.vdpCommand.DATA_PORT
 .endm
 
 ;====
@@ -842,8 +842,8 @@
     or 128  ; OR A by 128 to combine bits
     ld d, a ; set D to value
 
-    ; Set B to bytes to write (tilemap.COL_SIZE_BYTES), and C to utils.vdp.DATA_PORT
-    ld bc, (tilemap.COL_SIZE_BYTES * 256) + utils.vdp.DATA_PORT
+    ; Set B to bytes to write (tilemap.COL_SIZE_BYTES), and C to utils.vdpCommand.DATA_PORT
+    ld bc, (tilemap.COL_SIZE_BYTES * 256) + utils.vdpCommand.DATA_PORT
 
     ; Set HL to the tile data to write
     .ifdef dataAddr
@@ -1265,11 +1265,11 @@
             .endif
 
             ; Set VRAM low byte write address
-            out (utils.vdp.COMMAND_PORT), a
+            out (utils.vdpCommand.COMMAND_PORT), a
 
             ; Set VRAM high byte write address
             ld a,  tilemap._writeColumn_writeAddressHigh; set A to high address
-            out (utils.vdp.COMMAND_PORT), a             ; send to VDP
+            out (utils.vdpCommand.COMMAND_PORT), a  ; send to VDP
 
             ; Write tile
             outi    ; pattern ref
@@ -1318,14 +1318,14 @@
 ;====
 .section "tilemap._writeBytesUntil" free
     tilemap._writeBytesUntil:
-        ld a, (hl)                      ; read byte
-        cp d                            ; compare value with terminator
-        ret z                           ; return if terminator byte found
-        out (utils.vdp.DATA_PORT), a    ; write pattern ref
-        ld a, b                         ; load attributes
-        out (utils.vdp.DATA_PORT), a    ; write attributes
-        inc hl                          ; next char
-        jp tilemap._writeBytesUntil     ; repeat
+        ld a, (hl)                          ; read byte
+        cp d                                ; compare value with terminator
+        ret z                               ; return if terminator byte found
+        out (utils.vdpCommand.DATA_PORT), a ; write pattern ref
+        ld a, b                             ; load attributes
+        out (utils.vdpCommand.DATA_PORT), a ; write attributes
+        inc hl                              ; next char
+        jp tilemap._writeBytesUntil         ; repeat
 .ends
 
 ;====

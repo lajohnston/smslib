@@ -38,3 +38,53 @@ describe "utils.vdpCommand.setRegister"
 
         expect.all.toBeUnclobberedExcept "af"
         expect.a.toBe 100
+
+describe "setFromHl"
+    test "does not clobber registers (when no operation given)"
+        zest.initRegisters
+
+        ld hl, $ffff
+
+        utils.preserve
+            utils.vdpCommand.setFromHl
+        utils.restore
+
+        expect.all.toBeUnclobberedExcept "hl"
+        expect.hl.toBe $ffff
+
+    test "does not clobber registers (when operation given)"
+        zest.initRegisters
+
+        utils.preserve
+            utils.vdpCommand.setFromHl utils.vdpCommand.READ_VRAM
+            utils.vdpCommand.setFromHl utils.vdpCommand.WRITE_VRAM
+            utils.vdpCommand.setFromHl utils.vdpCommand.WRITE_CRAM
+            utils.vdpCommand.setFromHl utils.vdpCommand.WRITE_REGISTER
+        utils.restore
+
+        expect.all.toBeUnclobbered
+
+describe "setFromDe"
+    test "does not clobber registers (when no operation given)"
+        zest.initRegisters
+
+        ld hl, $ffff
+
+        utils.preserve
+            utils.vdpCommand.setFromDe
+        utils.restore
+
+        expect.all.toBeUnclobberedExcept "hl"
+        expect.hl.toBe $ffff
+
+    test "does not clobber registers (when operation given)"
+        zest.initRegisters
+
+        utils.preserve
+            utils.vdpCommand.setFromDe utils.vdpCommand.READ_VRAM
+            utils.vdpCommand.setFromDe utils.vdpCommand.WRITE_VRAM
+            utils.vdpCommand.setFromDe utils.vdpCommand.WRITE_CRAM
+            utils.vdpCommand.setFromDe utils.vdpCommand.WRITE_REGISTER
+        utils.restore
+
+        expect.all.toBeUnclobbered
