@@ -44,40 +44,6 @@
 .define utils.vdp.commands.WRITE_CRAM       %11000000   ; Constant
 
 ;====
-; Prepares the VDP to write to the given VRAM write address
-;
-; @in   address     the VRAM write address
-; @in   [setPort]   if 1 (the default) then the c register will be loaded with
-;                   the VDP data. Set to 0 if the port is already set (saves 7
-;                   cycles)
-; @out  c           data port, ready to output data to with out, outi etc.
-;====
-.macro "utils.vdp.prepVramWrite" args address setPort
-    ; Assert address is in VRAM range
-    utils.assert.range address 0 $3fff "\.: Address should be a valid VRAM address"
-
-    ; Default setPort to 1
-    .ifndef setPort
-        .redefine setPort 1
-    .endif
-
-    utils.clobbers "af"
-        ; Output low byte to VDP
-        utils.registers.loadA <address
-        out (utils.vdp.COMMAND_PORT), a
-
-        ; Output high byte to VDP with write command set
-        ld a, >address | utils.vdp.commands.WRITE_VRAM
-        out (utils.vdp.COMMAND_PORT), a
-
-        .if setPort == 1
-            ; Port to write to
-            ld c, utils.vdp.DATA_PORT
-        .endif
-    utils.clobbers.end
-.endm
-
-;====
 ; Prepares the VDP to write to the given Color RAM (CRAM) address
 ;
 ; @in   address     the CRAM write address (0-31)

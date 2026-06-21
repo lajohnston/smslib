@@ -9,13 +9,17 @@
 ;====
 .define utils.vram.COMMAND_PORT $bf
 .define utils.vram.DATA_PORT $be
-.define utils.vram.WRITE_VRAM_COMMAND%01000000   ; OR mask
+.define utils.vram.WRITE_VRAM_COMMAND %01000000   ; OR mask
 
 ;====
 ; Dependencies
 ;====
 .ifndef utils.registers
     .include "utils/registers.asm"
+.endif
+
+.ifndef utils.vdpCommand
+    .include "utils/vdpCommand.asm"
 .endif
 
 ;====
@@ -39,13 +43,7 @@
     .endif
 
     utils.clobbers "af"
-        ; Output low byte to VDP
-        utils.registers.loadA <address
-        out (utils.vram.COMMAND_PORT), a
-
-        ; Output high byte to VDP with write command set
-        ld a, >address | utils.vram.WRITE_VRAM_COMMAND
-        out (utils.vram.COMMAND_PORT), a
+        utils.vdpCommand.setVramWriteAddress address
 
         .if setPort == "true"
             ; Port to write to
@@ -57,7 +55,7 @@
 ;====
 ; Writes a byte to the data port and increments the write address
 ;
-; @in   value   the value to write
+; @in   value|a the value to write. If not set, outputs value in A
 ; @in   VRAM    pointer to address (with write command set)
 ; @out  VRAM    pointer to given address + 1
 ;====
