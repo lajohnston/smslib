@@ -17,3 +17,24 @@ describe "utils.vdpCommand.setColorRamWriteAddress"
         utils.restore
 
         expect.all.toBeUnclobbered
+
+describe "utils.vdpCommand.setRegister"
+    test "does not clobber registers when a constant is given"
+        zest.initRegisters
+
+        utils.preserve
+            utils.vdpCommand.setRegister 8, 0
+        utils.restore
+
+        expect.all.toBeUnclobbered
+
+    test "does not clobber registers when no constant value given"
+        zest.initRegisters
+        ld a, 100
+
+        utils.preserve
+            utils.vdpCommand.setRegister 8
+        utils.restore
+
+        expect.all.toBeUnclobberedExcept "af"
+        expect.a.toBe 100

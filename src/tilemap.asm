@@ -81,6 +81,9 @@
 .define tilemap.TILES tilemap.ROWS * tilemap.COLS
 .define tilemap.MAX_PATTERN_INDEX 511
 
+.define tilemap.SCROLL_X_REGISTER 8
+.define tilemap.SCROLL_Y_REGISTER 9
+
 ; Min and max number of rows visible on screen. If the Y scroll offset is a
 ; multiple of 8 it's the minimum, otherwise there is an extra row (the bottom
 ; of the top row is still visible, as well as the top of the bottom row)
@@ -776,10 +779,10 @@
     utils.clobbers "af"
         ld a, (tilemap.ram.xScrollBuffer)
         neg
-        utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
+        utils.vdpCommand.setRegister tilemap.SCROLL_X_REGISTER
 
         ld a, (tilemap.ram.yScrollBuffer)
-        utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER
+        utils.vdpCommand.setRegister tilemap.SCROLL_Y_REGISTER
     utils.clobbers.end
 .endm
 
@@ -1214,7 +1217,7 @@
         ld (tilemap.ram.colWriteCall + 1), a
 
         ; Set the VDP SCROLL_Y_REGISTER to 0
-        utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER
+        utils.vdpCommand.setRegister tilemap.SCROLL_Y_REGISTER
 
         ; Set the xScrollBuffer to the starting X_OFFSET value
         ld a, tilemap.X_OFFSET
@@ -1222,7 +1225,7 @@
 
         ; Write xScrollBuffer to the VDP SCROLL_X_REGISTER (needs to be negated)
         ld a, -tilemap.X_OFFSET
-        utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
+        utils.vdpCommand.setRegister tilemap.SCROLL_X_REGISTER
 
         ret
 .ends

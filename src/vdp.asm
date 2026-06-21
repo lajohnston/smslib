@@ -12,8 +12,8 @@
     utils.ram.assertRamSlot
 .endif
 
-.ifndef utils.vdp
-    .include "utils/vdp.asm"
+.ifndef utils.vdpCommand
+    .include "utils/vdpCommand.asm"
 .endif
 
 ;====
@@ -51,6 +51,11 @@
 .define vdp.REGISTER_8_DEFAULT  %00000000   ; Background X scroll
 .define vdp.REGISTER_9_DEFAULT  %00000000   ; Background Y scroll
 .define vdp.REGISTER_10_DEFAULT %11111111   ; Line interrupt counter
+
+.define vdp.BORDER_COLOR_REGISTER 7
+.define vdp.SCROLL_X_REGISTER 8
+.define vdp.SCROLL_Y_REGISTER 9
+.define vdp.LINE_COUNTER_REGISTER 10
 
 ;====
 ; Batch variables
@@ -302,7 +307,7 @@
         .print "Warning: vdp.setBorderColorIndex value must be between 16 and 31\n"
     .endif
 
-    utils.vdp.setRegister utils.vdp.BORDER_COLOR_REGISTER (value - 16)
+    utils.vdpCommand.setRegister tilemap.BORDER_COLOR_REGISTER (value - 16)
 .endm
 
 ;====
@@ -313,9 +318,9 @@
 ;====
 .macro "vdp.setScrollX" args value
     .ifdef value
-        utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER value
+        utils.vdpCommand.setRegister vdp.SCROLL_X_REGISTER value
     .else
-        utils.vdp.setRegister utils.vdp.SCROLL_X_REGISTER
+        utils.vdpCommand.setRegister vdp.SCROLL_X_REGISTER
     .endif
 .endm
 
@@ -327,9 +332,9 @@
 ;====
 .macro "vdp.setScrollY" args value
     .ifdef value
-        utils.vdp.setRegister utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER value
+        utils.vdpCommand.setRegister vdp.SCROLL_Y_REGISTER value
     .else
-        utils.vdp.setRegister utils.vdp.setRegister utils.vdp.SCROLL_Y_REGISTER
+        utils.vdpCommand.setRegister vdp.SCROLL_Y_REGISTER
     .endif
 .endm
 
@@ -340,9 +345,9 @@
 ;====
 .macro "vdp.setLineCounter" args value
     .ifdef value
-        utils.vdp.setRegister utils.vdp.LINE_COUNTER_REGISTER value
+        utils.vdpCommand.setRegister vdp.LINE_COUNTER_REGISTER value
     .else
-        utils.vdp.setRegister utils.vdp.LINE_COUNTER_REGISTER
+        utils.vdpCommand.setRegister vdp.LINE_COUNTER_REGISTER
     .endif
 .endm
 
@@ -372,7 +377,7 @@
     ld (de), a
 
     ; Send value to VDP
-    utils.vdp.setRegister register
+    utils.vdpCommand.setRegister register
 .endm
 
 ;====

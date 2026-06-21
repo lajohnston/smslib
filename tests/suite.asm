@@ -173,11 +173,6 @@
     .include "tilemap/writeTiles.test.asm"
 .ends
 
-; utils.vdp
-.section "utils.vdp" appendto zest.suiteBank5
-    .include "utils/vdp.test.asm"
-.ends
-
 ; utils.vdpCommand
 .section "utils.vdpCommand" appendto zest.suiteBank5
     .include "utils/vdpCommand.test.asm"

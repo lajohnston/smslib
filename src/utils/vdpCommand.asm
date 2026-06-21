@@ -7,10 +7,15 @@
 ;====
 ; Constants
 ;====
+
+; Ports
 .define utils.vdpCommand.COMMAND_PORT $bf
 .define utils.vdpCommand.DATA_PORT $be
-.define utils.vdpCommand.WRITE_VRAM %01000000   ; OR mask
-.define utils.vdpCommand.WRITE_CRAM %11000000   ; Constant
+
+; Commands
+.define utils.vdpCommand.WRITE_VRAM     %01000000   ; OR mask
+.define utils.vdpCommand.WRITE_CRAM     %11000000   ; Constant
+.define utils.vdpCommand.WRITE_REGISTER %10000000   ; OR mask
 
 ;====
 ; Dependencies
@@ -53,6 +58,35 @@
 
         ; Output CRAM write command
         utils.registers.transformA address, utils.vdpCommand.WRITE_CRAM
+        out (utils.vdpCommand.COMMAND_PORT), a
+    utils.clobbers.end
+.endm
+
+;====
+; Sets the value of the given VDP register
+;
+; @in   registerNumber  the register number (0-10)
+; @in   a|registerValue the register value
+;====
+.macro "utils.vdpCommand.setRegister" args registerNumber registerValue
+    utils.assert.range registerNumber, 0, 10, "\.: Invalid register number"
+
+    utils.clobbers "af"
+        ; Load A with value if one is given
+        .ifdef registerValue
+            utils.registers.loadA registerValue
+        .endif
+
+        ; Send the register value
+        out (utils.vdpCommand.COMMAND_PORT), a
+
+        ; Send register number, ORed with WRITE_REGISTER command
+        .ifdef registerValue
+            utils.registers.transformA registerValue, utils.vdpCommand.WRITE_REGISTER | registerNumber
+        .else
+            ld a, utils.vdpCommand.WRITE_REGISTER | registerNumber
+        .endif
+
         out (utils.vdpCommand.COMMAND_PORT), a
     utils.clobbers.end
 .endm

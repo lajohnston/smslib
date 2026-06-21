@@ -31,12 +31,6 @@
 .define utils.vdp.COMMAND_PORT $bf
 .define utils.vdp.DATA_PORT $be
 
-; Registers
-.define utils.vdp.BORDER_COLOR_REGISTER 7
-.define utils.vdp.SCROLL_X_REGISTER 8
-.define utils.vdp.SCROLL_Y_REGISTER 9
-.define utils.vdp.LINE_COUNTER_REGISTER 10
-
 ; Commands
 .define utils.vdp.commands.READ_VRAM        %00111111   ; AND mask
 .define utils.vdp.commands.WRITE_VRAM       %01000000   ; OR mask
@@ -121,28 +115,4 @@
 
     ; Output high address byte + command
     out (utils.vdp.COMMAND_PORT), a
-.endm
-
-;====
-; Sets the value of the given VDP register
-;
-; @in   registerNumber  the register number (0-10)
-; @in   a|registerValue the register value
-;====
-.macro "utils.vdp.setRegister" args registerNumber registerValue
-    utils.assert.range registerNumber, 0, 10, "\.: Invalid register number"
-
-    utils.clobbers "af"
-        ; Load A with value if one is given
-        .ifdef registerValue
-            utils.registers.loadA registerValue
-        .endif
-
-        ; Send the register value
-        out (utils.vdp.COMMAND_PORT), a
-
-        ; Send register number, ORed with WRITE_REGISTER command
-        ld a, utils.vdp.commands.WRITE_REGISTER | registerNumber
-        out (utils.vdp.COMMAND_PORT), a
-    utils.clobbers.end
 .endm
