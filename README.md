@@ -40,7 +40,7 @@ See example programs in the `examples` directory. Build the examples using the `
 - [scroll/tiles.asm](./docs/scroll/tiles.md) - Scrollable tilemaps
 - [scroll/metatiles.asm](./docs/scroll/metatiles.md) - Scrollable maps of metatiles
 - [tilemap.asm](./docs/tilemap.md) - Background tilemap and scrolling
-- [vdp.asm](./docs/vdp.md) - Graphics chip register settings
+- [vdpSettings.asm](./docs/vdpSettings.md) - Graphics chip register settings
 
 ### Additional utils
 

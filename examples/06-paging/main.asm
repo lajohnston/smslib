@@ -97,7 +97,7 @@
         tilemap.writeBytesUntil $ff instructions
 
         ; Enable the display
-        vdp.enableDisplay
+        vdpSettings.enableDisplay
 
         ; Start the update loop
         jp update

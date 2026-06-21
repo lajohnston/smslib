@@ -49,7 +49,7 @@
         ld (ram.color), a   ; set color to 1 (red)
 
         ; Enable the display
-        vdp.enableDisplay
+        vdpSettings.enableDisplay
 
         ; Begin
         jp update

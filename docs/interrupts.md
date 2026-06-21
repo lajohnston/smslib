@@ -9,18 +9,17 @@ You will need to enable interrupts in both the VDP and Z80. After you initialise
 - Enable HBlank - VDP register 0, bit 4
 - Enable VBlank - VDP register 1, bit 5
 
-You can use [vdp.asm](./vdp.md) for this:
+You can use [vdpSettings.asm](./vdpSettings.md) for this:
 
 ```asm
-vdp.enableVBlank    ; (already enabled by default)
-vdp.enableHBlank
-```
+vdpSettings.enableVBlank    ; (already enabled by default)
+vdpSettings.enableHBlank
 
 ## VBlanks (frame interrupts)
 
 VBlanks occur each time the VDP has finished drawing the last/bottom line of a frame. They occur 50 times a second in PAL and 60 times a second in NTSC, providing a reliable means to time your game logic loop. The VBlank period is also a small window of opportunity to blast data to the VDP before it starts drawing the next frame, as sending data during 'active display' can result in missed writes and graphical corruption. The only other safe times to write to the VDP is when the display is off or by spacing each byte written with a 26-cycle.
 
-VBlanks will need to be enabled in the VDP using register 1, bit 5. This is enabled by default by `vdp.asm`.
+The VBlank detection will need to be enabled in the VDP using register 1, bit 5. This is enabled by default by `vdpSettings.asm`.
 
 Usually you would then use `ei` to enable interrupts on the Z80, causing it to jump to the interrupt handler at address `$0038` when a VBlank occurs. However, you won't need to use `ei` for VBlanks as `interrupts.asm` instead provides an `interrupts.waitForVBlank` mechanism that polls the VDP status flag to check for the VBlank flag.
 

@@ -56,12 +56,12 @@
         scroll.tiles.init tilemapData MAP_COLS MAP_ROWS 0 0
 
         ; Enable the display
-        vdp.startBatch
-            vdp.enableDisplay
+        vdpSettings.startBatch
+            vdpSettings.enableDisplay
 
             ; Left column gets filled with junk when scrolling, so best to hide it
-            vdp.hideLeftColumn
-        vdp.endBatch
+            vdpSettings.hideLeftColumn
+        vdpSettings.endBatch
 
         ; Start the update loop
         jp update

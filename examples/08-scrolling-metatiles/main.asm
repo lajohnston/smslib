@@ -110,12 +110,12 @@
         ; When changing multiple vdp settings it's usually more efficient
         ; (but optional) to specify changes within a 'batch'
         ;====
-        vdp.startBatch
-            vdp.enableDisplay
+        vdpSettings.startBatch
+            vdpSettings.enableDisplay
 
             ; Left column gets filled with junk when scrolling, so best hide it
-            vdp.hideLeftColumn
-        vdp.endBatch
+            vdpSettings.hideLeftColumn
+        vdpSettings.endBatch
 
         ; Start the update loop
         jp update

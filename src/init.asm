@@ -69,9 +69,9 @@
     .endif
 
     ; Initialise vdp registers
-    .ifdef vdp.ENABLED
-        .ifeq vdp.ENABLED 1
-            vdp.init
+    .ifdef vdpSettings.ENABLED
+        .ifeq vdpSettings.ENABLED 1
+            vdpSettings.init
         .endif
     .endif
 

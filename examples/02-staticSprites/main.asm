@@ -81,6 +81,6 @@
         sprites.copyToVram
 
         ; Enable the display then stop
-        vdp.enableDisplay
+        vdpSettings.enableDisplay
         halt
 .ends

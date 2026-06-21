@@ -22,7 +22,7 @@
     init:
         call table.draw
 
-        vdp.enableDisplay
+        vdpSettings.enableDisplay
 
         jp update
 .ends

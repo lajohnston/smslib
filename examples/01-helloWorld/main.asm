@@ -54,7 +54,7 @@
         tilemap.writeBytesUntil $ff message ; write data from 'message' until reaching terminator ($ff) byte
 
         ; Enable the display
-        vdp.enableDisplay
+        vdpSettings.enableDisplay
 
         ; End program with infinite loop
         halt

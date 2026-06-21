@@ -47,13 +47,13 @@
         ; When changing multiple vdp settings it's usually more efficient
         ; (but optional) to specify changes within a 'batch'
         ;====
-        vdp.startBatch
-            vdp.enableDisplay
+        vdpSettings.startBatch
+            vdpSettings.enableDisplay
 
             ; hide the left-most column - allows sprites to scroll more smoothly
             ; off the left side of the screen
-            vdp.hideLeftColumn
-        vdp.endBatch
+            vdpSettings.hideLeftColumn
+        vdpSettings.endBatch
 
         ; Begin
         jp mainLoop
