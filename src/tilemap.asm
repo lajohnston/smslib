@@ -155,7 +155,8 @@
 .macro "tilemap.setIndex" args index
     utils.assert.range index 0, 895, "\.: Index should be between 0 and 895"
 
-    utils.vram.setWriteAddress (tilemap.VRAM_ADDRESS + (index * tilemap.TILE_SIZE_BYTES))
+    utils.vdpCommand.setVramWriteAddress (tilemap.VRAM_ADDRESS + (index * tilemap.TILE_SIZE_BYTES))
+    ld c, utils.vdpCommand.DATA_PORT
 .endm
 
 ;====

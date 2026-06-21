@@ -19,6 +19,10 @@
 ;====
 ; Dependencies
 ;====
+.ifndef utils.vdpCommand
+    .include "utils/vdpCommand.asm"
+.endif
+
 .ifndef utils.vram
     .include "utils/vram.asm"
 .endif
@@ -103,7 +107,7 @@
 .section "init.smslibModules" free
     init.smslibModules:
         ; Zero VRAM
-        utils.vram.setWriteAddress 0 "false"
+        utils.vdpCommand.setVramWriteAddress 0
         utils.vram.writeZeroes
 
         ; Initialise modules

@@ -35,6 +35,10 @@
     .include "utils/outiBlock.asm"
 .endif
 
+.ifndef utils.vdpCommand
+    .include "utils/vdpCommand.asm"
+.endif
+
 .ifndef utils.vram
     .include "utils/vram.asm"
 .endif
@@ -251,10 +255,11 @@
 .macro "sprites.init"
     \@_\.:
 
-    utils.clobbers "af"
+    utils.clobbers "af" "bc"
         ; Init VRAM
-        utils.vram.setWriteAddress sprites.VRAM_ADDRESS "false"
-        utils.vram.writeByte sprites.Y_TERMINATOR
+        utils.vdpCommand.setVramWriteAddress sprites.VRAM_ADDRESS
+        ld c, utils.vdpCommand.DATA_PORT            ; set C to data port
+        utils.vram.writeByte sprites.Y_TERMINATOR   ; write y terminator
 
         ; Init RAM buffer
         sprites.reset
@@ -279,7 +284,8 @@
 .section "sprites._copyToVram"
     sprites._copyToVram:
         ; Set VDP write address to y positions
-        utils.vram.setWriteAddress sprites.VRAM_ADDRESS
+        utils.vdpCommand.setVramWriteAddress sprites.VRAM_ADDRESS
+        ld c, utils.vdpCommand.DATA_PORT
 
         ; Load number of sprites set
         ld hl, sprites.ram.buffer.nextIndex
@@ -302,7 +308,7 @@
         +:
 
         ; Point to x positions in VRAM and buffer
-        utils.vram.setWriteAddress (sprites.VRAM_ADDRESS + 128) "false"
+        utils.vdpCommand.setVramWriteAddress (sprites.VRAM_ADDRESS + 128)
         ld l, <(sprites.ram.buffer.xPosAndPattern)
 
         ; Copy x positions and patterns from buffer to VRAM

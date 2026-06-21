@@ -38,8 +38,8 @@
     .include "utils/outiBlock.asm"
 .endif
 
-.ifndef utils.vram
-    .include "utils/vram.asm"
+.ifndef utils.vdpCommand
+    .include "utils/vdpCommand.asm"
 .endif
 
 ;====
@@ -94,5 +94,6 @@
     utils.assert.equals NARGS, 1, "patterns.asm \. received the wrong number of arguments"
     utils.assert.range index, 0, patterns.MAX_PATTERN_INDEX, "patterns.asm \.: Invalid size argument"
 
-    utils.vram.setWriteAddress (patterns.VRAM_ADDRESS + (index * patterns.ELEMENT_SIZE_BYTES))
+    utils.vdpCommand.setVramWriteAddress (patterns.VRAM_ADDRESS + (index * patterns.ELEMENT_SIZE_BYTES))
+    ld c, utils.vdpCommand.DATA_PORT
 .endm
