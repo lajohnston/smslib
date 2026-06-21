@@ -90,6 +90,7 @@
     .include "utils/registers/iRegister.test.asm"
     .include "utils/registers/nestedPreserveScopes.test.asm"
     .include "utils/registers/registers.test.asm"
+    .include "utils/registers/transformA.test.asm"
 .ends
 
 ; Interrupts

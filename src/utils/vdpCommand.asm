@@ -33,7 +33,7 @@
         out (utils.vdpCommand.COMMAND_PORT), a
 
         ; Output high byte to VDP with write command set
-        ld a, >address | utils.vdpCommand.WRITE_VRAM
+        utils.registers.transformA <address, >address | utils.vdpCommand.WRITE_VRAM
         out (utils.vdpCommand.COMMAND_PORT), a
     utils.clobbers.end
 .endm
@@ -52,7 +52,7 @@
         out (utils.vdpCommand.COMMAND_PORT), a
 
         ; Output CRAM write command
-        ld a, utils.vdpCommand.WRITE_CRAM
+        utils.registers.transformA address, utils.vdpCommand.WRITE_CRAM
         out (utils.vdpCommand.COMMAND_PORT), a
     utils.clobbers.end
 .endm

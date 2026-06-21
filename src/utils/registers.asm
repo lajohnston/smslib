@@ -573,3 +573,35 @@
         ld a, value
     .endif
 .endm
+
+;====
+; Transforms A from one constant to another using the most efficient
+; instruction, which may shave a few cycles
+;
+; @in   fromValue   the current known constant value in A
+; @in   toValue     the new constant value to transform A into
+; @out  a           A will contain the new constant value
+; @clobbers f       may clobber flags depending on the transformation used
+;====
+.macro "utils.registers.transformA" args fromValue toValue
+    utils.assert.range fromValue, 0, 255 "\.: From value is out of range"
+    utils.assert.range toValue, 0, 255 "\.: To value is out of range"
+
+    .ifeq fromValue toValue
+        ; No transformation needed
+    .elif toValue == 0
+        xor a
+    .elif toValue == fromValue + 1
+        inc a
+    .elif toValue == ((fromValue - 1) & $ff)
+        dec a
+    .elif toValue == ((fromValue << 1) | (fromValue >> 7)) & $FF
+        rlca
+    .elif toValue == ((fromValue >> 1) | (fromValue << 7)) & $FF
+        rrca
+    .elif toValue == fromValue ^ $ff
+        cpl
+    .else
+        ld a, toValue
+    .endif
+.endm
