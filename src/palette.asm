@@ -28,8 +28,8 @@
     .include "utils/registers.asm"
 .endif
 
-.ifndef utils.vdp
-    .include "utils/vdp.asm"
+.ifndef utils.vdpCommand
+    .include "utils/vdpCommand.asm"
 .endif
 
 .ifndef utils.vram
@@ -51,7 +51,7 @@
 ; Clears the 32-color palette with the color black
 ;====
 .macro "palette.init"
-    utils.vdp.prepCramWrite 0
+    utils.vdpCommand.setColorRamWriteAddress 0
     utils.vram.writeZeroes 32
 .endm
 
@@ -150,10 +150,12 @@
 ;
 ; @in   index   the palette index (0-31)
 ; @out  c       data port ready to write data to
+; @out  vram    write address set to the given palette index
 ;====
 .macro "palette.setIndex" args index
     utils.assert.equals NARGS, 1, "palette.asm \. received the wrong number of arguments"
     utils.assert.range index, 0, 31, "palette.asm \.: Invalid index argument"
 
-    utils.vdp.prepCramWrite index
+    utils.vdpCommand.setColorRamWriteAddress index
+    ld c, utils.vdpCommand.DATA_PORT    ; set port, ready for data output
 .endm

@@ -8,7 +8,9 @@
 ; Constants
 ;====
 .define utils.vdpCommand.COMMAND_PORT $bf
+.define utils.vdpCommand.DATA_PORT $be
 .define utils.vdpCommand.WRITE_VRAM %01000000   ; OR mask
+.define utils.vdpCommand.WRITE_CRAM %11000000   ; Constant
 
 ;====
 ; Dependencies
@@ -32,6 +34,25 @@
 
         ; Output high byte to VDP with write command set
         ld a, >address | utils.vdpCommand.WRITE_VRAM
+        out (utils.vdpCommand.COMMAND_PORT), a
+    utils.clobbers.end
+.endm
+
+;====
+; Sets the write address to the given Color RAM address/index
+;
+; @in   address     the color RAM write address (0-31)
+;====
+.macro "utils.vdpCommand.setColorRamWriteAddress" args address
+    utils.assert.range address 0, 31, "\.: Address must be between 0-31"
+
+    utils.clobbers "af"
+        ; Output address
+        utils.registers.loadA address
+        out (utils.vdpCommand.COMMAND_PORT), a
+
+        ; Output CRAM write command
+        ld a, utils.vdpCommand.WRITE_CRAM
         out (utils.vdpCommand.COMMAND_PORT), a
     utils.clobbers.end
 .endm

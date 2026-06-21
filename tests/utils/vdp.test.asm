@@ -18,14 +18,3 @@ describe "utils.vdp.setRegister"
 
         expect.all.toBeUnclobberedExcept "af"
         expect.a.toBe 100
-
-describe "utils.vdp.prepCramWrite"
-    test "does not clobber registers (except C, which is set to port)"
-        zest.initRegisters
-
-        utils.preserve
-            utils.vdp.prepCramWrite 31
-        utils.restore
-
-        expect.all.toBeUnclobberedExcept "c"
-        expect.c.toBe $be

@@ -44,29 +44,6 @@
 .define utils.vdp.commands.WRITE_CRAM       %11000000   ; Constant
 
 ;====
-; Prepares the VDP to write to the given Color RAM (CRAM) address
-;
-; @in   address     the CRAM write address (0-31)
-; @out  c           data port, ready to output data to with out, outi etc.
-;====
-.macro "utils.vdp.prepCramWrite" args address
-    utils.assert.range address 0, 31, "\.: Address must be between 0-31"
-
-    utils.clobbers "af"
-        ; Output address
-        utils.registers.loadA address
-        out (utils.vdp.COMMAND_PORT), a
-
-        ; Output CRAM write command
-        ld a, utils.vdp.commands.WRITE_CRAM
-        out (utils.vdp.COMMAND_PORT), a
-
-        ; Set port, ready for data output
-        ld c, utils.vdp.DATA_PORT
-    utils.clobbers.end
-.endm
-
-;====
 ; Sets the command bits on the high byte of the VRAM address
 ;
 ; @in   a   high byte of the VRAM address ($00 - $3F)
