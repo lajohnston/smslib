@@ -4,7 +4,7 @@
 ;====
 .macro "tilemap.writeScrollBuffers"
     utils.clobbers "af" "bc" "de" "hl" "iy"
-        call tilemap.writeScrollBuffers
+        call tilemap._writeScrollBuffers
     utils.clobbers.end
 .endm
 
@@ -110,8 +110,8 @@
 ;====
 ; See tilemap.writeScrollBuffers macro alias
 ;====
-.section "tilemap.writeScrollBuffers" free
-    tilemap.writeScrollBuffers:
+.section "tilemap._writeScrollBuffers" free
+    tilemap._writeScrollBuffers:
         ; Set scroll registers
         tilemap._writeScrollRegisters
 
