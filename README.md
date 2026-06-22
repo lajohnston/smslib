@@ -1,6 +1,6 @@
 # SMSLib - Sega Master System Z80 Libs
 
-Low-level Sega Master System libs for the WLA-DX Z80 assembler (v10.3+). Its aim is to provide a consistent API for the hardware with zero/very low cost abstractions and to minimise the boilerplate required to get homebrew projects up and running quickly.
+Low-level Sega Master System libs for the WLA-DX Z80 assembler (v10.5+). Its aim is to provide a consistent API for the hardware with zero/very low cost abstractions and to minimise the boilerplate required to get homebrew projects up and running quickly.
 
 ## Quick Start
 
