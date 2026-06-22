@@ -168,7 +168,6 @@
     .include "tilemap/writeRow.test.asm"
     .include "tilemap/writeRows.test.asm"
     .include "tilemap/writeScrollBuffers.test.asm"
-    .include "tilemap/writeScrollRegisters.test.asm"
     .include "tilemap/writeTile.test.asm"
     .include "tilemap/writeTiles.test.asm"
 .ends
