@@ -34,10 +34,6 @@
     .include "utils/clobbers.asm"
 .endif
 
-.ifndef utils.outiBlock
-    .include "utils/outiBlock.asm"
-.endif
-
 .ifndef utils.vdpCommand
     .include "utils/vdpCommand.asm"
 .endif
@@ -55,12 +51,12 @@
 
     .ifndef offset
         utils.assert.equals NARGS, 2, "patterns.asm \. received the wrong number of arguments"
-        utils.outiBlock.writeSlice dataAddress, patterns.ELEMENT_SIZE_BYTES, count, 0
+        utils.vram.writeSlice dataAddress, patterns.ELEMENT_SIZE_BYTES, count, 0
     .else
         utils.assert.equals NARGS, 3, "patterns.asm \. received the wrong number of arguments"
         utils.assert.number offset, "patterns.asm \.: Invalid offset argument"
 
-        utils.outiBlock.writeSlice dataAddress, patterns.ELEMENT_SIZE_BYTES, count, offset
+        utils.vram.writeSlice dataAddress, patterns.ELEMENT_SIZE_BYTES, count, offset
     .endif
 .endm
 
@@ -81,7 +77,7 @@
 
     utils.clobbers "hl"
         ld hl, dataAddress
-        utils.outiBlock.write size
+        utils.vram.writeBytes size
     utils.clobbers.end
 .endm
 

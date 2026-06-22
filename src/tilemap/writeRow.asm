@@ -6,5 +6,5 @@
 ;====
 .macro "tilemap.writeRow"
     ; Output 1 row of data
-    utils.outiBlock.write tilemap.ROW_SIZE_BYTES
+    utils.vram.writeBytes tilemap.ROW_SIZE_BYTES
 .endm

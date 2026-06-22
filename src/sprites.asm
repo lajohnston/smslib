@@ -31,10 +31,6 @@
     .include "utils/clobbers.asm"
 .endif
 
-.ifndef utils.outiBlock
-    .include "utils/outiBlock.asm"
-.endif
-
 .ifndef utils.vdpCommand
     .include "utils/vdpCommand.asm"
 .endif
@@ -297,7 +293,7 @@
         ; Copy y positions to VRAM
         ld b, ixl                       ; load size into B
         inc l                           ; point to y positions in buffer
-        utils.outiBlock.writeUpTo128Bytes   ; write data
+        utils.vram.writeUpTo128Bytes    ; write data
 
         ; Output sprite terminator at end of y positions
         ld a, ixl                       ; load counter into A
@@ -312,9 +308,9 @@
         ld l, <(sprites.ram.buffer.xPosAndPattern)
 
         ; Copy x positions and patterns from buffer to VRAM
-        ld b, ixl                       ; restore sprite count
-        rlc b                           ; double to get xPos + pattern
-        utils.outiBlock.writeUpTo128BytesThenReturn ; write bytes, then ret
+        ld b, ixl                               ; restore sprite count
+        rlc b                                   ; double to get xPos + pattern
+        utils.vram.writeUpTo128BytesThenReturn  ; write bytes, then ret
 
     ; No sprites in buffer - cap table with sprite terminator then return
     ; VRAM address must be set

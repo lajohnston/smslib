@@ -145,9 +145,11 @@
 ;====
 ; OUTI between 1-128 bytes
 ;
-; @in   b   the number of bytes to write. Must be greater than 0 and <= 128
-; @in   c   the port to output the data to
-; @in   hl  the address of the source data
+; @in   b       the number of bytes to write. Must be > 0 and <= 128
+; @in   c       the port to output the data to
+; @in   hl      the address of the source data
+; @in   vram    the VRAM address to write to, with write command set
+; @out  vram    the VRAM address after writing the bytes
 ;====
 .macro "utils.outiBlock.writeUpTo128Bytes"
     utils.clobbers "af", "bc", "hl", "iy"
@@ -156,8 +158,8 @@
 .endm
 
 ;====
-; Like utils.outiBlock.writeUpTo128Bytes but 'jp's to the routine then returns
-; to the original caller
+; Like utils.outiBlock.writeUpTo128Bytes but 'jp's to the routine, which will
+; return to the original caller
 ;====
 .macro "utils.outiBlock.writeUpTo128BytesThenReturn"
     utils.clobbers "af", "bc", "hl", "iy"

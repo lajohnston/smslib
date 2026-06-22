@@ -20,10 +20,6 @@
     .include "utils/clobbers.asm"
 .endif
 
-.ifndef utils.outiBlock
-    .include "utils/outiBlock.asm"
-.endif
-
 .ifndef utils.registers
     .include "utils/registers.asm"
 .endif
@@ -119,7 +115,7 @@
 
     utils.clobbers "hl"
         ld hl, address
-        utils.outiBlock.write size
+        utils.vram.writeBytes size
     utils.clobbers.end
 .endm
 
@@ -138,10 +134,10 @@
     .ifdef offset
         utils.assert.equals NARGS, 3, "palette.asm \. received the wrong number of arguments"
         utils.assert.number offset, "palette.asm \.: Expected count to be a numeric value"
-        utils.outiBlock.writeSlice dataAddr, palette.ELEMENT_SIZE_BYTES, count, offset
+        utils.vram.writeSlice dataAddr, palette.ELEMENT_SIZE_BYTES, count, offset
     .else
         utils.assert.equals NARGS, 2, "palette.asm \. received the wrong number of arguments"
-        utils.outiBlock.writeSlice dataAddr, palette.ELEMENT_SIZE_BYTES, count, 0
+        utils.vram.writeSlice dataAddr, palette.ELEMENT_SIZE_BYTES, count, 0
     .endif
 .endm
 

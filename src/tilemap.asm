@@ -33,10 +33,6 @@
     .include "utils/math.asm"
 .endif
 
-.ifndef utils.outiBlock
-    .include "utils/outiBlock.asm"
-.endif
-
 .ifndef utils.ram
     .include "utils/ram.asm"
     utils.ram.assertRamSlot
@@ -289,7 +285,7 @@
 .macro "tilemap.writeTiles" args number
     utils.assert.range number, 1, tilemap.TILES, "\.: Invalid number argument"
 
-    utils.outiBlock.write tilemap.TILE_SIZE_BYTES * number
+    utils.vram.writeBytes tilemap.TILE_SIZE_BYTES * number
 .endm
 
 ;====

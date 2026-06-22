@@ -150,7 +150,7 @@
                 ld l, a
 
                 ; Copy bytes from buffer to VDP
-                utils.outiBlock.writeUpTo128Bytes
+                utils.vram.writeUpTo128Bytes
 
             ;===
             ; Second write
@@ -168,7 +168,7 @@
 
                 ; Write bytes then return to caller
                 ld b, a     ; set B to bytes to write
-                utils.outiBlock.writeUpTo128BytesThenReturn
+                utils.vram.writeUpTo128BytesThenReturn
         +:
 
         ret
