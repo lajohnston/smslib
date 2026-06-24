@@ -11,6 +11,10 @@
     .define scroll.metatiles.ENFORCE_BOUNDS
     .include "scroll/metatiles.asm"
     .include "scroll/tiles.asm"
+
+    .ifndef utils.vram
+        .include "utils/vram.asm"
+    .endif
 .incdir "."
 
 ; Test helpers
@@ -175,4 +179,9 @@
 ; utils.vdpCommand
 .section "utils.vdpCommand" appendto zest.suiteBank5
     .include "utils/vdpCommand.test.asm"
+.ends
+
+; utils.vram
+.section "utils.vram" appendto zest.suiteBank5
+    .include "utils/vram/_isActiveDisplay.test.asm"
 .ends
