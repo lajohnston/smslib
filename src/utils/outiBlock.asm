@@ -170,6 +170,7 @@
 ;====
 ; Writes elements from an array of data to VRAM using OUTI instructions
 ;
+; @in   c           the output port
 ; @in   dataAddress the address of the data to transfer
 ; @in   elementSize the size of each array element in bytes
 ; @in   count       the number of elements to transfer (1-based)
