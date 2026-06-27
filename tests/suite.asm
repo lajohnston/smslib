@@ -183,5 +183,5 @@
 
 ; utils.vram
 .section "utils.vram" appendto zest.suiteBank5
-    .include "utils/vram/_isActiveDisplay.test.asm"
+    .include "utils/vram/isActiveDisplay.test.asm"
 .ends
