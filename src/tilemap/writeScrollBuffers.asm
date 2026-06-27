@@ -4,6 +4,11 @@
 ;====
 .macro "tilemap.writeScrollBuffers"
     utils.clobbers "af" "bc" "de" "hl" "iy"
+        utils.vram.isActiveDisplay
+        .if utils.vram.isActiveDisplay.returnValue == 1
+            .print "\.: WARNING, utils.vram.ACTIVE_DISPLAY is set, but routine is not safe to call in active display\n"
+        .endif
+
         call tilemap._writeScrollBuffers
     utils.clobbers.end
 .endm
