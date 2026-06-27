@@ -88,6 +88,19 @@
         interrupts.waitForVBlank
 
         ; Apply scroll changes to the VDP/VRAM
+        ld b, 255
+
+        -:
+            .repeat 20
+                push ix
+                pop ix
+            .endr
+
+            dec b
+        jp nz, -
+
+
+        .redefine utils.vram.ACTIVE_DISPLAY 1
         scroll.tiles.render
 
         jp update   ; start loop again
