@@ -38,15 +38,15 @@
 .endif
 
 ;====
-; (Private) Sets a utils.vram._isActiveDisplay.returnValue variable to 1 if
+; Sets a utils.vram.isActiveDisplay.returnValue variable to 1 if
 ; utils.vram.ACTIVE_DISPLAY or utils.vram.ACTIVE_DISPLAY_NEXT is set.
 ; If utils.vram.ACTIVE_DISPLAY_NEXT is set it will be reset to 0
 ;====
-.macro "utils.vram._isActiveDisplay"
+.macro "utils.vram.isActiveDisplay"
     utils.assert.oneOf utils.vram.ACTIVE_DISPLAY 0 1 "\.: utils.vram.ACTIVE_DISPLAY must be 0 or 1"
 
     .ifdef utils.vram.ACTIVE_DISPLAY_NEXT
-        utils.assert.oneOf utils.vram.ACTIVE_DISPLAY_NEXT, 0, 1 "\.: utils.vram.ACTIVE_DISPLAY_NEXT must be -1 (off), 0 or 1"
+        utils.assert.oneOf utils.vram.ACTIVE_DISPLAY_NEXT, 0, 1 "\.: utils.vram.ACTIVE_DISPLAY_NEXT must be 0 or 1"
     .endif
 
     .ifdef utils.vram.ACTIVE_DISPLAY_NEXT
@@ -82,56 +82,65 @@
 .endm
 
 ;====
-; (Private) Writes bytes to VRAM, delaying by at least 26 cycles between each
-; to stay within active display constraints.
+; Writes one or more blocks of 256-bytes to VRAM, staying within active display
+; speed limits
 ;
-; 26 works for all known Master Systems. 27 might be needed for Game Gear support
+; @in   a       the number of 256-byte blocks to write (should be 1-64)
+; @in   c       the data port to write to (usually utils.vram.DATA_PORT)
+; @in   hl      source data address
+; @in   VRAM    address and write command set
 ;====
-.section "utils.vram._writeBytesActiveDisplay" free
-    utils.vram._write256BytesActiveDisplay:
-        ; Call was at least 17 cycles (more with push bc)
-        ld b, 0         ; +7 (24 cycles)
-
-    utils.vram._writeBytesActiveDisplay:
-        ; Delay by at least 26 cycles between writes
-        ; ld b + call took at least 24 cycles (more with push bc)
+.section "utils.vram._write256ByteBlocksActiveDisplay" free
+    utils.vram._write256ByteBlocksActiveDisplay:
+        ; Write 256 bytes
+        ld b, 0     ; will wrap to 255 when decremented after first byte
         -:
-            nop         ; + 4 cycles (=28 cycles for first byte, =26 for subsequent)
-            outi        ; output byte; inc hl; dec b
+            outi    ; 16 cycles
+        jp nz, -    ; +10 (26 cycles)
 
-            ; Delay by at least 26 cycles before next write
-            ret z       ; ret if b == 0 (=5 cycles if not returning)
-            jr z, -     ; + 7 (=12 cycles) - never jumps
-        jp -            ; + 10 (=22 cycles)
+        ; Dec 256 block counter
+        dec a
+        jp nz, -    ; continue if more blocks to write; B will be 0
+        ret
 .ends
 
 ;====
 ; Writes bytes to VRAM, delaying by at least 26 cycles between each to stay
 ; within active display speed limits
 ;
-; @in   bytes   number of bytes to write
 ; @in   c       the data port to write to (usually utils.vram.DATA_PORT)
 ; @in   hl      source data address
 ; @in   VRAM    address and write command set
+; @in   bytes|b number of bytes to write. If using B, 0 = 256
 ;
 ; @out  VRAM    start address + bytes
-; @out  hl      source data address + number of bytes written
 ;====
 .macro "utils.vram.writeBytesActiveDisplay" isolated args bytes
-    utils.assert.range bytes 1 16384 "\.: Invalid bytes argument"
+    .ifndef bytes
+        ; Bytes arguement not given, so use B register
+        utils.clobbers "af" "bc" "hl"
+            ; Output B number of bytes (0 = 256)
+            -:
+                outi    ; 16 cycles
+            jp nz, -    ; +10 (26 cycles)
+        utils.clobbers.end
+    .else
+        utils.assert.range bytes 1 16384 "\.: Invalid bytes argument"
 
-    utils.clobbers "af" "bc" "hl"
-        ; 256-byte chunks
-        .rept bytes / 256
-            call utils.vram._write256BytesActiveDisplay
-        .endr
+        utils.clobbers "af" "bc" "hl"
+            .if bytes >= 256
+                ld a, (bytes / 256) + 1; 256-byte blocks = floor(bytes/256) + 1
+                call utils.vram._write256ByteBlocksActiveDisplay
+            .endif
 
-        ; Remaining bytes (if any)
-        .if (bytes # 256) > 0
-            ld b, bytes # 256 ; modulo
-            call utils.vram._writeBytesActiveDisplay
-        .endif
-    utils.clobbers.end
+            ; Write remaining bytes (if any)
+            .if (bytes # 256) > 0
+                -:
+                    outi    ; 16 cycles
+                jp nz, -    ; +10 (26 cycles)
+            .endif
+        utils.clobbers.end
+    .endif
 .endm
 
 ;====
@@ -142,9 +151,9 @@
 ; @in   hl      the source data address
 ;====
 .macro "utils.vram.writeBytes" args bytes
-    utils.vram._isActiveDisplay
+    utils.vram.isActiveDisplay
 
-    .if utils.vram._isActiveDisplay.returnValue == 1
+    .if utils.vram.isActiveDisplay.returnValue == 1
         utils.vram.writeBytesActiveDisplay bytes
     .else
         utils.outiBlock.write bytes
@@ -161,26 +170,33 @@
 ; @out  vram    the VRAM address after writing the bytes
 ;====
 .macro "utils.vram.writeUpTo128Bytes"
-    utils.vram._isActiveDisplay
+    utils.vram.isActiveDisplay
 
-    .if utils.vram._isActiveDisplay.returnValue == 1
-        call utils.vram._writeBytesActiveDisplay
+    .if utils.vram.isActiveDisplay.returnValue == 1
+        utils.vram.writeBytesActiveDisplay
     .else
         utils.outiBlock.writeUpTo128Bytes
     .endif
 .endm
 
 ;====
-; Like utils.vram.writeUpTo128Bytes but 'jp's to the routine, which will
-; return to the original caller
+; Write a variable number of bytes between 1-128 bytes (inclusive) then
+; returns
+;
+; @in   b       the number of bytes to write. Must be > 0 and <= 128
+; @in   c       the port to output the data to
+; @in   hl      the address of the source data
+; @in   vram    the VRAM address to write to, with write command set
+; @out  vram    the VRAM address after writing the bytes
 ;====
 .macro "utils.vram.writeUpTo128BytesThenReturn"
-    utils.vram._isActiveDisplay
+    utils.vram.isActiveDisplay
 
-    .if utils.vram._isActiveDisplay.returnValue == 1
-        jp utils.vram._writeBytesActiveDisplay
+    .if utils.vram.isActiveDisplay.returnValue == 1
+        utils.vram.writeBytesActiveDisplay
+        ret
     .else
-        utils.outiBlock.writeUpTo128Bytes
+        utils.outiBlock.writeUpTo128BytesThenReturn
     .endif
 .endm
 
@@ -194,9 +210,9 @@
 ; @in   offset      the first item in the array to copy (0-based)
 ;====
 .macro "utils.vram.writeSlice" args dataAddress elementSize count offset
-    utils.vram._isActiveDisplay
+    utils.vram.isActiveDisplay
 
-    .if utils.vram._isActiveDisplay.returnValue == 1
+    .if utils.vram.isActiveDisplay.returnValue == 1
         utils.clobbers "hl"
             ld hl, dataAddress + (offset * elementSize)
             utils.vram.writeBytesActiveDisplay (count * elementSize)
@@ -238,7 +254,7 @@
     .endif
 
     ; Consume ACTIVE_DISPLAY_NEXT if set, but return value not needed
-    utils.vram._isActiveDisplay
+    utils.vram.isActiveDisplay
 
     utils.clobbers "bc"
         ld bc, bytes
