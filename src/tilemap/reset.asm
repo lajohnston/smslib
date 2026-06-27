@@ -21,8 +21,7 @@
         ld (tilemap.ram.vramRowWrite), a
         ld (tilemap.ram.vramRowWrite + 1), a
 
-        ld (tilemap.ram.colWriteCall), a
-        ld (tilemap.ram.colWriteCall + 1), a
+        ld (tilemap.ram.colWriteIndex), a
 
         ; Set the VDP SCROLL_Y_REGISTER to 0
         utils.vdpCommand.setRegister tilemap.SCROLL_Y_REGISTER

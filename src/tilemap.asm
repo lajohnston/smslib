@@ -122,8 +122,8 @@
     ; VRAM write command/address for row scrolling
     tilemap.ram.vramRowWrite:   dw
 
-    ; Address to call when writing the scrolling column
-    tilemap.ram.colWriteCall:   dw
+    ; _writeColumnLookup table index to use when writing the scroll column
+    tilemap.ram.colWriteIndex:  db
 .ends
 
 ; Buffer of raw column tiles

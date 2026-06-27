@@ -25,7 +25,8 @@
 
 ;====
 ; Write tile data to the scrolling column in VRAM, if required. The data should
-; be a sequential list of tiles starting with top of the column visible on screen
+; be a sequential list of tiles starting with the top tile of the column visible
+; on screen
 ;
 ; @in   dataAddr    (optional) pointer to the sequential tile data (top of the
 ;                   column). Defaults to the internal column buffer
@@ -55,8 +56,7 @@
     +:
 
     ;===
-    ; Prep the call to the address stored in tilemap.ram.colWriteCall, which
-    ; points to an iteration of tilemap._writeColumn
+    ; Lookup the tilemap._writeColumn index
     ;===
 
     ; Set E to column address bits
@@ -66,8 +66,20 @@
     or 128  ; OR A by 128 to combine bits
     ld d, a ; set D to value
 
-    ; Set B to bytes to write (tilemap.COL_SIZE_BYTES), and C to utils.vdpCommand.DATA_PORT
-    ld bc, (tilemap.COL_SIZE_BYTES * 256) + utils.vdpCommand.DATA_PORT
+    ; Set HL to tilemap._writeColumnLookup + offset in A
+    ld hl, tilemap._writeColumnLookup
+    ld a, (tilemap.ram.colWriteIndex)   ; load row offset into A
+    add l           ; add L to row offset in A
+    ld l, a         ; store low byte in L
+
+    ; Load (HL) into B and A
+    ld b, (hl)      ; load low byte into B
+    inc l           ; point to high byte
+    ld a, (hl)      ; load high byte into A
+
+    ; Transfer to IY
+    ld iyh, a       ; set high byte of IY
+    ld iyl, b       ; set low byte of IY
 
     ; Set HL to the tile data to write
     .ifdef dataAddr
@@ -76,9 +88,9 @@
         ld hl, tilemap.ram.colBuffer
     .endif
 
-    ; Call (tilemap.ram.colWriteCall); This points to an iteration of
-    ; tilemap._writeColumn
-    ld iy, (tilemap.ram.colWriteCall)
+    ; Set B to bytes to write (tilemap.COL_SIZE_BYTES), and C to utils.vdpCommand.DATA_PORT
+    ld bc, (tilemap.COL_SIZE_BYTES * 256) + utils.vdpCommand.DATA_PORT
+
     call tilemap._callIY
 
     _continue:
@@ -172,4 +184,81 @@
         +:
 
         ret
+.ends
+
+;====
+; Lookup table for the loop iterations in tilemap._writeColumn
+; Usage: load HL with tilemap._writeColumnLookup then add row * 2 to L; HL will
+; then point to the address to call in the loop
+;=====
+.section "tilemap._writeColumnLookup" free bitwindow 8
+    tilemap._writeColumnLookup:
+        ; The offset to the current tilemap._writeColumn iteration
+        .redefine tilemap._writeColumnLookup_currentOffset 0
+
+        ; Iterate over each potential row, starting from 0
+        .repeat tilemap.ROWS index rowNumber
+            ; Set address of the row iteration in tilemap._writeColumn
+            .dw tilemap._writeColumn + tilemap._writeColumnLookup_currentOffset
+
+            ; Update offset to next iteration
+            .if rowNumber # 2 == 0
+                ; Every second iteration uses additional optimisations, so we
+                ; only need to increase the offset by 12 bytes
+                .redefine tilemap._writeColumnLookup_currentOffset tilemap._writeColumnLookup_currentOffset + 12
+            .else
+                ; Increase offset by 14 bytes
+                .redefine tilemap._writeColumnLookup_currentOffset tilemap._writeColumnLookup_currentOffset + 14
+            .endif
+        .endr
+.ends
+
+;====
+; Unrolled loop of column tile writes. Call one of the addresses stored in the
+; tilemap._writeColumnLookup lookup table to start from a given row. The loop
+; will wrap back to 0 after the 28th tile is written and continue until all
+; bytes are written
+;
+; @in   hl  pointer to sequential tile data
+; @in   b   bytes to write (number of rows * 2)
+; @in   d   column number * 2 ORed with 128
+; @in   e   column number * 2
+;====
+.section "tilemap._writeColumn" free
+    tilemap._writeColumn:
+        .repeat tilemap.ROWS index rowNumber
+            ; Calculate write address for column 0
+            .redefine tilemap._writeColumn_writeAddress ($4000 | tilemap.VRAM_ADDRESS) + (rowNumber * tilemap.COLS * tilemap.TILE_SIZE_BYTES)
+            .redefine tilemap._writeColumn_writeAddressHigh >tilemap._writeColumn_writeAddress
+            .redefine tilemap._writeColumn_writeAddressLow <tilemap._writeColumn_writeAddress
+
+            ; Calculate VRAM low byte write address (0, 64, 128, 192)
+            .if tilemap._writeColumn_writeAddressLow == 0
+                ; Row address low byte is 0; Just set A to column address
+                ld a, e ; set A to column address
+            .elif tilemap._writeColumn_writeAddressLow == 128
+                ; Row address low byte is 128; This value (and col address) is cached in D
+                ld a, d
+            .else
+                ; Set A to low address
+                ld a, tilemap._writeColumn_writeAddressLow
+
+                ; Set column address bits
+                or e
+            .endif
+
+            ; Set VRAM low byte write address
+            out (utils.vdpCommand.COMMAND_PORT), a
+
+            ; Set VRAM high byte write address
+            ld a,  tilemap._writeColumn_writeAddressHigh; set A to high address
+            out (utils.vdpCommand.COMMAND_PORT), a  ; send to VDP
+
+            ; Write tile
+            outi    ; pattern ref
+            outi    ; tile attributes
+            ret z   ; return if no more tiles to write (B = 0)
+        .endr
+
+        jp tilemap._writeColumn  ; continue from row 0
 .ends
